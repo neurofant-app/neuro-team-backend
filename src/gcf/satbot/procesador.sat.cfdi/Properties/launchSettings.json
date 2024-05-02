@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "procesador.sat.cfdi": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PathDescargaXML": "C:\\CfdiEmitido"
+      }
+    }
+  }
+}

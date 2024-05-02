@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "gcf.conciliador.captcha": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "urlCaptcha": "https://localhost:7023",
+        "PathGoogleCredentials": "C:\\Proyectos\\contabee\\contabee-backend\\src\\gcf\\sat.bot.comun\\eccordion-359212-dabac4458cde.json",
+        "RutaCache": "C:\\temp",
+        "BucketName": "contabee-db-storage",
+        "PathDescargaXML": "C:\\CfdiEmitido"
+      }
+    }
+  }
+}

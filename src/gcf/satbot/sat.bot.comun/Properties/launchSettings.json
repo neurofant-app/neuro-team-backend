@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "sat.bot.comun": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PathGoogleCredentials": "C:\\Proyectos\\contabee\\contabee-backend\\src\\gcf\\sat.bot.comun\\eccordion-359212-dabac4458cde.json",
+        "RutaCache": "C:\\temp"
+      },
+      "remoteDebugEnabled": true
+    }
+  }
+}

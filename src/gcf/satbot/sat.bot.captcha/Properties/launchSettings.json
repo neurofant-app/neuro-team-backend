@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "sat.bot.captcha": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "PathDescargaXML": "C:\\CfdiEmitido"
+      }
+    }
+  }
+}

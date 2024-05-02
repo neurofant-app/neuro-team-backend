@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="Google.Cloud.Functions.Hosting" Version="2.1.0" />
+	  <PackageReference Include="Google.Events.Protobuf" Version="1.4.0" />
+	  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.3">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Microsoft.Extensions.ApiDescription.Client" Version="8.0.3">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	  <PackageReference Include="NSwag.ApiDescription.Client" Version="14.0.3">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+    <None Include="appsettings*.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\modelo.repositorio.cfdi\modelo.repositorio.cfdi.csproj" />
+    <ProjectReference Include="..\sat.bot.comun\sat.bot.comun.csproj" />
+    <ProjectReference Include="..\sat.bot.ejecutor\sat.bot.ejecutor.csproj" />
+    <ProjectReference Include="..\sat.bot.modelo\sat.bot.modelo.csproj" />
+    <ProjectReference Include="..\sat.bot.services\sat.bot.services.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="SwaggerDocs\accesoCaptchaAPI.json" ClassName="AccesoCaptchaClient" />
+  </ItemGroup>
+</Project>

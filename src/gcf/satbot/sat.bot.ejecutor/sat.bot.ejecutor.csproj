@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\modelo.repositorio.cfdi\modelo.repositorio.cfdi.csproj" />
+    <ProjectReference Include="..\procesador.sat.cfdi\procesador.sat.cfdi.csproj" />
+    <ProjectReference Include="..\sat.bot.captcha\sat.bot.captcha.csproj" />
+    <ProjectReference Include="..\sat.bot.comun\sat.bot.comun.csproj" />
+    <ProjectReference Include="..\sat.bot.services\sat.bot.services.csproj" />
+  </ItemGroup>
+
+</Project>

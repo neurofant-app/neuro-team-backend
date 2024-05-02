@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.3" />
+	  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	  <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\lib\apigenerica.model\apigenerica.model.csproj" />
+    <ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
+    <ProjectReference Include="..\comunicaciones.modelo\comunicaciones.modelo.csproj" />
+    <ProjectReference Include="..\comunicaciones.servicios\comunicaciones.servicios.csproj" />
+  </ItemGroup>
+
+</Project>

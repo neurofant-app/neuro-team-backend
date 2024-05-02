@@ -1,0 +1,568 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "cfdi.consulta.api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/accesocaptcha/facturacion": {
+      "post": {
+        "tags": [
+          "AccesoCaptcha"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccesoCaptchaFacturacion"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccesoCaptchaFacturacion"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccesoCaptchaFacturacion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accesocaptcha/facturacion/respuesta/{id}": {
+      "get": {
+        "tags": [
+          "AccesoCaptcha"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accesocaptcha/facturacion/reenviar/{id}": {
+      "post": {
+        "tags": [
+          "AccesoCaptcha"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "tel",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Consulta/cfdi": {
+      "post": {
+        "tags": [
+          "Consulta"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Consulta"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Consulta"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Consulta"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/CFDIPaginaDatos"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CFDIPaginaDatos"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CFDIPaginaDatos"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/Cronograma": {
+      "get": {
+        "tags": [
+          "Cronograma"
+        ],
+        "parameters": [
+          {
+            "name": "RFC",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Anio",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "mes",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DTOCronogramaConciliacion"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DTOCronogramaConciliacion"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DTOCronogramaConciliacion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccesoCaptchaFacturacion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "rfc": {
+            "type": "string",
+            "nullable": true
+          },
+          "captchaBase64": {
+            "type": "string",
+            "nullable": true
+          },
+          "fecha": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "respuestaHumana": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CFDI": {
+        "type": "object",
+        "properties": {
+          "rowid": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uuid": {
+            "type": "string",
+            "nullable": true
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "emitido": {
+            "type": "boolean"
+          },
+          "cancelado": {
+            "type": "boolean"
+          },
+          "fechaCFDI": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "iano": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "imes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idia": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rfcId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "subTotal": {
+            "type": "number",
+            "format": "double"
+          },
+          "total": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalIRetenidos": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalITrasladados": {
+            "type": "number",
+            "format": "double"
+          },
+          "uso": {
+            "type": "string",
+            "nullable": true
+          },
+          "tieneIRetenidos": {
+            "type": "boolean"
+          },
+          "tieneITrasladados": {
+            "type": "boolean"
+          },
+          "tieneRelacionados": {
+            "type": "boolean"
+          },
+          "tieneI3os": {
+            "type": "boolean"
+          },
+          "tieneInfoAduanera": {
+            "type": "boolean"
+          },
+          "tieneCPredial": {
+            "type": "boolean"
+          },
+          "tieneComplementos": {
+            "type": "boolean"
+          },
+          "tieneAddenda": {
+            "type": "boolean"
+          },
+          "serie": {
+            "type": "string",
+            "nullable": true
+          },
+          "folio": {
+            "type": "string",
+            "nullable": true
+          },
+          "formaPago": {
+            "type": "string",
+            "nullable": true
+          },
+          "moneda": {
+            "type": "string",
+            "nullable": true
+          },
+          "tipoDeComprobante": {
+            "type": "string",
+            "nullable": true
+          },
+          "metodoPago": {
+            "type": "string",
+            "nullable": true
+          },
+          "lugarExpedicion": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CFDIPaginaDatos": {
+        "type": "object",
+        "properties": {
+          "indice": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "elementos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CFDI"
+            },
+            "nullable": true
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "Consulta": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "indice": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tamano": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "ordenamiento": {
+            "$ref": "#/components/schemas/Ordenamiento"
+          },
+          "columnaOrdenamiento": {
+            "type": "string",
+            "nullable": true
+          },
+          "filtros": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Filtro"
+            },
+            "nullable": true
+          },
+          "recalcularTotales": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DTOCronogramaConciliacion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tipoComprobante": {
+            "$ref": "#/components/schemas/TipoComprobante"
+          },
+          "estado": {
+            "$ref": "#/components/schemas/EstadoConciliacion"
+          },
+          "mes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "anio": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dia": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "EstadoConciliacion": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Filtro": {
+        "type": "object",
+        "properties": {
+          "campo": {
+            "type": "string",
+            "nullable": true
+          },
+          "operador": {
+            "$ref": "#/components/schemas/OperadorFiltro"
+          },
+          "negado": {
+            "type": "boolean"
+          },
+          "valores": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "nivelFuzzy": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "OperadorFiltro": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          100,
+          101
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "Ordenamiento": {
+        "enum": [
+          0,
+          1
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "TipoComprobante": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "format": "int32"
+      }
+    }
+  }
+}
