@@ -1,5 +1,7 @@
 ﻿using comunes.primitivas.atributos;
 using comunes.primitivas.entidades;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace controlescolar.modelo.campi;
 
@@ -12,6 +14,8 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
     /// <summary>
     /// Identificador único del campus en el repositorio, se genera al crear un registro
     /// </summary>
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public virtual Guid Id { get; set; }
 
     /// <summary>

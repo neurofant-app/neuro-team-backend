@@ -14,6 +14,6 @@ public abstract class CampusBase
     /// <summary>
     /// Especifica si el campus es virtual
     /// </summary>
-    public virtual required bool Virtual { get; set; } ;
+    public virtual required bool Virtual { get; set; }
 
 }
