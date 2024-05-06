@@ -1,5 +1,6 @@
 ﻿using comunes.primitivas.atributos;
 using comunes.primitivas.entidades;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.IdGenerators;
 
@@ -28,6 +29,6 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
     /// Identificador único del campo padre
     /// </summary>
     [BsonElement("caid")]
-    public Guid? CampusId { get; set; }
+    public Guid? CampusPadreId { get; set; }
 
 }

@@ -6,7 +6,7 @@ namespace controlescolar.modelo.campi;
 /// Modelo en forma de árbol representando los campus de una cuenta
 /// </summary>
 [CQRSConsulta]
-public class ConsultaCampusCuenta: CampusBase
+public class ConsultaCampusCuenta
 {
-    public List<CampusBase> Campus { get; set; }
+    public List<ConsultaCampus> Campus { get; set; }
 }

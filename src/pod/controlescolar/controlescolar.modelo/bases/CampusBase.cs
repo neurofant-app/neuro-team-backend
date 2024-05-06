@@ -7,7 +7,6 @@ namespace controlescolar.modelo;
 /// </summary>
 public abstract class CampusBase
 {
-
     /// <summary>
     /// Nombre del campus
     /// </summary>

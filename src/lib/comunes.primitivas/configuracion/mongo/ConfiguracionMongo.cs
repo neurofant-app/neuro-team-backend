@@ -9,4 +9,6 @@ public sealed class ConfiguracionMongo
 
     [JsonPropertyName("conexiones-entidad")]
     public List<ConexionEntidad>? ConexionesEntidad { get; set; }
+
+
 }
