@@ -6,6 +6,10 @@ namespace controlescolar.modelo.campi;
 /// Datos para la creación de un campus
 /// </summary>
 [CQRSCrear]
-public class CreaCanpus: CampusBase
+public class CreaCampus: CampusBase
 {
+    /// <summary>
+    /// Referencia al Campus padre.
+    /// </summary>
+    public virtual Guid? CampusPadreId { get; set; }
 }

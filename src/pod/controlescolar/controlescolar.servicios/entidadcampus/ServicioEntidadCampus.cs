@@ -1,0 +1,326 @@
+﻿#pragma warning disable CS8603 // Possible null reference return.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using apigenerica.model.interpretes;
+using apigenerica.model.modelos;
+using apigenerica.model.reflectores;
+using apigenerica.model.servicios;
+using comunes.primitivas;
+using comunes.primitivas.configuracion.mongo;
+using controlescolar.modelo.campi;
+using controlescolar.servicios.dbcontext;
+using extensibilidad.metadatos;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Driver;
+using System.Text.Json;
+using static OpenIddict.Abstractions.OpenIddictConstants;
+
+
+namespace controlescolar.servicios.entidadcampus;
+[ServicioEntidadAPI(entidad:typeof(EntidadCampus))]
+public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, CreaCampus, ActualizaCampus, ConsultaCampusCuenta, string>,
+    IServicioEntidadAPI, IServicioEntidadCampus
+{
+    private readonly IMongoCollection<EntidadCampus> _campus;
+    private readonly ILogger _logger;
+    private MongoDbContext localContext;
+    private readonly IReflectorEntidadesAPI reflector;
+    public ServicioEntidadCampus(MongoDbContext context,ILogger<ServicioEntidadCampus> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.EntidadCampi, logger, Reflector, cache) {
+        _logger = logger;
+        interpreteConsulta = new InterpreteConsultaMySQL();
+        localContext = context;
+        reflector = Reflector;
+        var conexion = configuracionMongo.ConexionEntidad("campus");
+        if (conexion == null )
+        {
+            string err = "No existe configuracion de mongo para 'campus'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        // Este fragemnto debe ir simrpe al inicio para evitar conflicts de mongo con cambios en el modelo
+        var pack = new ConventionPack
+            {
+                new IgnoreExtraElementsConvention(true)
+            };
+        ConventionRegistry.Register("Conventions", pack, t => true);
+        try
+        {
+            _logger.LogDebug($"Mongo DB {conexion.Esquema} coleccioón {conexion.Esquema} utilziando conexion default {string.IsNullOrEmpty(conexion.Conexion)}");
+            var conexi = configuracionMongo.ConexionDefault();
+            var client = new MongoClient(conexi);
+            var database = client.GetDatabase(conexion.Esquema);
+            _campus = database.GetCollection<EntidadCampus>(conexion.Coleccion);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al inicializar mongo para 'campus'");
+            throw;
+        }        
+    }
+    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
+    public bool RequiereAutenticacion => true;
+    public Entidad EntidadRepoAPI()
+    {
+        return this.EntidadRepo();
+    }
+    public Entidad EntidadInsertAPI()
+    {
+        return this.EntidadInsert();
+    }
+    public Entidad EntidadUpdateAPI()
+    {
+        return this.EntidadUpdate();
+    }
+    public Entidad EntidadDespliegueAPI()
+    {
+        return this.EntidadDespliegue();
+    }
+
+    public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
+    {
+        this.EstableceContextoUsuario(contexto);
+    }
+
+    public ContextoUsuario? ObtieneContextoUsuarioAPI()
+    {
+        return this._contextoUsuario;
+    }
+
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    {
+        var add = data.Deserialize<CreaCampus>(JsonAPIDefaults());
+        var temp = await this.Insertar(add);
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    {
+        var update = data.Deserialize<ActualizaCampus>(JsonAPIDefaults());
+        return await this.Actualizar((string)id, update);
+    }
+
+    public async Task<Respuesta> EliminarAPI(object id)
+    {
+        return await this.Eliminar((string)id);
+    }
+
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    {
+        var temp = await this.UnicaPorId((string)id);
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    {
+        var temp = await this.UnicaPorIdDespliegue((string)id);
+
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    {
+        var temp = await this.Pagina(consulta);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    {
+        var temp = await this.PaginaDespliegue(consulta);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijoAPI(Consulta consulta, string tipoPadre, string id)
+    {
+        var temp = await this.PaginaHijo(consulta, tipoPadre, id);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijosDespliegueAPI(Consulta consulta, string tipoPadre, string id)
+    {
+        var temp = await this.PaginaHijosDespliegue(consulta, tipoPadre, id);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+    #region Overrides para la personalización de la entidad LogoAplicacion
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaCampus data)
+    {
+        ResultadoValidacion resultado = new();
+        resultado.Valido = true;
+
+        return resultado;
+    }
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadCampus original)
+    {
+        ResultadoValidacion resultado = new();
+        resultado.Valido = true;
+        return resultado;
+    }
+
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaCampus actualizacion, EntidadCampus original)
+    {
+        ResultadoValidacion resultado = new();
+
+        resultado.Valido = true;
+
+        return resultado;
+    }
+
+    public override EntidadCampus ADTOFull(ActualizaCampus actualizacion, EntidadCampus actual)
+    {
+        actual.Nombre = actualizacion.Nombre;
+        actual.Virtual = actualizacion.Virtual;
+        return actual;
+    }
+
+    public override EntidadCampus ADTOFull(CreaCampus data)
+    {
+        EntidadCampus entidadCampus = new EntidadCampus()
+        {
+            Id = Guid.NewGuid(),
+            Nombre = data.Nombre,
+            Virtual = data.Virtual,
+            CampusPadreId = data.CampusPadreId
+            
+        };
+        return entidadCampus;
+    }
+
+    public override async Task<Respuesta> Actualizar(string id, ActualizaCampus data)
+    {
+        var respuesta = new Respuesta();
+        try
+        {
+            if (string.IsNullOrEmpty(id.ToString()) || data == null)
+            {
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
+            }
+
+
+            EntidadCampus actual = _dbSetFull.Find(Guid.Parse(id));
+
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data, actual);
+                _dbSetFull.Update(entidad);
+                await _db.SaveChangesAsync();
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+
+    public override async Task<RespuestaPayload<EntidadCampus>> UnicaPorId(string id)
+    {
+        var respuesta = new RespuestaPayload<EntidadCampus>();
+        try
+        {
+            EntidadCampus actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            respuesta.Ok = true;
+            respuesta.HttpCode = HttpCode.Ok;
+            respuesta.Payload = actual;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
+    public override async Task<Respuesta> Eliminar(string id)
+    {
+        var respuesta = new Respuesta();
+        try
+        {
+
+            if (string.IsNullOrEmpty(id))
+            {
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
+            }
+
+            EntidadCampus actual = _dbSetFull.Find(Guid.Parse(id));
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            var resultadoValidacion = await ValidarEliminacion(id, actual);
+            if (resultadoValidacion.Valido)
+            {
+
+                _dbSetFull.Remove(actual);
+                await _db.SaveChangesAsync();
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
+    #endregion
+
+
+}
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8603 // Possible null reference return.

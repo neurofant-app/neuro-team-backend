@@ -71,7 +71,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
-                respuesta.Payload = ADTODespliegue(entidad);
+                //respuesta.Payload = ADTODespliegue(entidad);
             }
             else
             {

@@ -6,7 +6,7 @@ using FluentValidation;
 /// <summary>
 /// Validador para la creación de campus
 /// </summary>
-public class CreaCampusValidator : AbstractValidator<CreaCanpus>
+public class CreaCampusValidator : AbstractValidator<CreaCampus>
 {
     public CreaCampusValidator()
     {
@@ -18,7 +18,7 @@ public class CreaCampusValidator : AbstractValidator<CreaCanpus>
 /// <summary>
 /// Validador para la actualización de campus
 /// </summary>
-public class ActualizaCampusValidator : AbstractValidator<CreaCanpus>
+public class ActualizaCampusValidator : AbstractValidator<CreaCampus>
 {
     public ActualizaCampusValidator()
     {
