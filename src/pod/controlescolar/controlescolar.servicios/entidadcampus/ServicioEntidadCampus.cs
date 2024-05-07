@@ -10,12 +10,9 @@ using controlescolar.modelo.campi;
 using controlescolar.servicios.dbcontext;
 using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using System.Text.Json;
-using static OpenIddict.Abstractions.OpenIddictConstants;
 
 
 namespace controlescolar.servicios.entidadcampus;
@@ -23,40 +20,39 @@ namespace controlescolar.servicios.entidadcampus;
 public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, CreaCampus, ActualizaCampus, ConsultaCampusCuenta, string>,
     IServicioEntidadAPI, IServicioEntidadCampus
 {
-    private readonly IMongoCollection<EntidadCampus> _campus;
     private readonly ILogger _logger;
-    private MongoDbContext localContext;
+
     private readonly IReflectorEntidadesAPI reflector;
-    public ServicioEntidadCampus(MongoDbContext context,ILogger<ServicioEntidadCampus> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.EntidadCampi, logger, Reflector, cache) {
+    public ServicioEntidadCampus(ILogger<ServicioEntidadCampus> logger, 
+        IServicionConfiguracionMongo configuracionMongo, 
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache) {
         _logger = logger;
         interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+       
+        
         reflector = Reflector;
-        var conexion = configuracionMongo.ConexionEntidad("campus");
-        if (conexion == null )
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_CAMPUS);
+        if (configuracionEntidad == null )
         {
-            string err = "No existe configuracion de mongo para 'campus'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_CAMPUS}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
 
-        // Este fragemnto debe ir simrpe al inicio para evitar conflicts de mongo con cambios en el modelo
-        var pack = new ConventionPack
-            {
-                new IgnoreExtraElementsConvention(true)
-            };
-        ConventionRegistry.Register("Conventions", pack, t => true);
         try
         {
-            _logger.LogDebug($"Mongo DB {conexion.Esquema} coleccioón {conexion.Esquema} utilziando conexion default {string.IsNullOrEmpty(conexion.Conexion)}");
-            var conexi = configuracionMongo.ConexionDefault();
-            var client = new MongoClient(conexi);
-            var database = client.GetDatabase(conexion.Esquema);
-            _campus = database.GetCollection<EntidadCampus>(conexion.Coleccion);
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+
+            var cadenaConexion = configuracionEntidad.Conexion ?? configuracionMongo.ConexionDefault();
+            var client = new MongoClient(cadenaConexion);
+            
+            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContext)_db).EntidadCampi;
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al inicializar mongo para 'campus'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_CAMPUS}'");
             throw;
         }        
     }
