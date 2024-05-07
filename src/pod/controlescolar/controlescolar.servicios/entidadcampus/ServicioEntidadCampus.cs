@@ -43,7 +43,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         {
             _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
 
-            var cadenaConexion = configuracionEntidad.Conexion ?? configuracionMongo.ConexionDefault();
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : configuracionEntidad.Conexion ?? configuracionMongo.ConexionDefault();
+
             var client = new MongoClient(cadenaConexion);
             
             _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
