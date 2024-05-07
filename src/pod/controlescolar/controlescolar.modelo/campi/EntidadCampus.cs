@@ -16,6 +16,7 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
     /// Identificador único del campus en el repositorio, se genera al crear un registro
     /// </summary>
     [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
     public virtual Guid Id { get; set; }
 
     /// <summary>

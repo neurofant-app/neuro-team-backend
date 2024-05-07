@@ -21,34 +21,29 @@ namespace apigenerica.model.servicios;
 /// <typeparam name="DTOUpdate">DTO utilizado para actualizar</typeparam>
 /// <typeparam name="DTODespliegue">DTO utilizado para el despligue neutral en UI</typeparam>
 /// <typeparam name="TipoId">Tipo de dato utilizado para el identificador de la entidad</typeparam>
+/// <remarks>
+/// Constructor de la clase base
+/// </remarks>
+/// <param name="db"></param>
+/// <param name="dbSetFull"></param>
+/// <param name="logger"></param>
+/// <param name="reflectorEntidades"></param>
 public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate, DTODespliegue, TipoId>
+    (DbContext? db, DbSet<DTOFull>? dbSetFull, ILogger logger, IReflectorEntidadesAPI reflectorEntidades, IDistributedCache cache)
     where DTOFull : class
     where DTODespliegue : class
     where DTOUpdate : class
     where DTOInsert : class
 {
+
+    // Asignación utilizando Primary Ccosntructor
     protected IInterpreteConsulta? interpreteConsulta;
-    protected DbSet<DTOFull> _dbSetFull;
-    protected DbContext _db;
+    protected DbSet<DTOFull>? _dbSetFull = dbSetFull;
+    protected DbContext? _db = db;
     protected ContextoUsuario? _contextoUsuario;
-    protected ILogger _logger;
-    protected IReflectorEntidadesAPI reflectorEntidades;
-    protected IDistributedCache _cache;
-    /// <summary>
-    /// Constructor de la clase base
-    /// </summary>
-    /// <param name="db"></param>
-    /// <param name="dbSetFull"></param>
-    /// <param name="logger"></param>
-    /// <param name="reflectorEntidades"></param>
-    public ServicioEntidadGenericaBase(DbContext db, DbSet<DTOFull> dbSetFull, ILogger logger, IReflectorEntidadesAPI reflectorEntidades, IDistributedCache cache)
-    {
-        _cache = cache;
-        _dbSetFull = dbSetFull;
-        _db = db;
-        _logger = logger;
-        this.reflectorEntidades = reflectorEntidades;
-    }
+    protected ILogger _logger = logger;
+    protected IReflectorEntidadesAPI reflectorEntidades = reflectorEntidades;
+    protected IDistributedCache _cache = cache;
 
     public JsonSerializerOptions JsonAPIDefaults()
     {
@@ -66,12 +61,12 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             {
                 var entidad = ADTOFull(data);
 
-                _dbSetFull.Add(entidad);
-                await _db.SaveChangesAsync();
+                _dbSetFull!.Add(entidad);
+                await _db!.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
-                //respuesta.Payload = ADTODespliegue(entidad);
+                respuesta.Payload = ADTODespliegue(entidad);
             }
             else
             {
@@ -120,7 +115,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             }
 
 
-            DTOFull actual = _dbSetFull.Find(id);
+            DTOFull actual = _dbSetFull!.Find(id);
 
             if (actual == null)
             {
@@ -132,8 +127,8 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                _dbSetFull.Update(entidad);
-                await _db.SaveChangesAsync();
+                _dbSetFull!.Update(entidad);
+                await _db!.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -169,7 +164,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
                 return respuesta;
             }
 
-            DTOFull actual = _dbSetFull.Find(id);
+            DTOFull actual = _dbSetFull!.Find(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -180,8 +175,8 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             if (resultadoValidacion.Valido)
             {
 
-                _dbSetFull.Remove(actual);
-                await _db.SaveChangesAsync();
+                _dbSetFull!.Remove(actual);
+                await _db!.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -208,7 +203,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         var respuesta = new RespuestaPayload<DTOFull>();
         try
         {
-            DTOFull actual = await _dbSetFull.FindAsync(id);
+            DTOFull actual = await _dbSetFull!.FindAsync(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;

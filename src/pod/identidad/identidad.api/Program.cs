@@ -97,7 +97,7 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
         {
             // Configure the context to use mysql.
-            var connectionString = builder.Configuration.GetConnectionString("contabee-identity");
+            var connectionString = builder.Configuration.GetConnectionString("identity");
             options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
             // Register the entity sets needed by OpenIddict.

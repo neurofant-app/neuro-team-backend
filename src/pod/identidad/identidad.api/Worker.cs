@@ -19,25 +19,12 @@ public class Worker : IHostedService
         await context.Database.EnsureCreatedAsync();
 
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-        if (await manager.FindByClientIdAsync("console") == null)
+
+        if (await manager.FindByClientIdAsync("neurofant-interservicio") == null)
         {
             await manager.CreateAsync(new OpenIddictApplicationDescriptor
             {
-                ClientId = "console",
-                ClientSecret = "388D45FA-B36B-4988-BA59-B187D329C207",
-                DisplayName = "My client application",
-                Permissions =
-                {
-                    Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.ClientCredentials                    
-                }
-            });            
-        }
-        if (await manager.FindByClientIdAsync("contabee") == null)
-        {
-            await manager.CreateAsync(new OpenIddictApplicationDescriptor
-            {
-                ClientId = "contabee",
+                ClientId = "neurofant-interservicio",
                 ClientSecret = "s3cr3t0",
                 DisplayName = "My client application",
                 Permissions =
@@ -48,16 +35,17 @@ public class Worker : IHostedService
             });
         }
 
-        if (await manager.FindByClientIdAsync("contabee-password") == null)
+        if (await manager.FindByClientIdAsync("neurofant-password") == null)
         {
             await manager.CreateAsync(new OpenIddictApplicationDescriptor
             {
-                ClientId = "contabee-password",
-                DisplayName = "Acceso usuarios Contabee",
+                ClientId = "neurofant-password",
+                DisplayName = "Acceso usuarios Neurofant",
                 Permissions =
                 {
                     Permissions.Endpoints.Token,
-                    Permissions.GrantTypes.Password
+                    Permissions.GrantTypes.Password,
+                    Permissions.GrantTypes.RefreshToken
                 }
             });
         }
