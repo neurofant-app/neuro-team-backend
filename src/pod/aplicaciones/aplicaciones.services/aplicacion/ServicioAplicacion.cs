@@ -13,25 +13,56 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using comunes.primitivas.configuracion.mongo;
+using aplicaciones.services.dbcontext;
+using MongoDB.Driver;
 
 namespace invitaciones.services.aplicacion;
 [ServicioEntidadAPI(entidad: typeof(Aplicacion))]
 public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, AplicacionInsertar, AplicacionActualizar, AplicacionDesplegar, string>,
    IServicioEntidadAPI, IServicioAplicacion
 {
-    private DbContextAplicaciones localContext;
+    private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
     private readonly IDistributedCache cache;
 
-    public ServicioAplicacion(DbContextAplicaciones context, ILogger<ServicioAplicacion> logger, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.Aplicaciones, logger, Reflector, cache)
+    public ServicioAplicacion(ILogger<ServicioAplicacion> logger, 
+        IServicionConfiguracionMongo configuracionMongo,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
-        interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+        _logger = logger;
         reflector = Reflector;
         this.cache = cache;
+
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
+        if(configuracionEntidad == null)
+        {
+            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        try
+        {
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
+            var client = new MongoClient(cadenaConexion);
+
+            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).Aplicaciones;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'");
+            throw;
+        }
     }
 
-    private DbContextAplicaciones DB { get { return (DbContextAplicaciones)_db; } }
+    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
 
     public Entidad EntidadRepoAPI()
@@ -191,13 +222,13 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaAplicaciones);
 
         int? total = null;
-        List<Aplicacion> elementos = localContext.Aplicaciones.FromSqlRaw(query).ToList();
+        List<Aplicacion> elementos = DB.Aplicaciones.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
             query = query.Split("ORDER")[0];
             query = $"{query.Replace("*", "count(*)")}";
-            total = localContext.Database.SqlQueryRaw<int>(query).ToArray().First();
+            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
         }
 
 
@@ -273,13 +304,13 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
-            var plantillas = await localContext.PlantillasAplicaciones
+            var plantillas = await DB.PlantillaInvitaciones
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
-            var logos = await localContext.LogosAplicaciones
+            var logos = await DB.LogoAplicaciones
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
-            var consentimientos = await localContext.Consentimientos
+            var consentimientos = await DB.Consentimientos
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
 

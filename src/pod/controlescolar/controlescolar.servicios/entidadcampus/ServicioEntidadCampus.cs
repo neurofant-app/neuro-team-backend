@@ -27,10 +27,8 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         IServicionConfiguracionMongo configuracionMongo, 
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache) {
         _logger = logger;
-        interpreteConsulta = new InterpreteConsultaMySQL();
-       
-        
         reflector = Reflector;
+
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_CAMPUS);
         if (configuracionEntidad == null )
         {
@@ -42,11 +40,11 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         try
         {
             _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
-
             var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
                 ? configuracionMongo.ConexionDefault()
-                : configuracionEntidad.Conexion ?? configuracionMongo.ConexionDefault();
-
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
             
             _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
