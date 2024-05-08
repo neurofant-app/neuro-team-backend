@@ -21,8 +21,8 @@ using MongoDB.Driver;
 
 
 namespace aplicaciones.services.logo;
-[ServicioEntidadAPI(entidad:typeof(LogoAplicacion))]
-public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion,LogoAplicacion,LogoAplicacion,LogoAplicacion,string>,
+[ServicioEntidadAPI(entidad:typeof(EntidadLogoAplicacion))]
+public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,string>,
     IServicioEntidadAPI, IServicioLogoAplicacion
 {
     private readonly ILogger _logger;
@@ -93,7 +93,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<LogoAplicacion>(JsonAPIDefaults());
+        var add = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -101,7 +101,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<LogoAplicacion>(JsonAPIDefaults());
+        var update = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -154,21 +154,21 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         return respuesta;
     }
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(LogoAplicacion data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadLogoAplicacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, LogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadLogoAplicacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, LogoAplicacion actualizacion, LogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -177,7 +177,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         return resultado;
     }
 
-    public override LogoAplicacion ADTOFull(LogoAplicacion actualizacion, LogoAplicacion actual)
+    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion actual)
     {
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.Tipo = actualizacion.Tipo;
@@ -189,9 +189,9 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         return actual;
     }
 
-    public override LogoAplicacion ADTOFull(LogoAplicacion data)
+    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion data)
     {
-        LogoAplicacion logoAplicacion = new LogoAplicacion()
+        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
         {
             Id = Guid.NewGuid(),
             AplicacionId = data.AplicacionId,
@@ -205,9 +205,9 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         return logoAplicacion;
     }
 
-    public override LogoAplicacion ADTODespliegue(LogoAplicacion data)
+    public override EntidadLogoAplicacion ADTODespliegue(EntidadLogoAplicacion data)
     {
-        LogoAplicacion logoAplicacion = new LogoAplicacion()
+        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
         {
             Id = data.Id,
             AplicacionId = data.AplicacionId,
@@ -222,14 +222,14 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         return logoAplicacion;
     }
 
-    public override async Task<(List<LogoAplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<(List<EntidadLogoAplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
     {
         await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(LogoAplicacion));
+        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadLogoAplicacion));
         string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaLogosAplicaciones);
 
         int? total = null;
-        List<LogoAplicacion> elementos = DB.LogoAplicaciones.FromSqlRaw(query).ToList();
+        List<EntidadLogoAplicacion> elementos = DB.LogoAplicaciones.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
@@ -245,11 +245,11 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         }
         else
         {
-            return new(new List<LogoAplicacion>(), total); ;
+            return new(new List<EntidadLogoAplicacion>(), total); ;
         }
     }
 
-    public override async Task<Respuesta> Actualizar(string id, LogoAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, EntidadLogoAplicacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -261,7 +261,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
             }
 
 
-            LogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -299,12 +299,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
     }
 
 
-    public override async Task<RespuestaPayload<LogoAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadLogoAplicacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<LogoAplicacion>();
+        var respuesta = new RespuestaPayload<EntidadLogoAplicacion>();
         try
         {
-            LogoAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadLogoAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -338,7 +338,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
                 return respuesta;
             }
 
-            LogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -348,7 +348,6 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-
                 _dbSetFull.Remove(actual);
                 await _db.SaveChangesAsync();
 

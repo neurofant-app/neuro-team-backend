@@ -38,16 +38,16 @@ public class Aplicacion
     /// Lista de invitaciones asociadass a una aplicación
     /// </summary>
     [JsonIgnore]
-    public IEnumerable<Invitacion>? Invitaciones { get; set; }
+    public IEnumerable<EntidadInvitacion>? Invitaciones { get; set; }
 
     [JsonIgnore]
-    public IEnumerable<PlantillaInvitacion> Plantillas { get; set; }
+    public IEnumerable<EntidadPlantillaInvitacion> Plantillas { get; set; }
 
     [JsonIgnore]
-    public IEnumerable<LogoAplicacion> Logotipos { get; set; }
+    public IEnumerable<EntidadLogoAplicacion> Logotipos { get; set; }
 
 
     [JsonIgnore]
-    public IEnumerable<Consentimiento> Consentimientos { get; set; }
+    public IEnumerable<EntidadConsentimiento> Consentimientos { get; set; }
 }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

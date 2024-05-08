@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace aplicaciones.services.configuraciones;
 
-public class ConfiguracionConsentimiento : IEntityTypeConfiguration<Consentimiento>
+public class ConfiguracionConsentimiento : IEntityTypeConfiguration<EntidadConsentimiento>
 {
-    public void Configure(EntityTypeBuilder<Consentimiento> builder)
+    public void Configure(EntityTypeBuilder<EntidadConsentimiento> builder)
     {
         builder.ToTable("aplicacion$consentimientos");
         builder.HasKey(x => x.Id);

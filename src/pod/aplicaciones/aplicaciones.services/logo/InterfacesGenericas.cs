@@ -6,7 +6,7 @@ namespace aplicaciones.services.logo;
 /// Interfaz para el servicio de LogoAplicacion
 /// </summary>
 
-public interface IServicioLogoAplicacion : IServicioEntidadGenerica<LogoAplicacion, LogoAplicacion, LogoAplicacion,LogoAplicacion,string>
+public interface IServicioLogoAplicacion : IServicioEntidadGenerica<EntidadLogoAplicacion, EntidadLogoAplicacion, EntidadLogoAplicacion,EntidadLogoAplicacion,string>
 {
 
 }

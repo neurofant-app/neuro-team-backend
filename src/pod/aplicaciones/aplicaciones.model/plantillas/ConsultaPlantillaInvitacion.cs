@@ -1,11 +1,8 @@
-﻿using System.Text.Json.Serialization;
+﻿using comunes.primitivas.atributos;
 
 namespace aplicaciones.model;
-
-/// <summary>
-/// Define laplantilla de contenido para las comunicaciones con los usuarios del sistema
-/// </summary>
-public class PlantillaInvitacion
+[CQRSConsulta]
+public class ConsultaPlantillaInvitacion
 {
     /// <summary>
     /// Identificador único de la plantila
@@ -21,7 +18,6 @@ public class PlantillaInvitacion
     // Requerida
     // [I] [A] [D]
 
-
     /// <summary>
     /// Identificador único de la aplicación a la qu pertenece la plantilla
     /// </summary>
@@ -35,12 +31,4 @@ public class PlantillaInvitacion
     public required string Plantilla { get; set; }
     // Requerida TAMAÑO MAXIMO EN LA BASE DE DATOS
     // [I [A] [D]
-    //
-
-
-    /// <summary>
-    /// Aplicación asociada a la invitación
-    /// </summary>
-    [JsonIgnore]
-    public Aplicacion Aplicacion { get; set; }
 }

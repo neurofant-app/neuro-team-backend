@@ -8,35 +8,34 @@ using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
 using aplicaciones.services.dbContext;
-using aplicaciones.services.plantilla;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using aplicaciones.services.dbcontext;
+using aplicaciones.services.invitacion;
 using comunes.primitivas.configuracion.mongo;
 using MongoDB.Driver;
 
-namespace aplicaciones.services.consentimiento;
-[ServicioEntidadAPI(entidad: typeof(EntidadConsentimiento))]
-
-public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, string>,
-    IServicioEntidadAPI, IServicioConsentimiento
+namespace aplicaciones.services.plantilla;
+[ServicioEntidadAPI(entidad:typeof(EntidadPlantillaInvitacion))]
+public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<EntidadPlantillaInvitacion, CreaPlantillaInvitacion, ActualizaPlantillaInvitacion, ConsultaPlantillaInvitacion, string>,
+    IServicioEntidadAPI, IServicioPlantillaInvitacion
 {
     private readonly ILogger _logger;
-    private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioConsentimiento(ILogger<IServicioConsentimiento> logger,
-                IServicionConfiguracionMongo configuracionMongo,
+    private readonly IReflectorEntidadesAPI reflector;
+    public ServicioEntidadPlantillaInvitacion(ILogger<ServicioEntidadPlantillaInvitacion> logger,
+        IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -52,32 +51,29 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextAplicaciones)_db).Consentimientos;
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).PlantillaInvitaciones;
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION}'");
             throw;
         }
     }
     private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
-
     public Entidad EntidadRepoAPI()
     {
         return this.EntidadRepo();
     }
-
     public Entidad EntidadInsertAPI()
     {
         return this.EntidadInsert();
     }
-
     public Entidad EntidadUpdateAPI()
     {
         return this.EntidadUpdate();
     }
-
     public Entidad EntidadDespliegueAPI()
     {
         return this.EntidadDespliegue();
@@ -95,7 +91,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
+        var add = data.Deserialize<CreaPlantillaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -103,7 +99,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
+        var update = data.Deserialize<ActualizaPlantillaInvitacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -155,22 +151,22 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
-    #region Overrides para la personalización de la entidad PlantillaAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadConsentimiento data)
+    #region Overrides para la personalización de la entidad LogoAplicacion
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaPlantillaInvitacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadConsentimiento original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadPlantillaInvitacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadConsentimiento actualizacion, EntidadConsentimiento original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaPlantillaInvitacion actualizacion, EntidadPlantillaInvitacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -179,73 +175,29 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return resultado;
     }
 
-    public override EntidadConsentimiento ADTOFull(EntidadConsentimiento actualizacion, EntidadConsentimiento actual)
+    public override EntidadPlantillaInvitacion ADTOFull(ActualizaPlantillaInvitacion actualizacion, EntidadPlantillaInvitacion actual)
     {
+        actual.Id = actualizacion.Id;
+        actual.TipoContenido = actualizacion.TipoContenido;
         actual.AplicacionId = actualizacion.AplicacionId;
-        actual.Tipo = actualizacion.Tipo;
-        actual.Idioma = actualizacion.Idioma;
-        actual.IdiomaDefault = actualizacion.IdiomaDefault;
-        actual.Texto = actualizacion.Texto;
+        actual.Plantilla = actualizacion.Plantilla;
+
         return actual;
     }
 
-    public override EntidadConsentimiento ADTOFull(EntidadConsentimiento data)
+    public override EntidadPlantillaInvitacion ADTOFull(CreaPlantillaInvitacion data)
     {
-        EntidadConsentimiento consentimiento = new EntidadConsentimiento()
+        EntidadPlantillaInvitacion plantillaInvitacion = new EntidadPlantillaInvitacion()
         {
             Id = Guid.NewGuid(),
+            TipoContenido = data.TipoContenido,
             AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            Texto = data.Texto,
+            Plantilla = data.Plantilla,
         };
-        return consentimiento;
+        return plantillaInvitacion;
     }
 
-    public override EntidadConsentimiento ADTODespliegue(EntidadConsentimiento data)
-    {
-        EntidadConsentimiento consentimiento = new EntidadConsentimiento()
-        {
-            Id = data.Id,
-            AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            Texto = data.Texto,
-
-        };
-        return consentimiento;
-    }
-
-    public override async Task<(List<EntidadConsentimiento> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
-    {
-        await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadConsentimiento));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaConsentimientos);
-
-        int? total = null;
-        List<EntidadConsentimiento> elementos = DB.Consentimientos.FromSqlRaw(query).ToList();
-
-        if (consulta.Contar)
-        {
-            query = query.Split("ORDER")[0];
-            query = $"{query.Replace("*", "count(*)")}";
-            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
-        }
-
-
-        if (elementos != null)
-        {
-            return new(elementos, total);
-        }
-        else
-        {
-            return new(new List<EntidadConsentimiento>(), total); ;
-        }
-    }
-
-    public override async Task<Respuesta> Actualizar(string id, EntidadConsentimiento data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaPlantillaInvitacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -257,7 +209,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
             }
 
 
-            EntidadConsentimiento actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -295,12 +247,12 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     }
 
 
-    public override async Task<RespuestaPayload<EntidadConsentimiento>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadPlantillaInvitacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<EntidadConsentimiento>();
+        var respuesta = new RespuestaPayload<EntidadPlantillaInvitacion>();
         try
         {
-            EntidadConsentimiento actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -334,7 +286,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
                 return respuesta;
             }
 
-            EntidadConsentimiento actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -369,4 +321,8 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     }
 
     #endregion
+
+
 }
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8603 // Possible null reference return.  

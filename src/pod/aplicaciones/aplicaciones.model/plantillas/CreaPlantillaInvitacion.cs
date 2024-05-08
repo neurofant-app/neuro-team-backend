@@ -1,14 +1,9 @@
-﻿namespace aplicaciones.model;
+﻿using comunes.primitivas.atributos;
 
-public class PlantillaInvitacionActualizar
+namespace aplicaciones.model;
+[CQRSCrear]
+public class CreaPlantillaInvitacion
 {
-    /// <summary>
-    /// Identificador único de la plantila
-    /// </summary>
-    public Guid Id { get; set; }
-    // Requerida
-    // [A] [D]
-
     /// <summary>
     /// Tipo de contenido de la plantilla
     /// </summary>

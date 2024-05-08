@@ -17,10 +17,10 @@ public class DbContextAplicaciones : DbContext
     }
 
     public DbSet<Aplicacion> Aplicaciones { get; set; }
-    public DbSet<Invitacion> Invitaciones { get; set; }
-    public DbSet<PlantillaInvitacion> PlantillasAplicaciones { get; set; }
-    public DbSet<LogoAplicacion> LogosAplicaciones { get; set; }
-    public DbSet<Consentimiento> Consentimientos { get; set; }
+    public DbSet<EntidadInvitacion> Invitaciones { get; set; }
+    public DbSet<EntidadPlantillaInvitacion> PlantillasAplicaciones { get; set; }
+    public DbSet<EntidadLogoAplicacion> LogosAplicaciones { get; set; }
+    public DbSet<EntidadConsentimiento> Consentimientos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

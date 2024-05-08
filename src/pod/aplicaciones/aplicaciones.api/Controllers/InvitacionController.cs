@@ -48,7 +48,7 @@ public class InvitacionController : ControladorJwt
         {
             if (ValidaPassword(confirmacion.Password))
             {
-                Invitacion invitacion = (Invitacion)respuestaInivtacion.Payload!;
+                EntidadInvitacion invitacion = (EntidadInvitacion)respuestaInivtacion.Payload!;
                 RegisterViewModel usuario = new() { Email = invitacion.Email, Password = confirmacion.Password };
                 var respuestaUsuario = await _proxyIdentityServices.CreaUsuario(usuario);
                 if (respuestaUsuario.Ok)

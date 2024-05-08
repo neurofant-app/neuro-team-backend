@@ -2,7 +2,7 @@
 
 namespace aplicaciones.model;
 
-public class Consentimiento
+public class EntidadConsentimiento
 {
     /// <summary>
     /// Identificador único del logo

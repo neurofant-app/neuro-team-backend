@@ -1,7 +1,16 @@
-﻿namespace aplicaciones.model;
+﻿using comunes.primitivas.atributos;
 
-public class PlantillaInvitacionInsertar
+namespace aplicaciones.model;
+[CQRSActualizar]
+public class ActualizaPlantillaInvitacion
 {
+    /// <summary>
+    /// Identificador único de la plantila
+    /// </summary>
+    public Guid Id { get; set; }
+    // Requerida
+    // [A] [D]
+
     /// <summary>
     /// Tipo de contenido de la plantilla
     /// </summary>

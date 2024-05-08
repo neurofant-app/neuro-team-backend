@@ -50,7 +50,7 @@ public class UsuarioController : ControladorJwt
             if (respuestaUsuario.Ok)
             {
                 DTORecuperacionPassword dto = (DTORecuperacionPassword)respuestaUsuario.Payload;
-                InvitacionInsertar invInsertar = new InvitacionInsertar()
+                CreaInvitacion invInsertar = new CreaInvitacion()
                 {
                     AplicacionId = new Guid("00000000-0000-0000-0000-000000000000"),
                     Email = dto.Email,
@@ -88,7 +88,7 @@ public class UsuarioController : ControladorJwt
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
         // Verificar que la invitacion exista con los datos del DTO, si no existe devolver NotFound()
-        Invitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
+        EntidadInvitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
         if(invitacion != null)
         {
             ActualizarContrasena actualizarContrasena = new ActualizarContrasena() { Email = invitacion.Email, Password = dtoReset.NuevoPassword, Token = invitacion.Token };

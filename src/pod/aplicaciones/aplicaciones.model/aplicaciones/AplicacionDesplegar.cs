@@ -25,9 +25,9 @@ public class AplicacionDesplegar
     // Requerida
     // [I] [A] [D]
 
-    public IEnumerable<PlantillaInvitacion> Plantillas { get; set; } = [];
+    public IEnumerable<EntidadPlantillaInvitacion> Plantillas { get; set; } = [];
 
-    public IEnumerable<LogoAplicacion> Logotipos { get; set; } = [];
+    public IEnumerable<EntidadLogoAplicacion> Logotipos { get; set; } = [];
 
-    public IEnumerable<Consentimiento> Consentimientos { get; set; } = [];
+    public IEnumerable<EntidadConsentimiento> Consentimientos { get; set; } = [];
 }

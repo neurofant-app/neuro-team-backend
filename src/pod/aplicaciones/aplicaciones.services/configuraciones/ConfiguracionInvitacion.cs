@@ -5,9 +5,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace aplicaciones.services.configuraciones;
 
-public class ConfiguracionInvitacion : IEntityTypeConfiguration<Invitacion>
+public class ConfiguracionInvitacion : IEntityTypeConfiguration<EntidadInvitacion>
 {
-    public void Configure(EntityTypeBuilder<Invitacion> builder)
+    public void Configure(EntityTypeBuilder<EntidadInvitacion> builder)
     {
         builder.ToTable("aplicacion$invitaciones");
         builder.HasKey(x => x.Id);

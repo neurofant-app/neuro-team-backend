@@ -1,35 +1,15 @@
-﻿namespace aplicaciones.model;
+﻿using comunes.primitivas.atributos;
 
-public class InvitacionDesplegar
+namespace aplicaciones.model;
+[CQRSCrear]
+public class CreaInvitacion
 {
-    /// <summary>
-    /// IDentificador únido de la entidad
-    /// </summary>
-    public Guid Id { get; set; }
-    // Requerida 
-    // [A] [D]
-
     /// <summary>
     /// Identificadeor único de la aplicación que genera la invitacions
     /// </summary>
     public required Guid AplicacionId { get; set; }
     // Requerida 
     // [A] [I] [D]
-
-    /// <summary>
-    /// Fecha de creación de la invitaciónwhatsapp
-    /// </summary>
-    public DateTime Fecha { get; set; } = DateTime.UtcNow;
-    // Requerida 
-    // [D]
-
-    /// <summary>
-    /// Esatdo de la invitación
-    /// </summary>
-    public EstadoInvitacion Estado { get; set; } = EstadoInvitacion.Nueva;
-    // Requerida 
-    // [D]
-
 
     /// <summary>
     /// Email de contacto del invitado
@@ -46,9 +26,14 @@ public class InvitacionDesplegar
     // [D]
 
     /// <summary>
+    /// Nombre del destinatario de la invitacion
+    /// </summary>
+    public string Nombre { get; set; }
+
+    /// <summary>
     /// Define el tipo de invitacion
     /// </summary>
-    public TipoComunicacion Tipo { get; set; } = TipoComunicacion.Registro;
+    public TipoComunicacion Tipo { get; set; }
     // Requerida 
     // [I] [D]
 

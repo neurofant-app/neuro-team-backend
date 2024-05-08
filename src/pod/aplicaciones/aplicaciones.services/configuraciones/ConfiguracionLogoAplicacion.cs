@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace aplicaciones.services.configuraciones;
 
-public class ConfiguracionLogoAplicacion : IEntityTypeConfiguration<LogoAplicacion>
+public class ConfiguracionLogoAplicacion : IEntityTypeConfiguration<EntidadLogoAplicacion>
 {
-    public void Configure(EntityTypeBuilder<LogoAplicacion> builder)
+    public void Configure(EntityTypeBuilder<EntidadLogoAplicacion> builder)
     {
         builder.ToTable("aplicacion$logosaplicaciones");
         builder.HasKey(x => x.Id);

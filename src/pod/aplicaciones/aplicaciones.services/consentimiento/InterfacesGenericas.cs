@@ -8,6 +8,6 @@ using System.Threading.Tasks;
 
 namespace aplicaciones.services.consentimiento;
 
-public interface IServicioConsentimiento : IServicioEntidadGenerica<Consentimiento, Consentimiento, Consentimiento, Consentimiento, string>
+public interface IServicioConsentimiento : IServicioEntidadGenerica<EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, string>
 {
 }

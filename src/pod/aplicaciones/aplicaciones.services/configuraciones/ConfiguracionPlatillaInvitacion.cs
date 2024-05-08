@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace aplicaciones.services.configuraciones;
 
-public class ConfiguracionPlatillaInvitacion : IEntityTypeConfiguration<PlantillaInvitacion>
+public class ConfiguracionPlatillaInvitacion : IEntityTypeConfiguration<EntidadPlantillaInvitacion>
 {
-    public void Configure(EntityTypeBuilder<PlantillaInvitacion> builder)
+    public void Configure(EntityTypeBuilder<EntidadPlantillaInvitacion> builder)
     {
         builder.ToTable("aplicacion$plantillasinvitaciones");
         builder.HasKey(x => x.Id);

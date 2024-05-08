@@ -9,13 +9,15 @@ namespace aplicaciones.services.dbcontext;
 public class MongoDbContextAplicaciones(DbContextOptions<MongoDbContextAplicaciones> options) : DbContext(options) 
 {
     public const string NOMBRE_COLECCION_APLICACION = "aplicacion";
+    public const string NOMBRE_COLECCION_INVITACION = "invitacion";
     public const string NOMBRE_COLECCION_CONSENTIMIENTO = "consentimiento";
     public const string NOMBRE_COLECCION_LOGOAPLICACION = "logoAplicacion";
     public const string NOMBRE_COLECCION_PLANTILLaAPLICACION = "plantillaAplicacion";
     public DbSet<Aplicacion> Aplicaciones { get; set; }
-    public DbSet<Consentimiento> Consentimientos { get; set; }
-    public DbSet<LogoAplicacion> LogoAplicaciones { get; set; }
-    public DbSet<PlantillaInvitacion> PlantillaInvitaciones { get; set; }
+    public DbSet<EntidadInvitacion> Invitaciones { get; set; }
+    public DbSet<EntidadConsentimiento> Consentimientos { get; set; }
+    public DbSet<EntidadLogoAplicacion> LogoAplicaciones { get; set; }
+    public DbSet<EntidadPlantillaInvitacion> PlantillaInvitaciones { get; set; }
 
 
     public static MongoDbContextAplicaciones Create(IMongoDatabase database)
@@ -36,9 +38,10 @@ public class MongoDbContextAplicaciones(DbContextOptions<MongoDbContextAplicacio
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Aplicacion>().ToCollection(NOMBRE_COLECCION_APLICACION);
-        modelBuilder.Entity<Consentimiento>().ToCollection(NOMBRE_COLECCION_CONSENTIMIENTO);
-        modelBuilder.Entity<LogoAplicacion>().ToCollection(NOMBRE_COLECCION_LOGOAPLICACION);
-        modelBuilder.Entity<PlantillaInvitacion>().ToCollection(NOMBRE_COLECCION_PLANTILLaAPLICACION);
+        modelBuilder.Entity<EntidadInvitacion>().ToCollection(NOMBRE_COLECCION_INVITACION);
+        modelBuilder.Entity<EntidadConsentimiento>().ToCollection(NOMBRE_COLECCION_CONSENTIMIENTO);
+        modelBuilder.Entity<EntidadLogoAplicacion>().ToCollection(NOMBRE_COLECCION_LOGOAPLICACION);
+        modelBuilder.Entity<EntidadPlantillaInvitacion>().ToCollection(NOMBRE_COLECCION_PLANTILLaAPLICACION);
 
     }
 

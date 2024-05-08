@@ -7,6 +7,7 @@ using apigenerica.model.reflectores;
 using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
+using apigenerica.model.interpretes;
 
 namespace apigenerica.model.servicios;
 
