@@ -6,7 +6,7 @@ namespace controlescolar.modelo.alumnos;
 /// Define el DTO para el despliegue de alumnos perteneciente a un campus
 /// </summary>
 [CQRSConsulta]
-public class ConsultaALumno : PersonaBase
+public class ConsultaAlumno : PersonaBase
 {
 
     /// <summary>
