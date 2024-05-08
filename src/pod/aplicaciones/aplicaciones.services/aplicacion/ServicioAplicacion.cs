@@ -183,7 +183,6 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public override Aplicacion ADTOFull(AplicacionActualizar actualizacion, Aplicacion actual)
     {
-        actual.Id = actualizacion.Id;
         actual.Nombre = actualizacion.Nombre;
         actual.Activa = actualizacion.Activa;
         return actual;

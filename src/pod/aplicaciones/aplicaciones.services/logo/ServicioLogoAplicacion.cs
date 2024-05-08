@@ -14,6 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using comunes.primitivas.configuracion.mongo;
+using aplicaciones.services.dbcontext;
+using MongoDB.Driver;
 
 
 
@@ -22,16 +25,44 @@ namespace aplicaciones.services.logo;
 public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion,LogoAplicacion,LogoAplicacion,LogoAplicacion,string>,
     IServicioEntidadAPI, IServicioLogoAplicacion
 {
-    private DbContextAplicaciones localContext;
+    private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioLogoAplicacion(DbContextAplicaciones context, ILogger<IServicioConsentimiento> logger, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.LogosAplicaciones, logger, Reflector, cache)
+    public ServicioLogoAplicacion(ILogger<IServicioConsentimiento> logger,
+        IServicionConfiguracionMongo configuracionMongo,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
-        interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+        _logger = logger;
         reflector = Reflector;
+
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
+        if (configuracionEntidad == null)
+        {
+            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        try
+        {
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
+            var client = new MongoClient(cadenaConexion);
+
+            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).LogoAplicaciones;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'");
+            throw;
+        }
     }
-    private DbContextAplicaciones DB { get { return (DbContextAplicaciones)_db; } }
+    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
@@ -148,7 +179,6 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
 
     public override LogoAplicacion ADTOFull(LogoAplicacion actualizacion, LogoAplicacion actual)
     {
-        actual.Id = actualizacion.Id;
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.Tipo = actualizacion.Tipo;
         actual.Idioma = actualizacion.Idioma;
@@ -199,13 +229,13 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<LogoAplicacion
         string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaLogosAplicaciones);
 
         int? total = null;
-        List<LogoAplicacion> elementos = localContext.LogosAplicaciones.FromSqlRaw(query).ToList();
+        List<LogoAplicacion> elementos = DB.LogoAplicaciones.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
             query = query.Split("ORDER")[0];
             query = $"{query.Replace("*", "count(*)")}";
-            total = localContext.Database.SqlQueryRaw<int>(query).ToArray().First();
+            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
         }
 
 

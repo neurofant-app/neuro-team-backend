@@ -13,6 +13,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using aplicaciones.services.dbcontext;
+using comunes.primitivas.configuracion.mongo;
+using MongoDB.Driver;
 
 namespace aplicaciones.services.consentimiento;
 [ServicioEntidadAPI(entidad: typeof(Consentimiento))]
@@ -20,16 +23,44 @@ namespace aplicaciones.services.consentimiento;
 public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento, Consentimiento, Consentimiento, Consentimiento, string>,
     IServicioEntidadAPI, IServicioConsentimiento
 {
-    private DbContextAplicaciones localContext;
+    private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioConsentimiento(DbContextAplicaciones context, ILogger<IServicioConsentimiento> logger, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.Consentimientos, logger, Reflector, cache)
+    public ServicioConsentimiento(ILogger<IServicioConsentimiento> logger,
+                IServicionConfiguracionMongo configuracionMongo,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
-        interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+        _logger = logger;
         reflector = Reflector;
+
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
+        if (configuracionEntidad == null)
+        {
+            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        try
+        {
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
+            var client = new MongoClient(cadenaConexion);
+
+            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).Consentimientos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'");
+            throw;
+        }
     }
-    private DbContextAplicaciones DB { get { return (DbContextAplicaciones)_db; } }
+    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
 
     public Entidad EntidadRepoAPI()
@@ -150,7 +181,6 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
 
     public override Consentimiento ADTOFull(Consentimiento actualizacion, Consentimiento actual)
     {
-        actual.Id = actualizacion.Id;
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.Tipo = actualizacion.Tipo;
         actual.Idioma = actualizacion.Idioma;
@@ -195,13 +225,13 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaConsentimientos);
 
         int? total = null;
-        List<Consentimiento> elementos = localContext.Consentimientos.FromSqlRaw(query).ToList();
+        List<Consentimiento> elementos = DB.Consentimientos.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
             query = query.Split("ORDER")[0];
             query = $"{query.Replace("*", "count(*)")}";
-            total = localContext.Database.SqlQueryRaw<int>(query).ToArray().First();
+            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
         }
 
 

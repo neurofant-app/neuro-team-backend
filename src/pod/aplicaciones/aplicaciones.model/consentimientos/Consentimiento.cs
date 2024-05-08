@@ -1,10 +1,13 @@
-﻿namespace aplicaciones.model;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace aplicaciones.model;
 
 public class Consentimiento
 {
     /// <summary>
     /// Identificador único del logo
     /// </summary>
+    [BsonId]
     public Guid Id { get; set; }
     // R
 

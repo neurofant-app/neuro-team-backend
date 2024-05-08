@@ -3,13 +3,6 @@
 public class AplicacionActualizar
 {
     /// <summary>
-    /// Identificador único de la aplicación
-    /// </summary>
-    public Guid Id { get; set; }
-    // Requerida 
-    // [A] [D]
-
-    /// <summary>
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
     public required string Nombre { get; set; }

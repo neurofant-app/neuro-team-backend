@@ -1,4 +1,5 @@
 ﻿using comunes.primitivas.I18N;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace aplicaciones.model;
 
@@ -12,6 +13,7 @@ public class LogoAplicacion : IInternacionalizable
     /// <summary>
     /// Identificador único del logo
     /// </summary>
+    [BsonId]
     public Guid Id { get; set; }
     // R
 

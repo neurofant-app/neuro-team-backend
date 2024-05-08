@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace aplicaciones.model;
 
@@ -12,6 +13,7 @@ public class Aplicacion
     /// <summary>
     /// Identificador único de la aplicación
     /// </summary>
+    [BsonId]
     public Guid Id { get; set; }
     // Requerida 
     // [A] [D]
