@@ -8,7 +8,6 @@ using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
 using aplicaciones.services.aplicacion;
-using aplicaciones.services.dbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -18,8 +17,8 @@ using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
 
 namespace invitaciones.services.aplicacion;
-[ServicioEntidadAPI(entidad: typeof(Aplicacion))]
-public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, AplicacionInsertar, AplicacionActualizar, AplicacionDesplegar, string>,
+[ServicioEntidadAPI(entidad: typeof(EntidadAplicacion))]
+public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion, CreaAplicacion, ActualizaAplicacion, ConsultaAplicacion, string>,
    IServicioEntidadAPI, IServicioAplicacion
 {
     private readonly ILogger _logger;
@@ -97,7 +96,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<AplicacionInsertar>(JsonAPIDefaults());
+        var add = data.Deserialize<CreaAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -105,7 +104,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<AplicacionActualizar>(JsonAPIDefaults());
+        var update = data.Deserialize<ActualizaAplicacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -158,21 +157,21 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         return respuesta;
     }
     #region Overrides para la personalización de la entidad Aplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(AplicacionInsertar data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaAplicacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Aplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadAplicacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, AplicacionActualizar actualizacion, Aplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaAplicacion actualizacion, EntidadAplicacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -181,16 +180,16 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         return resultado;
     }
 
-    public override Aplicacion ADTOFull(AplicacionActualizar actualizacion, Aplicacion actual)
+    public override EntidadAplicacion ADTOFull(ActualizaAplicacion actualizacion, EntidadAplicacion actual)
     {
         actual.Nombre = actualizacion.Nombre;
         actual.Activa = actualizacion.Activa;
         return actual;
     }
 
-    public override Aplicacion ADTOFull(AplicacionInsertar data)
+    public override EntidadAplicacion ADTOFull(CreaAplicacion data)
     {
-        Aplicacion aplicacion = new Aplicacion()
+        EntidadAplicacion aplicacion = new EntidadAplicacion()
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
@@ -199,10 +198,10 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         return aplicacion;
     }
 
-    public override AplicacionDesplegar ADTODespliegue(Aplicacion data)
+    public override ConsultaAplicacion ADTODespliegue(EntidadAplicacion data)
     {
 
-        AplicacionDesplegar aplicacion = new AplicacionDesplegar()
+        ConsultaAplicacion aplicacion = new ConsultaAplicacion()
         {
             Id = data.Id,
             Nombre = data.Nombre,
@@ -214,14 +213,14 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         return aplicacion;
     }
 
-    public override async Task<(List<Aplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<(List<EntidadAplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
     {
         await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(Aplicacion));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaAplicaciones);
+        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadAplicacion));
+        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
 
         int? total = null;
-        List<Aplicacion> elementos = DB.Aplicaciones.FromSqlRaw(query).ToList();
+        List<EntidadAplicacion> elementos = DB.Aplicaciones.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
@@ -237,11 +236,11 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         }
         else
         {
-            return new(new List<Aplicacion>(), total); ;
+            return new(new List<EntidadAplicacion>(), total); ;
         }
     }
 
-    public override async Task<Respuesta> Actualizar(string id, AplicacionActualizar data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaAplicacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -253,7 +252,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
             }
 
 
-            Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -291,12 +290,12 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
     }
 
 
-    public override async Task<RespuestaPayload<Aplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadAplicacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Aplicacion>();
+        var respuesta = new RespuestaPayload<EntidadAplicacion>();
         try
         {
-            Aplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -343,7 +342,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 return respuesta;
             }
 
-            Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -378,19 +377,19 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
     }
 
 
-    public override async Task<RespuestaPayload<AplicacionDesplegar>> UnicaPorIdDespliegue(string id)
+    public override async Task<RespuestaPayload<ConsultaAplicacion>> UnicaPorIdDespliegue(string id)
     {
-        RespuestaPayload<AplicacionDesplegar> respuesta = new RespuestaPayload<AplicacionDesplegar>();
+        RespuestaPayload<ConsultaAplicacion> respuesta = new RespuestaPayload<ConsultaAplicacion>();
 
         try
         {
             // Intentar obtener la información de la caché
             var cacheKey = $"AplicacionDesplegar_{id}";
             var cachedData = await _cache.GetStringAsync(cacheKey);
-            AplicacionDesplegar dtoDespliegue;
+            ConsultaAplicacion dtoDespliegue;
             if (cachedData != null)
             {
-                dtoDespliegue = JsonSerializer.Deserialize<AplicacionDesplegar>(cachedData);
+                dtoDespliegue = JsonSerializer.Deserialize<ConsultaAplicacion>(cachedData);
             }
             else
             {
@@ -403,7 +402,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                     return respuesta;
                 }
 
-                dtoDespliegue = ADTODespliegue((Aplicacion)resultado.Payload);
+                dtoDespliegue = ADTODespliegue((EntidadAplicacion)resultado.Payload);
 
                 await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(dtoDespliegue, new JsonSerializerOptions { IgnoreNullValues = true }));
 

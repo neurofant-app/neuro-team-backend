@@ -43,10 +43,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="dbcontext\data\migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <OpenApiReference Include="..\..\comunicaciones\comunicaciones.api\wwroot\api-servicio-comunicaciones.json" CodeGenerator="NSwagCSharp" Namespace="api.comunicaciones" ClassName="ServicioComunicaciones" Link="OpenAPIs\api-servicio-comunicaciones.json" />
   </ItemGroup>
 

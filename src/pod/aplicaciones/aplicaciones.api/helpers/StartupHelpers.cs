@@ -1,4 +1,4 @@
-﻿using aplicaciones.services.dbContext;
+﻿using aplicaciones.services.dbcontext;
 using Microsoft.EntityFrameworkCore;
 
 namespace aplicaciones.api;
@@ -15,7 +15,7 @@ public static class StartupHelpers
             .GetRequiredService<IServiceScopeFactory>()
             .CreateScope())
         {
-            using (var context = serviceScope.ServiceProvider.GetService<DbContextAplicaciones>())
+            using (var context = serviceScope.ServiceProvider.GetService<MongoDbContextAplicaciones>())
             {
                 context!.Database.Migrate();
             }

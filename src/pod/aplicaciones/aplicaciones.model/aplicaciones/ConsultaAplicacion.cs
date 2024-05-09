@@ -2,7 +2,7 @@
 
 namespace aplicaciones.model;
 
-public class AplicacionDesplegar
+public class ConsultaAplicacion
 {
     /// <summary>
     /// Identificador único de la aplicación

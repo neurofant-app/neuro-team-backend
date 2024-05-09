@@ -1,7 +1,7 @@
 ﻿using aplicaciones.model;
 using aplicaciones.model.aplicaciones;
 using aplicaciones.model.invitaciones;
-using aplicaciones.services.dbContext;
+using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using comunes.primitivas;
@@ -21,11 +21,12 @@ namespace aplicaciones.api.Controllers;
 [Authorize]
 public class UsuarioController : ControladorJwt
 {
-    private DbContextAplicaciones _localContext;
+    private MongoDbContextAplicaciones _localContext;
     private readonly IServicioInvitacion _servicioInvitacion;
     private readonly IProxyIdentityServices _proxyIdentityServices;
     private readonly ILogger<UsuarioController> _logger;
-    public UsuarioController(DbContextAplicaciones context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
+    public UsuarioController(MongoDbContextAplicaciones
+        context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
     {
         _localContext = context;
         _servicioInvitacion = ServicioInvitacion;

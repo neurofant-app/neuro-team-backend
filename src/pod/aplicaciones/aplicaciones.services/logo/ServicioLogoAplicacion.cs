@@ -8,7 +8,6 @@ using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
 using aplicaciones.services.consentimiento;
-using aplicaciones.services.dbContext;
 using aplicaciones.services.plantilla;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -28,17 +27,17 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioLogoAplicacion(ILogger<IServicioConsentimiento> logger,
+    public ServicioLogoAplicacion(ILogger<ServicioLogoAplicacion> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'";
+            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -58,7 +57,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'");
             throw;
         }
     }
@@ -179,7 +178,6 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
     public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion actual)
     {
-        actual.AplicacionId = actualizacion.AplicacionId;
         actual.Tipo = actualizacion.Tipo;
         actual.Idioma = actualizacion.Idioma;
         actual.IdiomaDefault = actualizacion.IdiomaDefault;
@@ -226,7 +224,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     {
         await Task.Delay(0);
         Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadLogoAplicacion));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaLogosAplicaciones);
+        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION);
 
         int? total = null;
         List<EntidadLogoAplicacion> elementos = DB.LogoAplicaciones.FromSqlRaw(query).ToList();

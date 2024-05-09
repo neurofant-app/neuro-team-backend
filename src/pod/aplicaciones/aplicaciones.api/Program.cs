@@ -1,5 +1,5 @@
 using apigenerica.primitivas;
-using aplicaciones.services.dbContext;
+using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using aplicaciones.services.proxy.abstractions;
@@ -20,14 +20,6 @@ public class Program
        
         // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
-
-        var connectionString = builder.Configuration.GetConnectionString("contabee-cloud");
-
-        // Add services to the container.
-        builder.Services.AddDbContext<DbContextAplicaciones>(options =>
-        {
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-        });
 
         builder.CreaConfiguiracionEntidadGenerica();
         builder.Services.AddTransient<IProxyIdentityServices, ProxyIdentityServices>();

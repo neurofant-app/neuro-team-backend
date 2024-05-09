@@ -13,7 +13,7 @@ public class MongoDbContextAplicaciones(DbContextOptions<MongoDbContextAplicacio
     public const string NOMBRE_COLECCION_CONSENTIMIENTO = "consentimiento";
     public const string NOMBRE_COLECCION_LOGOAPLICACION = "logoAplicacion";
     public const string NOMBRE_COLECCION_PLANTILLaAPLICACION = "plantillaAplicacion";
-    public DbSet<Aplicacion> Aplicaciones { get; set; }
+    public DbSet<EntidadAplicacion> Aplicaciones { get; set; }
     public DbSet<EntidadInvitacion> Invitaciones { get; set; }
     public DbSet<EntidadConsentimiento> Consentimientos { get; set; }
     public DbSet<EntidadLogoAplicacion> LogoAplicaciones { get; set; }
@@ -37,7 +37,7 @@ public class MongoDbContextAplicaciones(DbContextOptions<MongoDbContextAplicacio
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Aplicacion>().ToCollection(NOMBRE_COLECCION_APLICACION);
+        modelBuilder.Entity<EntidadAplicacion>().ToCollection(NOMBRE_COLECCION_APLICACION);
         modelBuilder.Entity<EntidadInvitacion>().ToCollection(NOMBRE_COLECCION_INVITACION);
         modelBuilder.Entity<EntidadConsentimiento>().ToCollection(NOMBRE_COLECCION_CONSENTIMIENTO);
         modelBuilder.Entity<EntidadLogoAplicacion>().ToCollection(NOMBRE_COLECCION_LOGOAPLICACION);

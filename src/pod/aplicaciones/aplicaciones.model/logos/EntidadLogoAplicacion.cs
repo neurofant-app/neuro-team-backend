@@ -23,7 +23,7 @@ public class EntidadLogoAplicacion : IInternacionalizable
     /// Identificador único de la aplicación a la que pertenece el logo
     /// </summary>
     [BsonElement("aid")]
-    public Guid AplicacionId { get; set; }
+    public required Guid AplicacionId { get; set; }
     // R
 
 
@@ -76,7 +76,7 @@ public class EntidadLogoAplicacion : IInternacionalizable
     /// </summary>
     [BsonIgnore]
     [JsonIgnore]
-    public Aplicacion Aplicacion { get; set; }
+    public EntidadAplicacion Aplicacion { get; set; }
 
 }
 

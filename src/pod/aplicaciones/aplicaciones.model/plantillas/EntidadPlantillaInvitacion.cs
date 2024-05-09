@@ -19,7 +19,7 @@ public class EntidadPlantillaInvitacion
     // [A] [D]
 
     /// <summary>
-    /// Tipo de contenido de la plantilla
+    /// Tipo de contenido de la plantilla   
     /// </summary>
     [BsonElement("tc")]
     public TipoContenido TipoContenido { get; set; }
@@ -31,7 +31,7 @@ public class EntidadPlantillaInvitacion
     /// Identificador único de la aplicación a la qu pertenece la plantilla
     /// </summary>
     [BsonElement("aid")]
-    public Guid AplicacionId { get; set; }
+    public required Guid AplicacionId { get; set; }
     // Requerida
     // [I] [A] [D]
 
@@ -50,5 +50,5 @@ public class EntidadPlantillaInvitacion
     /// </summary>
     [JsonIgnore]
     [BsonIgnore]
-    public Aplicacion Aplicacion { get; set; }
+    public EntidadAplicacion Aplicacion { get; set; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace aplicaciones.model;
 
-public class AplicacionActualizar
+public class ActualizaAplicacion
 {
     /// <summary>
     /// Nombre de la aplicación que emite la invitación
@@ -15,6 +15,4 @@ public class AplicacionActualizar
     public bool Activa { get; set; }
     // Requerida
     // [I] [A] [D]
-
-
 }

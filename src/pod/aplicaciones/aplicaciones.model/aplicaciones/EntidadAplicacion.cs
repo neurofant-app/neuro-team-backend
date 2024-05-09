@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
 
 namespace aplicaciones.model;
@@ -8,19 +9,21 @@ namespace aplicaciones.model;
 /// Define una aplicación orbetivo para el sistema de invitaciones
 /// por ejemeplo contabee o eccordion
 /// </summary>
-public class Aplicacion
+[EntidadDB]
+public class EntidadAplicacion
 {
     /// <summary>
     /// Identificador único de la aplicación
     /// </summary>
     [BsonId]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
     // Requerida 
     // [A] [D]
 
     /// <summary>
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
+    [BsonElement("n")]
     public required  string Nombre { get; set; }
     // Requerida 200
     // [I] [A] [D]
@@ -29,6 +32,7 @@ public class Aplicacion
     /// <summary>
     /// Especifica si la aplicación se encuentra activa, solo es posible emitir notificaciones so lo está
     /// </summary>
+    [BsonElement("ac")]
     public bool Activa { get; set; }
     // Requerida
     // [I] [A] [D]
@@ -37,16 +41,19 @@ public class Aplicacion
     /// <summary>
     /// Lista de invitaciones asociadass a una aplicación
     /// </summary>
+    [BsonIgnore]
     [JsonIgnore]
     public IEnumerable<EntidadInvitacion>? Invitaciones { get; set; }
-
+    
+    [BsonIgnore]
     [JsonIgnore]
     public IEnumerable<EntidadPlantillaInvitacion> Plantillas { get; set; }
-
+    
+    [BsonIgnore]
     [JsonIgnore]
     public IEnumerable<EntidadLogoAplicacion> Logotipos { get; set; }
 
-
+    [BsonIgnore]
     [JsonIgnore]
     public IEnumerable<EntidadConsentimiento> Consentimientos { get; set; }
 }

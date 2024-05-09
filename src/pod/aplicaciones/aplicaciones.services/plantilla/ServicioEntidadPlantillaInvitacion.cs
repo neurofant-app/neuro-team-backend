@@ -7,7 +7,6 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.dbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -177,7 +176,6 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
 
     public override EntidadPlantillaInvitacion ADTOFull(ActualizaPlantillaInvitacion actualizacion, EntidadPlantillaInvitacion actual)
     {
-        actual.Id = actualizacion.Id;
         actual.TipoContenido = actualizacion.TipoContenido;
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.Plantilla = actualizacion.Plantilla;

@@ -83,5 +83,5 @@ public class EntidadInvitacion
     /// </summary>
     [BsonIgnore]
     [JsonIgnore]
-    public Aplicacion Aplicacion { get; set; }
+    public EntidadAplicacion Aplicacion { get; set; }
 }
