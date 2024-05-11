@@ -1,7 +1,7 @@
 ﻿using aplicaciones.model;
 using aplicaciones.model.aplicaciones;
 using aplicaciones.model.invitaciones;
-using aplicaciones.services.dbContext;
+using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using comunes.primitivas;
@@ -21,11 +21,12 @@ namespace aplicaciones.api.Controllers;
 [Authorize]
 public class UsuarioController : ControladorJwt
 {
-    private DbContextAplicaciones _localContext;
+    private MongoDbContextAplicaciones _localContext;
     private readonly IServicioInvitacion _servicioInvitacion;
     private readonly IProxyIdentityServices _proxyIdentityServices;
     private readonly ILogger<UsuarioController> _logger;
-    public UsuarioController(DbContextAplicaciones context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
+    public UsuarioController(MongoDbContextAplicaciones
+        context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
     {
         _localContext = context;
         _servicioInvitacion = ServicioInvitacion;
@@ -50,7 +51,7 @@ public class UsuarioController : ControladorJwt
             if (respuestaUsuario.Ok)
             {
                 DTORecuperacionPassword dto = (DTORecuperacionPassword)respuestaUsuario.Payload;
-                InvitacionInsertar invInsertar = new InvitacionInsertar()
+                CreaInvitacion invInsertar = new CreaInvitacion()
                 {
                     AplicacionId = new Guid("00000000-0000-0000-0000-000000000000"),
                     Email = dto.Email,
@@ -88,7 +89,7 @@ public class UsuarioController : ControladorJwt
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
         // Verificar que la invitacion exista con los datos del DTO, si no existe devolver NotFound()
-        Invitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
+        EntidadInvitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
         if(invitacion != null)
         {
             ActualizarContrasena actualizarContrasena = new ActualizarContrasena() { Email = invitacion.Email, Password = dtoReset.NuevoPassword, Token = invitacion.Token };

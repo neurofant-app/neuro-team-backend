@@ -1,13 +1,37 @@
-﻿namespace aplicaciones.model;
+﻿using comunes.primitivas.atributos;
 
-public class InvitacionInsertar
+namespace aplicaciones.model;
+[CQRSConsulta]
+public class ConsultaInvitacion
 {
+    /// <summary>
+    /// IDentificador únido de la entidad
+    /// </summary>
+    public Guid Id { get; set; }
+    // Requerida 
+    // [A] [D]
+
     /// <summary>
     /// Identificadeor único de la aplicación que genera la invitacions
     /// </summary>
     public required Guid AplicacionId { get; set; }
     // Requerida 
     // [A] [I] [D]
+
+    /// <summary>
+    /// Fecha de creación de la invitaciónwhatsapp
+    /// </summary>
+    public DateTime Fecha { get; set; } = DateTime.UtcNow;
+    // Requerida 
+    // [D]
+
+    /// <summary>
+    /// Esatdo de la invitación
+    /// </summary>
+    public EstadoInvitacion Estado { get; set; } = EstadoInvitacion.Nueva;
+    // Requerida 
+    // [D]
+
 
     /// <summary>
     /// Email de contacto del invitado
@@ -22,11 +46,6 @@ public class InvitacionInsertar
     public int? RolId { get; set; }
     // Requerida 
     // [D]
-
-    /// <summary>
-    /// Nombre del destinatario de la invitacion
-    /// </summary>
-    public string Nombre { get; set; }
 
     /// <summary>
     /// Define el tipo de invitacion

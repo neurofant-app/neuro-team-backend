@@ -7,37 +7,34 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.consentimiento;
-using aplicaciones.services.plantilla;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using comunes.primitivas.configuracion.mongo;
 using aplicaciones.services.dbcontext;
+using aplicaciones.services.invitacion;
+using comunes.primitivas.configuracion.mongo;
 using MongoDB.Driver;
 
-
-
-namespace aplicaciones.services.logo;
-[ServicioEntidadAPI(entidad:typeof(EntidadLogoAplicacion))]
-public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,string>,
-    IServicioEntidadAPI, IServicioLogoAplicacion
+namespace aplicaciones.services.plantilla;
+[ServicioEntidadAPI(entidad:typeof(EntidadPlantillaInvitacion))]
+public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<EntidadPlantillaInvitacion, CreaPlantillaInvitacion, ActualizaPlantillaInvitacion, ConsultaPlantillaInvitacion, string>,
+    IServicioEntidadAPI, IServicioPlantillaInvitacion
 {
     private readonly ILogger _logger;
-    private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioLogoAplicacion(ILogger<ServicioLogoAplicacion> logger,
+    private readonly IReflectorEntidadesAPI reflector;
+    public ServicioEntidadPlantillaInvitacion(ILogger<ServicioEntidadPlantillaInvitacion> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -53,11 +50,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextAplicaciones)_db).LogoAplicaciones;
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).PlantillaInvitaciones;
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION}'");
             throw;
         }
     }
@@ -92,7 +90,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
+        var add = data.Deserialize<CreaPlantillaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -100,7 +98,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
+        var update = data.Deserialize<ActualizaPlantillaInvitacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -153,21 +151,21 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadLogoAplicacion data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaPlantillaInvitacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadLogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadPlantillaInvitacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaPlantillaInvitacion actualizacion, EntidadPlantillaInvitacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -176,78 +174,28 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return resultado;
     }
 
-    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion actual)
+    public override EntidadPlantillaInvitacion ADTOFull(ActualizaPlantillaInvitacion actualizacion, EntidadPlantillaInvitacion actual)
     {
-        actual.Tipo = actualizacion.Tipo;
-        actual.Idioma = actualizacion.Idioma;
-        actual.IdiomaDefault = actualizacion.IdiomaDefault;
-        actual.LogoURLBase64 = actualizacion.LogoURLBase64;
-        actual.EsSVG = actualizacion.EsSVG;
-        actual.EsUrl = actualizacion.EsUrl;
+        actual.TipoContenido = actualizacion.TipoContenido;
+        actual.AplicacionId = actualizacion.AplicacionId;
+        actual.Plantilla = actualizacion.Plantilla;
+
         return actual;
     }
 
-    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion data)
+    public override EntidadPlantillaInvitacion ADTOFull(CreaPlantillaInvitacion data)
     {
-        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
+        EntidadPlantillaInvitacion plantillaInvitacion = new EntidadPlantillaInvitacion()
         {
             Id = Guid.NewGuid(),
+            TipoContenido = data.TipoContenido,
             AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            LogoURLBase64 = data.LogoURLBase64,
-            EsSVG = data.EsSVG,
-            EsUrl = data.EsUrl
+            Plantilla = data.Plantilla,
         };
-        return logoAplicacion;
+        return plantillaInvitacion;
     }
 
-    public override EntidadLogoAplicacion ADTODespliegue(EntidadLogoAplicacion data)
-    {
-        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
-        {
-            Id = data.Id,
-            AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            LogoURLBase64 = data.LogoURLBase64,
-            EsSVG = data.EsSVG,
-            EsUrl = data.EsUrl
-
-        };
-        return logoAplicacion;
-    }
-
-    public override async Task<(List<EntidadLogoAplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
-    {
-        await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadLogoAplicacion));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION);
-
-        int? total = null;
-        List<EntidadLogoAplicacion> elementos = DB.LogoAplicaciones.FromSqlRaw(query).ToList();
-
-        if (consulta.Contar)
-        {
-            query = query.Split("ORDER")[0];
-            query = $"{query.Replace("*", "count(*)")}";
-            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
-        }
-
-
-        if (elementos != null)
-        {
-            return new(elementos, total);
-        }
-        else
-        {
-            return new(new List<EntidadLogoAplicacion>(), total); ;
-        }
-    }
-
-    public override async Task<Respuesta> Actualizar(string id, EntidadLogoAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaPlantillaInvitacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -259,7 +207,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             }
 
 
-            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -297,12 +245,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     }
 
 
-    public override async Task<RespuestaPayload<EntidadLogoAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadPlantillaInvitacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<EntidadLogoAplicacion>();
+        var respuesta = new RespuestaPayload<EntidadPlantillaInvitacion>();
         try
         {
-            EntidadLogoAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -336,7 +284,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
                 return respuesta;
             }
 
-            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -346,6 +294,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
+
                 _dbSetFull.Remove(actual);
                 await _db.SaveChangesAsync();
 
@@ -370,6 +319,8 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     }
 
     #endregion
+
+
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning restore CS8603 // Possible null reference return.  

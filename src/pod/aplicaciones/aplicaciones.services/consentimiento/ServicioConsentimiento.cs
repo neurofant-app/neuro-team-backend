@@ -7,29 +7,59 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.dbContext;
 using aplicaciones.services.plantilla;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using aplicaciones.services.dbcontext;
+using comunes.primitivas.configuracion.mongo;
+using MongoDB.Driver;
 
 namespace aplicaciones.services.consentimiento;
-[ServicioEntidadAPI(entidad: typeof(Consentimiento))]
+[ServicioEntidadAPI(entidad: typeof(EntidadConsentimiento))]
 
-public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento, Consentimiento, Consentimiento, Consentimiento, string>,
+public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, EntidadConsentimiento, string>,
     IServicioEntidadAPI, IServicioConsentimiento
 {
-    private DbContextAplicaciones localContext;
+    private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioConsentimiento(DbContextAplicaciones context, ILogger<IServicioConsentimiento> logger, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.Consentimientos, logger, Reflector, cache)
+    public ServicioConsentimiento(ILogger<ServicioConsentimiento> logger,
+                IServicionConfiguracionMongo configuracionMongo,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
-        interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+        _logger = logger;
         reflector = Reflector;
+
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO);
+        if (configuracionEntidad == null)
+        {
+            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO}'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        try
+        {
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
+            var client = new MongoClient(cadenaConexion);
+
+            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).Consentimientos;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO}'");
+            throw;
+        }
     }
-    private DbContextAplicaciones DB { get { return (DbContextAplicaciones)_db; } }
+    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
 
     public Entidad EntidadRepoAPI()
@@ -64,7 +94,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<Consentimiento>(JsonAPIDefaults());
+        var add = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -72,7 +102,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<Consentimiento>(JsonAPIDefaults());
+        var update = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -125,21 +155,21 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         return respuesta;
     }
     #region Overrides para la personalización de la entidad PlantillaAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(Consentimiento data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadConsentimiento data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Consentimiento original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadConsentimiento original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Consentimiento actualizacion, Consentimiento original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadConsentimiento actualizacion, EntidadConsentimiento original)
     {
         ResultadoValidacion resultado = new();
 
@@ -148,9 +178,8 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         return resultado;
     }
 
-    public override Consentimiento ADTOFull(Consentimiento actualizacion, Consentimiento actual)
+    public override EntidadConsentimiento ADTOFull(EntidadConsentimiento actualizacion, EntidadConsentimiento actual)
     {
-        actual.Id = actualizacion.Id;
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.Tipo = actualizacion.Tipo;
         actual.Idioma = actualizacion.Idioma;
@@ -159,9 +188,9 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         return actual;
     }
 
-    public override Consentimiento ADTOFull(Consentimiento data)
+    public override EntidadConsentimiento ADTOFull(EntidadConsentimiento data)
     {
-        Consentimiento consentimiento = new Consentimiento()
+        EntidadConsentimiento consentimiento = new EntidadConsentimiento()
         {
             Id = Guid.NewGuid(),
             AplicacionId = data.AplicacionId,
@@ -173,9 +202,9 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         return consentimiento;
     }
 
-    public override Consentimiento ADTODespliegue(Consentimiento data)
+    public override EntidadConsentimiento ADTODespliegue(EntidadConsentimiento data)
     {
-        Consentimiento consentimiento = new Consentimiento()
+        EntidadConsentimiento consentimiento = new EntidadConsentimiento()
         {
             Id = data.Id,
             AplicacionId = data.AplicacionId,
@@ -188,20 +217,20 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         return consentimiento;
     }
 
-    public override async Task<(List<Consentimiento> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<(List<EntidadConsentimiento> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
     {
         await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(Consentimiento));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaConsentimientos);
+        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadConsentimiento));
+        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO);
 
         int? total = null;
-        List<Consentimiento> elementos = localContext.Consentimientos.FromSqlRaw(query).ToList();
+        List<EntidadConsentimiento> elementos = DB.Consentimientos.FromSqlRaw(query).ToList();
 
         if (consulta.Contar)
         {
             query = query.Split("ORDER")[0];
             query = $"{query.Replace("*", "count(*)")}";
-            total = localContext.Database.SqlQueryRaw<int>(query).ToArray().First();
+            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
         }
 
 
@@ -211,11 +240,11 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
         }
         else
         {
-            return new(new List<Consentimiento>(), total); ;
+            return new(new List<EntidadConsentimiento>(), total); ;
         }
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Consentimiento data)
+    public override async Task<Respuesta> Actualizar(string id, EntidadConsentimiento data)
     {
         var respuesta = new Respuesta();
         try
@@ -227,7 +256,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
             }
 
 
-            Consentimiento actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadConsentimiento actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -265,12 +294,12 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
     }
 
 
-    public override async Task<RespuestaPayload<Consentimiento>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadConsentimiento>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Consentimiento>();
+        var respuesta = new RespuestaPayload<EntidadConsentimiento>();
         try
         {
-            Consentimiento actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadConsentimiento actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -304,7 +333,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<Consentimiento,
                 return respuesta;
             }
 
-            Consentimiento actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadConsentimiento actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;

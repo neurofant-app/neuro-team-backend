@@ -1,6 +1,6 @@
 ﻿namespace aplicaciones.model;
 
-public class AplicacionInsertar
+public class ActualizaAplicacion
 {
     /// <summary>
     /// Nombre de la aplicación que emite la invitación

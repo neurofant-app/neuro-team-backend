@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace aplicaciones.model;
 
@@ -7,18 +9,21 @@ namespace aplicaciones.model;
 /// Define una aplicación orbetivo para el sistema de invitaciones
 /// por ejemeplo contabee o eccordion
 /// </summary>
-public class Aplicacion
+[EntidadDB]
+public class EntidadAplicacion
 {
     /// <summary>
     /// Identificador único de la aplicación
     /// </summary>
-    public Guid Id { get; set; }
+    [BsonId]
+    public virtual Guid Id { get; set; }
     // Requerida 
     // [A] [D]
 
     /// <summary>
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
+    [BsonElement("n")]
     public required  string Nombre { get; set; }
     // Requerida 200
     // [I] [A] [D]
@@ -27,6 +32,7 @@ public class Aplicacion
     /// <summary>
     /// Especifica si la aplicación se encuentra activa, solo es posible emitir notificaciones so lo está
     /// </summary>
+    [BsonElement("ac")]
     public bool Activa { get; set; }
     // Requerida
     // [I] [A] [D]
@@ -35,17 +41,20 @@ public class Aplicacion
     /// <summary>
     /// Lista de invitaciones asociadass a una aplicación
     /// </summary>
+    [BsonIgnore]
     [JsonIgnore]
-    public IEnumerable<Invitacion>? Invitaciones { get; set; }
-
+    public IEnumerable<EntidadInvitacion>? Invitaciones { get; set; }
+    
+    [BsonIgnore]
     [JsonIgnore]
-    public IEnumerable<PlantillaInvitacion> Plantillas { get; set; }
-
+    public IEnumerable<EntidadPlantillaInvitacion> Plantillas { get; set; }
+    
+    [BsonIgnore]
     [JsonIgnore]
-    public IEnumerable<LogoAplicacion> Logotipos { get; set; }
+    public IEnumerable<EntidadLogoAplicacion> Logotipos { get; set; }
 
-
+    [BsonIgnore]
     [JsonIgnore]
-    public IEnumerable<Consentimiento> Consentimientos { get; set; }
+    public IEnumerable<EntidadConsentimiento> Consentimientos { get; set; }
 }
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

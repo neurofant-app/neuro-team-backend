@@ -1,14 +1,7 @@
 ﻿namespace aplicaciones.model;
 
-public class AplicacionActualizar
+public class CreaAplicacion
 {
-    /// <summary>
-    /// Identificador único de la aplicación
-    /// </summary>
-    public Guid Id { get; set; }
-    // Requerida 
-    // [A] [D]
-
     /// <summary>
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
@@ -22,6 +15,4 @@ public class AplicacionActualizar
     public bool Activa { get; set; }
     // Requerida
     // [I] [A] [D]
-
-
 }

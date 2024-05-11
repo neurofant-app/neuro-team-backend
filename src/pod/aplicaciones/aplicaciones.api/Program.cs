@@ -1,11 +1,13 @@
 using apigenerica.primitivas;
-using aplicaciones.services.dbContext;
+using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using aplicaciones.services.proxy.abstractions;
 using aplicaciones.services.proxy.implementations;
 using comunes.interservicio.primitivas;
+using comunes.primitivas.configuracion.mongo;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 
 namespace aplicaciones.api;
@@ -19,23 +21,12 @@ public class Program
         // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
 
-        var connectionString = builder.Configuration.GetConnectionString("contabee-cloud");
-
-        // Add services to the container.
-        builder.Services.AddDbContext<DbContextAplicaciones>(options =>
-        {
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
-        });
-
         builder.CreaConfiguiracionEntidadGenerica();
         builder.Services.AddTransient<IProxyIdentityServices, ProxyIdentityServices>();
         builder.Services.AddTransient<IProxyComunicacionesServices, ProxyComunicacionesServices>();
-        builder.Services.AddTransient<IServicioInvitacion, ServicioInvitacion>();
-
+        builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
+        builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
         var app = builder.Build();
-
-        // Realiza la migracion del dbcontext de aplicacions
-        app.DbContextAplicacionesUpdateDatabase();
 
         // Añadir la extensión para los servicios de API genérica
         app.UseEntidadAPI();

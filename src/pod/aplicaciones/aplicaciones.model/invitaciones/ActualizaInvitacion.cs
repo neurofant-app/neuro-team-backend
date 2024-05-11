@@ -1,5 +1,8 @@
-﻿namespace aplicaciones.model;
-public class InvitacionActualizar
+﻿using comunes.primitivas.atributos;
+
+namespace aplicaciones.model;
+[CQRSActualizar]
+public class ActualizaInvitacion
 {
     /// <summary>
     /// IDentificador únido de la entidad

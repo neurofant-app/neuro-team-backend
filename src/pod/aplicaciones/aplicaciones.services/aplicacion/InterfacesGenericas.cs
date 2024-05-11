@@ -6,7 +6,7 @@ namespace aplicaciones.services.aplicacion;
 /// <summary>
 /// Interfaz para el servicio de Aplicacion
 /// </summary>
-public interface IServicioAplicacion : IServicioEntidadGenerica<Aplicacion, AplicacionInsertar, AplicacionActualizar, AplicacionDesplegar, string>
+public interface IServicioAplicacion : IServicioEntidadGenerica<EntidadAplicacion, CreaAplicacion, ActualizaAplicacion, ConsultaAplicacion, string>
 {
 }
 

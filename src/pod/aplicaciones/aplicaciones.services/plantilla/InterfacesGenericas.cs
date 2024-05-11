@@ -3,6 +3,6 @@ using aplicaciones.model;
 
 namespace aplicaciones.services.plantilla;
 
-public interface IServicioPlantillaInvitacion : IServicioEntidadGenerica<PlantillaInvitacion,PlantillaInvitacionInsertar, PlantillaInvitacionActualizar, PlantillaInvitacionDesplegar,string>
+public interface IServicioPlantillaInvitacion : IServicioEntidadGenerica<EntidadPlantillaInvitacion,CreaPlantillaInvitacion, ActualizaPlantillaInvitacion, ConsultaPlantillaInvitacion,string>
 {
 }

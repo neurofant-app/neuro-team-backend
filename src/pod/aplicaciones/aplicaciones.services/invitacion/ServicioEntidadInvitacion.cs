@@ -1,51 +1,77 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using api.comunicaciones;
 using extensibilidad.metadatos;
-using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
-using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.dbContext;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
+using comunes.primitivas;
+using aplicaciones.services.dbcontext;
+using comunes.primitivas.configuracion.mongo;
+using MongoDB.Driver;
 
-namespace aplicaciones.services.plantilla;
-[ServicioEntidadAPI(entidad:typeof(PlantillaInvitacion))]
-public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<PlantillaInvitacion,PlantillaInvitacionInsertar,PlantillaInvitacionActualizar,PlantillaInvitacionDesplegar,string>,
-    IServicioEntidadAPI, IServicioPlantillaInvitacion
+
+namespace aplicaciones.services.invitacion;
+[ServicioEntidadAPI(entidad: typeof(EntidadInvitacion))]
+public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvitacion, CreaInvitacion, ActualizaInvitacion, ConsultaInvitacion, string>,
+    IServicioEntidadAPI, IServicioInvitacion
 {
-    private DbContextAplicaciones localContext;
+    private readonly ILogger _logger;
+
     private readonly IReflectorEntidadesAPI reflector;
-
-    public ServicioPlantillaInvitacion(DbContextAplicaciones context, ILogger<IServicioPlantillaInvitacion> logger, IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.PlantillasAplicaciones, logger, Reflector, cache)
+    public ServicioEntidadInvitacion(ILogger<ServicioEntidadInvitacion> logger,
+        IServicionConfiguracionMongo configuracionMongo,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
-        interpreteConsulta = new InterpreteConsultaMySQL();
-        localContext = context;
+        _logger = logger;
         reflector = Reflector;
+
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_INVITACION);
+        if (configuracionEntidad == null)
+        {
+            string err = $"No existe configuracion de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_INVITACION}'";
+            _logger.LogError(err);
+            throw new Exception(err);
+        }
+
+        try
+        {
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
+                ? configuracionMongo.ConexionDefault()
+                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
+                    ? configuracionMongo.ConexionDefault()
+                    : configuracionEntidad.Conexion;
+            var client = new MongoClient(cadenaConexion);
+
+            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContextAplicaciones)_db).Invitaciones;
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_INVITACION}'");
+            throw;
+        }
     }
-
-    private DbContextAplicaciones DB { get { return (DbContextAplicaciones)_db; } }
+    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
     public bool RequiereAutenticacion => true;
-
     public Entidad EntidadRepoAPI()
     {
         return this.EntidadRepo();
     }
-
     public Entidad EntidadInsertAPI()
     {
         return this.EntidadInsert();
     }
-
     public Entidad EntidadUpdateAPI()
     {
         return this.EntidadUpdate();
     }
-
     public Entidad EntidadDespliegueAPI()
     {
         return this.EntidadDespliegue();
@@ -63,7 +89,7 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<PlantillaInvitacionInsertar>(JsonAPIDefaults());
+        var add = data.Deserialize<CreaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -71,7 +97,7 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<PlantillaInvitacionActualizar>(JsonAPIDefaults());
+        var update = data.Deserialize<ActualizaInvitacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -123,22 +149,22 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
-    #region Overrides para la personalización de la entidad PlantillaAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(PlantillaInvitacionInsertar data)
+    #region Overrides para la personalización de la entidad LogoAplicacion
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaInvitacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, PlantillaInvitacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadInvitacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, PlantillaInvitacionActualizar actualizacion, PlantillaInvitacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaInvitacion actualizacion, EntidadInvitacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -147,69 +173,29 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
         return resultado;
     }
 
-    public override PlantillaInvitacion ADTOFull(PlantillaInvitacionActualizar actualizacion, PlantillaInvitacion actual)
+    public override EntidadInvitacion ADTOFull(ActualizaInvitacion actualizacion, EntidadInvitacion actual)
     {
         actual.Id = actualizacion.Id;
-        actual.TipoContenido = actualizacion.TipoContenido;
         actual.AplicacionId = actualizacion.AplicacionId;
-        actual.Plantilla = actualizacion.Plantilla;
-
         return actual;
     }
 
-    public override PlantillaInvitacion ADTOFull(PlantillaInvitacionInsertar data)
+    public override EntidadInvitacion ADTOFull(CreaInvitacion data)
     {
-        PlantillaInvitacion plantillaInvitacion = new PlantillaInvitacion()
+        EntidadInvitacion inv = new EntidadInvitacion()
         {
             Id = Guid.NewGuid(),
-            TipoContenido = data.TipoContenido,
             AplicacionId = data.AplicacionId,
-            Plantilla = data.Plantilla,
+            Email = data.Email,
+            RolId = data.RolId,
+            Nombre = data.Nombre,
+            Tipo = data.Tipo,
+            Token = data.Token
         };
-        return plantillaInvitacion;
+        return inv;
     }
 
-    public override PlantillaInvitacionDesplegar ADTODespliegue(PlantillaInvitacion data)
-    {
-        PlantillaInvitacionDesplegar plantillaInvitacionDesplegar = new PlantillaInvitacionDesplegar()
-        {
-            Id = data.Id,
-            TipoContenido = data.TipoContenido,
-            AplicacionId = data.AplicacionId,
-            Plantilla = data.Plantilla,
-
-        };
-        return plantillaInvitacionDesplegar;
-    }
-
-    public override async Task<(List<PlantillaInvitacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
-    {
-        await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(PlantillaInvitacion));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, DbContextAplicaciones.TablaPlantillasInvitaciones);
-
-        int? total = null;
-        List<PlantillaInvitacion> elementos = localContext.PlantillasAplicaciones.FromSqlRaw(query).ToList();
-
-        if (consulta.Contar)
-        {
-            query = query.Split("ORDER")[0];
-            query = $"{query.Replace("*", "count(*)")}";
-            total = localContext.Database.SqlQueryRaw<int>(query).ToArray().First();
-        }
-
-
-        if (elementos != null)
-        {
-            return new(elementos, total);
-        }
-        else
-        {
-            return new(new List<PlantillaInvitacion>(), total); ;
-        }
-    }
-
-    public override async Task<Respuesta> Actualizar(string id, PlantillaInvitacionActualizar data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaInvitacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -221,7 +207,7 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
             }
 
 
-            PlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -259,12 +245,12 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
     }
 
 
-    public override async Task<RespuestaPayload<PlantillaInvitacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadInvitacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<PlantillaInvitacion>();
+        var respuesta = new RespuestaPayload<EntidadInvitacion>();
         try
         {
-            PlantillaInvitacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadInvitacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -298,7 +284,7 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
                 return respuesta;
             }
 
-            PlantillaInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -333,4 +319,8 @@ public class ServicioPlantillaInvitacion : ServicioEntidadGenericaBase<Plantilla
     }
 
     #endregion
+
+
 }
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8603 // Possible null reference return.
