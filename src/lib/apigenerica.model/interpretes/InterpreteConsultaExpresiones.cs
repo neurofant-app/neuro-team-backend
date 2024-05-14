@@ -9,7 +9,7 @@ namespace apigenerica.model.interpretes;
 /// <summary>
 /// INterprete de consultas para MySQL
 /// </summary>
-public class InterpreteConsultaMySQL : IInterpreteConsulta
+public class InterpreteConsultaExpresiones : IInterpreteConsulta
 {
 
     public string CrearConsulta(Consulta consulta, Entidad entidad, string coleccion)
@@ -310,8 +310,63 @@ public class InterpreteConsultaMySQL : IInterpreteConsulta
         return ordenConsulta;
     }
 
-    public Expression CrearConsultaExpresion(Consulta consulta, Entidad entidad, string coleccion)
+    public Expression CrearConsultaExpresion<T>(Consulta consulta, string coleccion)
     {
-        throw new NotImplementedException();
+        Expression final = null;
+        if (consulta.Filtros !=null && consulta.Filtros.Count > 0)
+        {
+            Type type = typeof(T);
+            var Props = type.GetProperties().ToList();
+            List<Expression> expressions = new List<Expression>();
+
+            foreach(var filtro in consulta.Filtros)
+            {
+                Expression e = null;
+                var p = Props.Where(x => x.Name == filtro.Campo).FirstOrDefault();
+                if(p!=null)
+                {
+
+                    switch (p.PropertyType)
+                    {
+                        case Type intType when intType == typeof(int):
+                        case Type longype when longype == typeof(long):
+                        case Type floatype when floatype == typeof(float):
+                        case Type decimalType when decimalType == typeof(decimal):
+                            e = GetNumExpression(pe, p, f.Operador, f.Valor, f.Negacion);
+                            break;
+
+
+                        case Type datetimeTypeNull when datetimeTypeNull == typeof(DateTime?):
+                        case Type datetimeType when datetimeType == typeof(DateTime):
+                            e = GetDateTimeExpression(pe, p, f.Operador, f.Valor, f.Negacion);
+                            break;
+
+                        case Type boolType when boolType == typeof(bool):
+                            e = GetBoolExpression(pe, p, f.Operador, f.Valor, f.Negacion);
+                            break;
+
+
+                        case Type stringType when stringType == typeof(string):
+                            e = GetStringExpression(pe, p, f.Operador, f.Valor, f.Negacion);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (e != null)
+                    {
+                        expressions.Add(e);
+                    }
+                    foreach (Expression expression in expressions)
+                    {
+                        final = (final == null) ? expression : Expression.AndAlso(final, expression);
+                    }
+                }
+            }
+
+        }
+
+        return final;
     }
 }
