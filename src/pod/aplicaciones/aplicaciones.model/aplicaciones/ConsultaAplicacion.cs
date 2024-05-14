@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Text.Json.Serialization;
 
 namespace aplicaciones.model;
 
@@ -22,8 +23,25 @@ public class ConsultaAplicacion
     /// Especifica si la aplicación se encuentra activa, solo es posible emitir notificaciones so lo está
     /// </summary>
     public bool Activa { get; set; }
-    // Requerida
-    // [I] [A] [D]
+
+    /// <summary>
+    /// Clave de la aplicación
+    /// </summary>
+    [BsonElement("k")]
+    public required string Clave { get; set; }
+
+    /// <summary>
+    /// Lista de Hosts asoviados a la aplciación
+    /// </summary>
+    [BsonElement("u")]
+    public List<string>? Hosts { get; set; }
+
+    /// <summary>
+    /// Determina si la configuración es la de default
+    /// </summary>
+    [BsonElement("d")]
+    public bool Default { get; set; } = false;
+
 
     public IEnumerable<EntidadPlantillaInvitacion> Plantillas { get; set; } = [];
 

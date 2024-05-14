@@ -1,7 +1,6 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 using extensibilidad.metadatos;
-using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using comunes.primitivas;
@@ -194,6 +193,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
             Activa = data.Activa,
+             Clave = data.Clave,
         };
         return aplicacion;
     }
@@ -208,7 +208,8 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             Activa = data.Activa,
             Plantillas = data.Plantillas,
             Logotipos = data.Logotipos,
-            Consentimientos = data.Consentimientos
+            Consentimientos = data.Consentimientos,
+            Clave =   data.Clave,
         };
         return aplicacion;
     }

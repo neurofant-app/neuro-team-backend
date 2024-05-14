@@ -39,6 +39,25 @@ public class EntidadAplicacion
 
 
     /// <summary>
+    /// Clave de la aplicación
+    /// </summary>
+    [BsonElement("k")]
+    public required string Clave { get; set; }
+
+    /// <summary>
+    /// Lista de Hosts asoviados a la aplciación
+    /// </summary>
+    [BsonElement("u")]
+    public List<string>? Hosts { get; set; }
+
+    /// <summary>
+    /// Determina si la configuración es la de default
+    /// </summary>
+    [BsonElement("d")]
+    public bool Default { get; set; } = false;
+
+
+    /// <summary>
     /// Lista de invitaciones asociadass a una aplicación
     /// </summary>
     [BsonIgnore]

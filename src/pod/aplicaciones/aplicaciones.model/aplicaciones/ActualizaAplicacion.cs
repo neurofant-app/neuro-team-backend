@@ -1,4 +1,6 @@
-﻿namespace aplicaciones.model;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace aplicaciones.model;
 
 public class ActualizaAplicacion
 {
@@ -6,13 +8,28 @@ public class ActualizaAplicacion
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
     public required string Nombre { get; set; }
-    // Requerida 200
-    // [I] [A] [D]
+    
 
     /// <summary>
     /// Especifica si la aplicación se encuentra activa, solo es posible emitir notificaciones so lo está
     /// </summary>
     public bool Activa { get; set; }
-    // Requerida
-    // [I] [A] [D]
+
+    /// <summary>
+    /// Clave de la aplicación
+    /// </summary>
+    [BsonElement("k")]
+    public required string Clave { get; set; }
+
+    /// <summary>
+    /// Lista de Hosts asoviados a la aplciación
+    /// </summary>
+    [BsonElement("u")]
+    public List<string>? Hosts { get; set; }
+
+    /// <summary>
+    /// Determina si la configuración es la de default
+    /// </summary>
+    [BsonElement("d")]
+    public bool Default { get; set; } = false;
 }
