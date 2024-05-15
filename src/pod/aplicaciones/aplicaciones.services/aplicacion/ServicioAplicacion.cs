@@ -14,8 +14,10 @@ using System.Text.Json;
 using comunes.primitivas.configuracion.mongo;
 using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
+using Polly.Caching;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace invitaciones.services.aplicacion;
+namespace aplicaciones.services.aplicacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadAplicacion))]
 public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion, CreaAplicacion, ActualizaAplicacion, ConsultaAplicacion, string>,
    IServicioEntidadAPI, IServicioAplicacion
@@ -158,23 +160,51 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
     #region Overrides para la personalización de la entidad Aplicacion
     public override async Task<ResultadoValidacion> ValidarInsertar(CreaAplicacion data)
     {
-        ResultadoValidacion resultado = new();
-        resultado.Valido = true;
+        ResultadoValidacion resultado = new ResultadoValidacion() { Error = new ErrorProceso() };
+
+        var apps = await DB.Aplicaciones
+            .Where(x => x.Clave.ToLower() == data.Clave.ToLower())
+            .ToListAsync();
+
+        resultado.Valido = apps.Count == 0;
+        if (!resultado.Valido)
+        {
+            resultado.Error = new ErrorProceso()
+            {
+                Codigo = "409",
+                Mensaje = "Ya existe una aplicación con la misma clave",
+                HttpCode = HttpCode.Conflict
+            };
+        }
 
         return resultado;
     }
     public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadAplicacion original)
     {
-        ResultadoValidacion resultado = new();
+        ResultadoValidacion resultado = new() { Error = new ErrorProceso() };
         resultado.Valido = true;
         return resultado;
     }
 
     public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaAplicacion actualizacion, EntidadAplicacion original)
     {
-        ResultadoValidacion resultado = new();
+        ResultadoValidacion resultado = new ResultadoValidacion() { Error = new ErrorProceso() };
 
-        resultado.Valido = true;
+        var apps = await DB.Aplicaciones
+            .Where(x => x.Clave.ToLower() == actualizacion.Clave.ToLower() && x.Id == original.Id)
+            .ToListAsync();
+
+        resultado.Valido = apps.Count <= 1;
+        if (!resultado.Valido)
+        {
+            resultado.Error = new ErrorProceso()
+            {
+                Codigo = "409",
+                Mensaje = "Ya existe una aplicación con la misma clave",
+                HttpCode = HttpCode.Conflict
+            };
+        }
+
 
         return resultado;
     }
@@ -183,6 +213,9 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
     {
         actual.Nombre = actualizacion.Nombre;
         actual.Activa = actualizacion.Activa;
+        actual.Clave = actualizacion.Clave;
+        actual.Hosts = actualizacion.Hosts;
+        actual.Default = actualizacion.Default;
         return actual;
     }
 
@@ -193,7 +226,9 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
             Activa = data.Activa,
-             Clave = data.Clave,
+            Hosts = data.Hosts,
+            Clave = data.Clave,
+            Default = data.Default,
         };
         return aplicacion;
     }
@@ -210,6 +245,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             Logotipos = data.Logotipos,
             Consentimientos = data.Consentimientos,
             Clave =   data.Clave,
+            Default = data.Default
         };
         return aplicacion;
     }
@@ -265,6 +301,19 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
+                
+                if (entidad.Default == true)
+                {
+                    var aplicaciones = await DB.Aplicaciones.Where(x => x.Default == true).ToListAsync();
+
+                    foreach (var aplicacion in aplicaciones)
+                    {
+                        aplicacion.Default = false;
+                        _dbSetFull.Update(aplicacion);
+                        await _db.SaveChangesAsync();
+                    }
+                }
+
                 _dbSetFull.Update(entidad);
                 await _db.SaveChangesAsync();
 
@@ -425,7 +474,79 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
+    public virtual async Task<RespuestaPayload<ConsultaAplicacion>> Insertar(CreaAplicacion data)
+    {
+        var respuesta = new RespuestaPayload<ConsultaAplicacion>();
 
+        try
+        {
+            var resultadoValidacion = await ValidarInsertar(data);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data);
+
+                if(entidad.Default == true)
+                {
+                    var aplicaciones = await DB.Aplicaciones.Where(x => x.Default == true).ToListAsync();
+
+                    foreach(var aplicacion in aplicaciones)
+                    {
+                        aplicacion.Default = false;
+                        _dbSetFull.Update(aplicacion);
+                        await _db.SaveChangesAsync();
+                    }
+                }
+
+                _dbSetFull!.Add(entidad);
+                await _db!.SaveChangesAsync();
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Payload = ADTODespliegue(entidad);
+            
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+    #endregion
+
+    #region Consulta Aplicacion
+    public async Task<ConsultaAplicacionAnonima> ConsultaAplicacion(string host, string? clave)
+    {
+        ConsultaAplicacionAnonima consultaAplicacionAnonima = null;
+        EntidadAplicacion aplicacion = null;
+
+        aplicacion = !string.IsNullOrEmpty(clave)
+        ? await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Clave.ToLower() == clave.ToLower()) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default)
+        : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
+
+
+        consultaAplicacionAnonima = new()
+        {
+            Nombre = aplicacion.Nombre,
+            Clave = aplicacion.Clave,
+            Plantillas = aplicacion.Plantillas,
+            Logotipos = aplicacion.Logotipos,
+            Consentimientos = aplicacion.Consentimientos
+        };
+        return consultaAplicacionAnonima;
+
+    }
     #endregion
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.

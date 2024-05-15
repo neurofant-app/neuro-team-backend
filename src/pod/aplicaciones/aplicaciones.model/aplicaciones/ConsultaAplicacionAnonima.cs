@@ -6,7 +6,6 @@ public class ConsultaAplicacionAnonima
     /// Identificador único de la aplicación
     /// </summary>
     public string Clave { get; set; }
-
     /// <summary>
     /// Nombre de la aplicación que emite la invitación
     /// </summary>
