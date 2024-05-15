@@ -536,14 +536,17 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
 
 
-        consultaAplicacionAnonima = new()
+        if(aplicacion != null)
         {
-            Nombre = aplicacion.Nombre,
-            Clave = aplicacion.Clave,
-            Plantillas = aplicacion.Plantillas,
-            Logotipos = aplicacion.Logotipos,
-            Consentimientos = aplicacion.Consentimientos
-        };
+            consultaAplicacionAnonima = new()
+            {
+                Nombre = aplicacion.Nombre,
+                Clave = aplicacion.Clave,
+                Plantillas = aplicacion.Plantillas,
+                Logotipos = aplicacion.Logotipos,
+                Consentimientos = aplicacion.Consentimientos
+            };
+        }
         return consultaAplicacionAnonima;
 
     }
