@@ -28,6 +28,7 @@ public class Program
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
         builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
+
         var app = builder.Build();
 
         // Añadir la extensión para los servicios de API genérica

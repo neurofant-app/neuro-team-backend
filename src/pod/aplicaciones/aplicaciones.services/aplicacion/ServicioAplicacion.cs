@@ -16,6 +16,7 @@ using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
 using Polly.Caching;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.OpenApi.Validations;
 
 namespace aplicaciones.services.aplicacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadAplicacion))]
@@ -352,19 +353,17 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
-            var plantillas = await DB.PlantillaInvitaciones
+
+            actual.Plantillas = await DB.PlantillaInvitaciones
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
-            var logos = await DB.LogoAplicaciones
+            actual.Logotipos = await DB.LogoAplicaciones
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
-            var consentimientos = await DB.Consentimientos
+            actual.Consentimientos = await DB.Consentimientos
                 .Where(x => x.AplicacionId == actual.Id)
                 .ToListAsync();
 
-            actual.Plantillas = plantillas;
-            actual.Logotipos = logos;
-            actual.Consentimientos = consentimientos;
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
             respuesta.Payload = actual;
@@ -534,9 +533,21 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         aplicacion = !string.IsNullOrEmpty(clave)
         ? await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Clave.ToLower() == clave.ToLower()) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default)
         : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
+        var apps = await DB.Aplicaciones.ToListAsync();
+        var logoTipos = await DB.LogoAplicaciones.ToListAsync();
+
+        aplicacion.Plantillas = await DB.PlantillaInvitaciones
+        .Where(x => x.AplicacionId == aplicacion.Id)
+        .ToListAsync();
+        aplicacion.Logotipos = await DB.LogoAplicaciones
+        .Where(x => x.AplicacionId == aplicacion.Id)
+        .ToListAsync();
+        aplicacion.Consentimientos = await DB.Consentimientos
+        .Where(x => x.AplicacionId == aplicacion.Id)
+        .ToListAsync();
 
 
-        if(aplicacion != null)
+        if (aplicacion != null)
         {
             consultaAplicacionAnonima = new()
             {

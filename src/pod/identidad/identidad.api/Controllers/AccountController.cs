@@ -82,6 +82,7 @@ public class AccountController : Controller
     [SwaggerResponse(statusCode: 500, description: "No se pudo registrar usuario")]
     [SwaggerResponse(statusCode: 409, description: "El usuario ya existe")]
     [HttpPost("register")]
+    [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
         EnsureDatabaseCreated(_applicationDbContext);
