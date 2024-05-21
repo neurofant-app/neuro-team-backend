@@ -29,7 +29,7 @@ public class AplicacionController : ControllerBase
         var consultaAnonima = await servicioAplicacion.ConsultaAplicacion(httpContextAccessor.HttpContext.Request.Host.ToString(), key);
         if(consultaAnonima == null)
         {
-            return Conflict("No se encontró la aplicación");
+            return NotFound("No se encontró la aplicación");
         }
         return Ok(consultaAnonima);
     }
