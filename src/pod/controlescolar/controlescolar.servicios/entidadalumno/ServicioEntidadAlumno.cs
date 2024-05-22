@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
 
+
 namespace controlescolar.servicios.entidadalumno;
 [ServicioEntidadAPI(entidad: typeof(EntidadAlumno))]
 public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, CreaAlumno, ActualizaAlumno, ConsultaAlumno, string>,
@@ -25,7 +26,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
-        interpreteConsulta = new InterpreteConsultaMySQL();
+        interpreteConsulta = new InterpreteConsultaExpresiones();
 
 
         reflector = Reflector;
@@ -184,9 +185,26 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         return actual;
     }
 
+    public override ConsultaAlumno ADTODespliegue(EntidadAlumno data)
+    {
+        ConsultaAlumno consultaAlumno = new ConsultaAlumno()
+        {
+            Id = data.Id,
+            Apellido1=data.Apellido1,
+            Apellido2=data.Apellido2,
+            Nombre=data.Nombre,
+            FechaNacimiento=data.FechaNacimiento,
+            Genero=data.Genero,
+            IdInterno=data.IdInterno,
+            IdNacional=data.IdNacional
+
+        };
+        return consultaAlumno;
+    }
+
     public override EntidadAlumno ADTOFull(CreaAlumno data)
     {
-        EntidadAlumno entidadCampus = new EntidadAlumno()
+        EntidadAlumno entidadAlumno = new EntidadAlumno()
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
@@ -197,10 +215,12 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
             Genero = data.Genero,
             CampusId=data.CampusId
         };
-        return entidadCampus;
+        return entidadAlumno;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data)
+
+
+public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data)
     {
         var respuesta = new Respuesta();
         try
@@ -250,7 +270,9 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
     }
 
 
-    public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
+
+
+public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
     {
         var respuesta = new RespuestaPayload<EntidadAlumno>();
         try
@@ -322,10 +344,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         }
         return respuesta;
     }
-
     #endregion
-
-
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return.

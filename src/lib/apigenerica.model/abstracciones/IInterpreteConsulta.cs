@@ -27,6 +27,6 @@ public interface IInterpreteConsulta
     /// <param name="entidad">Entidad y propiedades</param>
     /// <param name="coleccion">Nombre de la tabla o coleccion</param>
     /// <returns></returns>
-    Expression CrearConsultaExpresion(Consulta consulta, Entidad entidad, string coleccion);
+    Expression<Func<T, bool>> CrearConsultaExpresion<T>(Consulta consulta, Entidad entidad);
 
 }

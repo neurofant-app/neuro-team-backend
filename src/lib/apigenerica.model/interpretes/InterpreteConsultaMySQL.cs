@@ -310,7 +310,7 @@ public class InterpreteConsultaMySQL : IInterpreteConsulta
         return ordenConsulta;
     }
 
-    public Expression CrearConsultaExpresion(Consulta consulta, Entidad entidad, string coleccion)
+    public Expression<Func<T, bool>> CrearConsultaExpresion<T>(Consulta consulta, Entidad entidad)
     {
         throw new NotImplementedException();
     }

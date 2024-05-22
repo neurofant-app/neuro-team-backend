@@ -62,7 +62,6 @@ public class ReflectorEntidadAPI: IReflectorEntidadesAPI
                 propiedad.Id= propiedadObjeto.Name;
                 propiedad.Nombre = propiedadObjeto.Name;
                 propiedad.Tipo = TipoDatos.Texto;
-
                 break;
 
             case Type type when type == typeof(decimal) || type == typeof(decimal?):
@@ -72,32 +71,49 @@ public class ReflectorEntidadAPI: IReflectorEntidadesAPI
                 propiedad.Tipo = TipoDatos.Decimal;
                 break;
 
-            case Type type when type == typeof(DateTime):
+            case Type type when type == typeof(DateTime) || type == typeof(DateTime?):
 
                 propiedad.Id = propiedadObjeto.Name;
                 propiedad.Nombre = propiedadObjeto.Name;
                 propiedad.Tipo = TipoDatos.FechaHora;
                 break;
-            case Type type when type == typeof(int):
+            case Type type when type == typeof(int)|| type == typeof(int?):
 
                 propiedad.Id = propiedadObjeto.Name;
                 propiedad.Nombre = propiedadObjeto.Name;
                 propiedad.Tipo = TipoDatos.Entero;
                 break;
 
+            case Type type when type == typeof(long) || type == typeof(long?):
 
-            case Type type when type == typeof(bool):
+                propiedad.Id = propiedadObjeto.Name;
+                propiedad.Nombre = propiedadObjeto.Name;
+                propiedad.Tipo = TipoDatos.Long;
+                break;
+            case Type type when type == typeof(float) || type == typeof(float?):
+
+                propiedad.Id = propiedadObjeto.Name;
+                propiedad.Nombre = propiedadObjeto.Name;
+                propiedad.Tipo = TipoDatos.flotante;
+                break;
+            case Type type when type == typeof(bool) || type == typeof(bool?):
 
                 propiedad.Id = propiedadObjeto.Name;
                 propiedad.Nombre = propiedadObjeto.Name;
                 propiedad.Tipo = TipoDatos.Logico;
                 break;
 
-            case Type type when type == typeof(List<string>):
+            case Type type when type == typeof(List<string>) || type == typeof(List<string?>):
 
                 propiedad.Id = propiedadObjeto.Name;
                 propiedad.Nombre = propiedadObjeto.Name;
                 propiedad.Tipo = TipoDatos.ListaSeleccionMultiple;
+                break;
+            case Type type when type == typeof(Guid) || type == typeof(Guid?):
+
+                propiedad.Id = propiedadObjeto.Name;
+                propiedad.Nombre = propiedadObjeto.Name;
+                propiedad.Tipo = TipoDatos.Guid;
                 break;
             default:
 
@@ -106,6 +122,7 @@ public class ReflectorEntidadAPI: IReflectorEntidadesAPI
                 propiedad.Tipo = TipoDatos.Desconocido;
                 break;
         }
+        propiedad.Nullable = Nullable.GetUnderlyingType(propiedadObjeto.PropertyType) != null;
         return propiedad;
     }
 

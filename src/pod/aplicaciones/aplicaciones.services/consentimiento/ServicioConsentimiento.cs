@@ -217,32 +217,6 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return consentimiento;
     }
 
-    public override async Task<(List<EntidadConsentimiento> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
-    {
-        await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadConsentimiento));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO);
-
-        int? total = null;
-        List<EntidadConsentimiento> elementos = DB.Consentimientos.FromSqlRaw(query).ToList();
-
-        if (consulta.Contar)
-        {
-            query = query.Split("ORDER")[0];
-            query = $"{query.Replace("*", "count(*)")}";
-            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
-        }
-
-
-        if (elementos != null)
-        {
-            return new(elementos, total);
-        }
-        else
-        {
-            return new(new List<EntidadConsentimiento>(), total); ;
-        }
-    }
 
     public override async Task<Respuesta> Actualizar(string id, EntidadConsentimiento data)
     {
