@@ -214,33 +214,6 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return aplicacion;
     }
 
-    public override async Task<(List<EntidadAplicacion> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
-    {
-        await Task.Delay(0);
-        Entidad entidad = reflector.ObtieneEntidad(typeof(EntidadAplicacion));
-        string query = interpreteConsulta.CrearConsulta(consulta, entidad, MongoDbContextAplicaciones.NOMBRE_COLECCION_APLICACION);
-
-        int? total = null;
-        List<EntidadAplicacion> elementos = DB.Aplicaciones.FromSqlRaw(query).ToList();
-
-        if (consulta.Contar)
-        {
-            query = query.Split("ORDER")[0];
-            query = $"{query.Replace("*", "count(*)")}";
-            total = DB.Database.SqlQueryRaw<int>(query).ToArray().First();
-        }
-
-
-        if (elementos != null)
-        {
-            return new(elementos, total);
-        }
-        else
-        {
-            return new(new List<EntidadAplicacion>(), total); ;
-        }
-    }
-
     public override async Task<Respuesta> Actualizar(string id, ActualizaAplicacion data)
     {
         var respuesta = new Respuesta();

@@ -27,4 +27,4 @@ public class Entidad
     /// </summary>
     public List<Propiedad> Propiedades { get; set; } = new List<Propiedad>();
 }
-#pragma wa
+#pragma 

@@ -1,43 +1,40 @@
-﻿#pragma warning disable CS8603 // Possible null reference return.
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-using extensibilidad.metadatos;
-using apigenerica.model.interpretes;
+﻿using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
-using comunes.primitivas;
 using apigenerica.model.servicios;
-using aplicaciones.model;
-using aplicaciones.services.consentimiento;
-using aplicaciones.services.plantilla;
-using Microsoft.EntityFrameworkCore;
+using comunes.primitivas;
+using comunes.primitivas.configuracion.mongo;
+using controlescolar.modelo.alumnos;
+using controlescolar.modelo.prueba;
+using controlescolar.servicios.dbcontext;
+using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using System.Text.Json;
-using comunes.primitivas.configuracion.mongo;
-using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
+using System.Linq.Expressions;
+using System.Text.Json;
 
-
-
-namespace aplicaciones.services.logo;
-[ServicioEntidadAPI(entidad:typeof(EntidadLogoAplicacion))]
-public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,EntidadLogoAplicacion,string>,
-    IServicioEntidadAPI, IServicioLogoAplicacion
+namespace controlescolar.servicios;
+[ServicioEntidadAPI(entidad: typeof(EntidadPrueba))]
+public class ServicioEntidadPrueba : ServicioEntidadGenericaBase<EntidadPrueba, EntidadPrueba, EntidadPrueba, EntidadPrueba, string>,
+    IServicioEntidadAPI, IServicioEntidadPrueba
 {
     private readonly ILogger _logger;
-    private readonly IReflectorEntidadesAPI reflector;
 
-    public ServicioLogoAplicacion(ILogger<ServicioLogoAplicacion> logger,
+    private readonly IReflectorEntidadesAPI reflector;
+    public ServicioEntidadPrueba(ILogger<ServicioEntidadPrueba> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
-        reflector = Reflector;
+        interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION);
+
+        reflector = Reflector;
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_PRUEBA);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuración de mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_PRUEBA}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -45,6 +42,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         try
         {
             _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+
             var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
                 ? configuracionMongo.ConexionDefault()
                 : string.IsNullOrEmpty(configuracionEntidad.Conexion)
@@ -52,16 +50,17 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
                     : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
 
-            _db = MongoDbContextAplicaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextAplicaciones)_db).LogoAplicaciones;
+            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetFull = ((MongoDbContext)_db).EntidadPrueba;
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAplicaciones.NOMBRE_COLECCION_LOGOAPLICACION}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_PRUEBA}'");
             throw;
         }
     }
-    private MongoDbContextAplicaciones DB { get { return (MongoDbContextAplicaciones)_db; } }
+    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
@@ -92,7 +91,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
+        var add = data.Deserialize<EntidadPrueba>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -100,7 +99,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
+        var update = data.Deserialize<EntidadPrueba>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -153,21 +152,21 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadLogoAplicacion data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(EntidadPrueba data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadLogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadPrueba original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, EntidadPrueba actualizacion, EntidadPrueba original)
     {
         ResultadoValidacion resultado = new();
 
@@ -176,52 +175,40 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return resultado;
     }
 
-    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion actualizacion, EntidadLogoAplicacion actual)
+    public override EntidadPrueba ADTOFull(EntidadPrueba actualizacion, EntidadPrueba actual)
     {
-        actual.Tipo = actualizacion.Tipo;
-        actual.Idioma = actualizacion.Idioma;
-        actual.IdiomaDefault = actualizacion.IdiomaDefault;
-        actual.LogoURLBase64 = actualizacion.LogoURLBase64;
-        actual.EsSVG = actualizacion.EsSVG;
-        actual.EsUrl = actualizacion.EsUrl;
+        actual.Nombre = actualizacion.Nombre;
+        actual.Edad = actualizacion.Edad;
+        actual.FechaNacimiento = actualizacion.FechaNacimiento;
+        actual.Precio= actualizacion.Precio;
+        actual.Serie = actualizacion.Serie;
         return actual;
     }
 
-    public override EntidadLogoAplicacion ADTOFull(EntidadLogoAplicacion data)
+    public override EntidadPrueba ADTODespliegue(EntidadPrueba data)
     {
-        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
+
+        return data;
+    }
+
+    public override EntidadPrueba ADTOFull(EntidadPrueba data)
+    {
+        EntidadPrueba EntidadPrueba = new EntidadPrueba()
         {
             Id = Guid.NewGuid(),
-            AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            LogoURLBase64 = data.LogoURLBase64,
-            EsSVG = data.EsSVG,
-            EsUrl = data.EsUrl
+            Nombre = data.Nombre,
+            FechaNacimiento= data.FechaNacimiento,
+            Activo=data.Activo,
+            Edad=data.Edad,
+            Precio=data.Precio,
+            Serie=data.Serie
         };
-        return logoAplicacion;
-    }
-
-    public override EntidadLogoAplicacion ADTODespliegue(EntidadLogoAplicacion data)
-    {
-        EntidadLogoAplicacion logoAplicacion = new EntidadLogoAplicacion()
-        {
-            Id = data.Id,
-            AplicacionId = data.AplicacionId,
-            Tipo = data.Tipo,
-            Idioma = data.Idioma,
-            IdiomaDefault = data.IdiomaDefault,
-            LogoURLBase64 = data.LogoURLBase64,
-            EsSVG = data.EsSVG,
-            EsUrl = data.EsUrl
-
-        };
-        return logoAplicacion;
+        return EntidadPrueba;
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, EntidadLogoAplicacion data)
+
+public override async Task<Respuesta> Actualizar(string id, EntidadPrueba data)
     {
         var respuesta = new Respuesta();
         try
@@ -233,7 +220,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             }
 
 
-            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPrueba actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -271,12 +258,14 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     }
 
 
-    public override async Task<RespuestaPayload<EntidadLogoAplicacion>> UnicaPorId(string id)
+
+
+public override async Task<RespuestaPayload<EntidadPrueba>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<EntidadLogoAplicacion>();
+        var respuesta = new RespuestaPayload<EntidadPrueba>();
         try
         {
-            EntidadLogoAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadPrueba actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -310,7 +299,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
                 return respuesta;
             }
 
-            EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadPrueba actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -320,6 +309,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
+
                 _dbSetFull.Remove(actual);
                 await _db.SaveChangesAsync();
 
@@ -342,8 +332,8 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         }
         return respuesta;
     }
-
     #endregion
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return.
+

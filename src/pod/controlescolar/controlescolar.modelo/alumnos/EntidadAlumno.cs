@@ -15,7 +15,6 @@ public class EntidadAlumno: PersonaBase
     /// Identificador único del alumno en el repositorio, se genera al crear un registro
     /// </summary>
     [BsonId]
-    [BsonRepresentation(BsonType.ObjectId)]
     public virtual Guid Id { get; set; }
 
 

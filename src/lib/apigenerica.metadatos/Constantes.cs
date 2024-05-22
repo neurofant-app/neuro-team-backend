@@ -6,7 +6,7 @@ namespace extensibilidad.metadatos;
 public enum TipoDatos
 {
     Desconocido = 0, Texto = 1, TextoIndexado = 2, Decimal = 3, Entero = 4,
-    Logico = 5, Fecha = 6, Hora = 7, FechaHora = 8, ListaSeleccionSimple = 9, ListaSeleccionMultiple = 10
+    Logico = 5, Fecha = 6, Hora = 7, FechaHora = 8, ListaSeleccionSimple = 9, ListaSeleccionMultiple = 10,Guid=11,Long=12,flotante=13
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
