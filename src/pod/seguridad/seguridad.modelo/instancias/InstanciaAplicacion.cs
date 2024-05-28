@@ -1,23 +1,28 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace seguridad.modelo.instancias;
 
 /// <summary>
 /// Extiendoe los datos de la instancia para un dominio
 /// </summary>
+[EntidadDB]
 public class InstanciaAplicacion
 {
+
+    [BsonId]
+    public string Id { get; set; }
 
     /// <summary>
     /// Identificador único de la dominio en el que aplica la configuracion, este Id será propoerionado por un sistema externo
     /// </summary>
-    [BsonId(Order = 0)]
+    [BsonElement("did")]
     public required string DominioId { get; set; }
 
     /// <summary>
     /// Identificador único de la aplicación, este Id será propoerionado por un sistema externo
     /// </summary>
-    [BsonId(Order = 1)]
+    [BsonElement("aid")]
     public required string ApplicacionId { get; set; }
 
     /// <summary>
