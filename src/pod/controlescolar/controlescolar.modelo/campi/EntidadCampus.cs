@@ -2,7 +2,6 @@
 using comunes.primitivas.entidades;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace controlescolar.modelo.campi;
 
@@ -32,4 +31,16 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
     [BsonElement("caid")]
     public Guid? CampusPadreId { get; set; }
 
+    /// <summary>
+    /// Espedifica si el campus ha sido marcado para eliminación
+    /// </summary>
+    [BsonElement("mel")]
+    public bool MarcadoEliminar { get; set; } = false;
+
+    /// <summary>
+    /// Fecha en que el campus ha sidoo marcado para su eliminación
+    /// Se utiliza para removerlo totalmente una vez transcurrido el periodo de retención
+    /// </summary>
+    [BsonElement("fmel")]
+    public DateTime? FechaMarcadoEliminar { get; set; }
 }

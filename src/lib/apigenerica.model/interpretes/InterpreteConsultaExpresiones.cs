@@ -7,22 +7,22 @@ using System.Reflection;
 namespace apigenerica.model.interpretes;
 
 /// <summary>
-/// INterprete de consultas para MySQL
+/// Interprete de consultas para basado en expresiones
 /// </summary>
 public class InterpreteConsultaExpresiones : IInterpreteConsulta
 {
     public Expression<Func<T, bool>> CrearConsultaExpresion<T>(Consulta consulta, Entidad entidad)
     {
-        Expression final = null;
+        Expression? final = null;
         Type type = typeof(T);
         ParameterExpression pe = Expression.Parameter(type, "_");
         if (consulta.Filtros !=null && consulta.Filtros.Count > 0)
         {
-            List<Expression> expressions = new List<Expression>();
+            List<Expression> expressions = [];
 
             foreach(var filtro in consulta.Filtros)
             {
-                Expression e = null;
+                Expression? e = null;
                 var p = entidad.Propiedades.Where(x => x.Id.ToLower() == filtro.Campo.ToLower()).FirstOrDefault();
                 if(p!=null)
                 {

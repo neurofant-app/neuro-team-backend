@@ -41,11 +41,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "identidad.api", "src\pod\id
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "controlescolar", "controlescolar", "{8761BAE3-648D-49C7-84A0-D6B2EF590676}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "controlescolar.api", "src\pod\controlescolar\controlescolar.api\controlescolar.api.csproj", "{7FFC6A5C-A874-431A-AB52-41F1A782E89A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "controlescolar.api", "src\pod\controlescolar\controlescolar.api\controlescolar.api.csproj", "{7FFC6A5C-A874-431A-AB52-41F1A782E89A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "controlescolar.modelo", "src\pod\controlescolar\controlescolar.modelo\controlescolar.modelo.csproj", "{BF6C4AC2-B530-4342-9270-F3E3C16E504F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "controlescolar.modelo", "src\pod\controlescolar\controlescolar.modelo\controlescolar.modelo.csproj", "{BF6C4AC2-B530-4342-9270-F3E3C16E504F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "controlescolar.servicios", "src\pod\controlescolar\controlescolar.servicios\controlescolar.servicios.csproj", "{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "controlescolar.servicios", "src\pod\controlescolar\controlescolar.servicios\controlescolar.servicios.csproj", "{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "seguridad", "seguridad", "{68BB0FC7-BBC6-4E29-BB40-367C48307C42}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.api", "src\pod\seguridad\seguridad.api\seguridad.api.csproj", "{C91D0939-0B2F-41BA-B231-3B04A74F16F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.modelo", "src\pod\seguridad\seguridad.modelo\seguridad.modelo.csproj", "{5F22902C-AE79-42A0-8676-F85D54AD70DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.servicios", "src\pod\seguridad\seguridad.servicios\seguridad.servicios.csproj", "{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -117,6 +125,18 @@ Global
 		{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C91D0939-0B2F-41BA-B231-3B04A74F16F1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C91D0939-0B2F-41BA-B231-3B04A74F16F1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C91D0939-0B2F-41BA-B231-3B04A74F16F1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C91D0939-0B2F-41BA-B231-3B04A74F16F1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F22902C-AE79-42A0-8676-F85D54AD70DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F22902C-AE79-42A0-8676-F85D54AD70DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F22902C-AE79-42A0-8676-F85D54AD70DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F22902C-AE79-42A0-8676-F85D54AD70DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -142,6 +162,10 @@ Global
 		{7FFC6A5C-A874-431A-AB52-41F1A782E89A} = {8761BAE3-648D-49C7-84A0-D6B2EF590676}
 		{BF6C4AC2-B530-4342-9270-F3E3C16E504F} = {8761BAE3-648D-49C7-84A0-D6B2EF590676}
 		{EA04F663-F9B4-4227-AB27-83E2DE7CFD8D} = {8761BAE3-648D-49C7-84A0-D6B2EF590676}
+		{68BB0FC7-BBC6-4E29-BB40-367C48307C42} = {CE3ECDC2-ED09-4E61-A6CD-1147A7C402B6}
+		{C91D0939-0B2F-41BA-B231-3B04A74F16F1} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
+		{5F22902C-AE79-42A0-8676-F85D54AD70DC} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
+		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D116441E-D88A-4B9D-8367-516131CC9D3A}

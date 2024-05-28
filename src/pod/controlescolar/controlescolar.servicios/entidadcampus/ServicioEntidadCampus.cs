@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
@@ -27,6 +28,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache) {
         _logger = logger;
         reflector = Reflector;
+        interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_CAMPUS);
         if (configuracionEntidad == null )
@@ -185,8 +187,8 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
             Virtual = data.Virtual,
-            CampusPadreId = data.CampusPadreId
-            
+            CampusPadreId = data.CampusPadreId,
+            Activo = data.Activo
         };
         return entidadCampus;
     }

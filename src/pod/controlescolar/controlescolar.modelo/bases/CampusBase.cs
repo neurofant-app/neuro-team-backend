@@ -14,6 +14,12 @@ public abstract class CampusBase
     public virtual required string Nombre { get; set; }
 
     /// <summary>
+    /// DEtermina si un campus se encuentr activo o inactivo
+    /// </summary>
+    [BsonElement("act")]
+    public virtual required bool Activo { get; set; } = true;
+
+    /// <summary>
     /// Especifica si el campus es virtual
     /// </summary>
     [BsonElement("v")]
