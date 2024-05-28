@@ -2,6 +2,7 @@
 using apigenerica.model.abstracciones;
 using apigenerica.model.modelos;
 using System.Globalization;
+using System.Linq.Expressions;
 
 namespace apigenerica.model.interpretes;
 
@@ -307,5 +308,10 @@ public class InterpreteConsultaMySQL : IInterpreteConsulta
         ordenConsulta += consulta.Paginado.Ordenamiento == 0 ? Ordenamiento.ASC : Ordenamiento.DESC;
 
         return ordenConsulta;
+    }
+
+    public Expression<Func<T, bool>> CrearConsultaExpresion<T>(Consulta consulta, Entidad entidad)
+    {
+        throw new NotImplementedException();
     }
 }

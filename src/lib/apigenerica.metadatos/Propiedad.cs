@@ -77,7 +77,6 @@ public class Propiedad: PropiedadBase
     /// Validador opcional para propiedades fecha, fechahora y hora
     /// </summary>
     public ValidadorFecha? ValidadorFecha { get; set; }
-
 }
 
 
