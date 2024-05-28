@@ -217,6 +217,19 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         };
         return entidadAlumno;
     }
+    public override ConsultaAlumno ADTODespliegue(EntidadAlumno data)
+    {
+        return new ConsultaAlumno
+        { Id=data.Id,
+         Nombre=data.Nombre,
+         Apellido1=data.Apellido1,
+         Apellido2=data.Apellido2,
+         FechaNacimiento=data.FechaNacimiento,
+         Genero=data.Genero,
+         IdInterno=data.IdInterno,
+         IdNacional=data.IdNacional
+        };
+    }
 
 
 

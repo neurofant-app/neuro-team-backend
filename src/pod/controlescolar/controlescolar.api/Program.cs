@@ -12,6 +12,16 @@ public class Program
         var configuration = builder.Configuration;
 
         // Add services to the container.
+        // Add services to the container.
+        builder.Services.AddCors(c =>
+        {
+            c.AddPolicy("default", p =>
+            {
+                p.AllowAnyMethod();
+                p.AllowAnyOrigin();
+                p.AllowAnyHeader();
+            });
+        });
 
         builder.Services.AddControllers();
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -31,7 +41,7 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
+        app.UseCors("default");
         app.UseHttpsRedirection();
 
         app.UseAuthorization();
