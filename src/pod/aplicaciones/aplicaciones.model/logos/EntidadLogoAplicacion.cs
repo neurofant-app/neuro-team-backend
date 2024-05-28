@@ -1,4 +1,5 @@
-﻿using comunes.primitivas.I18N;
+﻿using comunes.primitivas.atributos;
+using comunes.primitivas.I18N;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Text.Json.Serialization;
@@ -10,6 +11,7 @@ namespace aplicaciones.model;
 /// <summary>
 /// Logo perteneciente a una aplciación
 /// </summary>
+[EntidadDB]
 public class EntidadLogoAplicacion : IInternacionalizable
 {
     /// <summary>
@@ -79,5 +81,4 @@ public class EntidadLogoAplicacion : IInternacionalizable
     public EntidadAplicacion Aplicacion { get; set; }
 
 }
-
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

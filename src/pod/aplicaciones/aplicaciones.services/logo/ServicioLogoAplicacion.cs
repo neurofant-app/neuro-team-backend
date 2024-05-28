@@ -181,7 +181,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         actual.Tipo = actualizacion.Tipo;
         actual.Idioma = actualizacion.Idioma;
         actual.IdiomaDefault = actualizacion.IdiomaDefault;
-        actual.LogoURLBase64 = actualizacion.LogoURLBase64;
+        actual.LogoURLBase64 = "data:image/jpeg;base64,"+actualizacion.LogoURLBase64;
         actual.EsSVG = actualizacion.EsSVG;
         actual.EsUrl = actualizacion.EsUrl;
         return actual;
@@ -196,7 +196,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             Tipo = data.Tipo,
             Idioma = data.Idioma,
             IdiomaDefault = data.IdiomaDefault,
-            LogoURLBase64 = data.LogoURLBase64,
+            LogoURLBase64 = "data:image/jpeg;base64,"+data.LogoURLBase64,
             EsSVG = data.EsSVG,
             EsUrl = data.EsUrl
         };

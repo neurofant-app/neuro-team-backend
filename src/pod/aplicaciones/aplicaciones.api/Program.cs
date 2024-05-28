@@ -1,4 +1,5 @@
 using apigenerica.primitivas;
+using aplicaciones.services.aplicacion;
 using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
@@ -26,6 +27,8 @@ public class Program
         builder.Services.AddTransient<IProxyComunicacionesServices, ProxyComunicacionesServices>();
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
+        builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
+
         var app = builder.Build();
 
         // Añadir la extensión para los servicios de API genérica
