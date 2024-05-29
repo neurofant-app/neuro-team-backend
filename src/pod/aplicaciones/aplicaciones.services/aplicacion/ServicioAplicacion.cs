@@ -506,8 +506,6 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         aplicacion = !string.IsNullOrEmpty(clave)
         ? await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Clave.ToLower() == clave.ToLower()) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default)
         : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
-        var apps = await DB.Aplicaciones.ToListAsync();
-        var logoTipos = await DB.LogoAplicaciones.ToListAsync();
 
         aplicacion.Plantillas = await DB.PlantillaInvitaciones
         .Where(x => x.AplicacionId == aplicacion.Id)
