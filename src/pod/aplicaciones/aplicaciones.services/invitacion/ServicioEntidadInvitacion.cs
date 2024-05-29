@@ -388,21 +388,21 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 };
 
                 var respuestaCorreo = await _proxyComunicacionesServices.EnviarCorreo(m);
-                //if (respuestaCorreo.Ok)
-                //{
+                if (respuestaCorreo.Ok)
+                {
                     _dbSetFull.Add(entidad);
                     await _db.SaveChangesAsync();
 
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                     respuesta.Payload = ADTODespliegue(entidad);
-                //}
-                //else
-                //{
-                //    respuesta.Error = resultadoValidacion.Error;
-                //    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-                //}
             }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
