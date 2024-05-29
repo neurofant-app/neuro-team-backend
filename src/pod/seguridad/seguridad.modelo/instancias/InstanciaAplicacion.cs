@@ -10,8 +10,11 @@ namespace seguridad.modelo.instancias;
 public class InstanciaAplicacion
 {
 
+    /// <summary>
+    /// Identificador único de la instancia de configuración
+    /// </summary>
     [BsonId]
-    public string Id { get; set; }
+    public string? Id { get; set; }
 
     /// <summary>
     /// Identificador único de la dominio en el que aplica la configuracion, este Id será propoerionado por un sistema externo
