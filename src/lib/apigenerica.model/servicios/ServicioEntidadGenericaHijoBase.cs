@@ -29,7 +29,7 @@ namespace apigenerica.model.servicios;
 /// <param name="dbSetFull"></param>
 /// <param name="logger"></param>
 /// <param name="reflectorEntidades"></param>
-public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate, DTODespliegue, TipoId>
+public abstract class ServicioEntidadGenericaHijoBase<DTOFull, DTOInsert, DTOUpdate, DTODespliegue, TipoId>
     (DbContext? db, DbSet<DTOFull>? dbSetFull, ILogger logger, IReflectorEntidadesAPI reflectorEntidades, IDistributedCache cache)
     where DTOFull : class
     where DTODespliegue : class
@@ -436,6 +436,16 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
     {
         throw new NotImplementedException();
     }
+
+    /// <summary>
+    /// Tipo del padre expresado como string
+    /// </summary>
+    protected string TipoPadreId { get; set; }
+
+    /// <summary>
+    /// Identificador único del padre expresado como string
+    /// </summary>
+    protected string Padreid { get; set; }
 }
 
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously

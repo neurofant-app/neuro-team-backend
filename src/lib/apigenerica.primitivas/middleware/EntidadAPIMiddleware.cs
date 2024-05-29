@@ -45,6 +45,9 @@ public class EntidadAPIMiddleware
                 case "EntidadGenerica":
                     await ProcesaEntidadGenerica(context);
                     break;
+                case "EntidadHijoGenerica":
+                    await ProcesaEntidadHijoGenerica(context);
+                    break;
 
             }
         }
@@ -229,6 +232,96 @@ public class EntidadAPIMiddleware
             throw;
         }
     }
+
+    /// <summary>
+    /// Realiza el procesamiento de un endpoint atendido por un servicio de entidad Hijo genérica
+    /// </summary>
+    /// <param name="context"></param>
+    /// <returns></returns>
+    private async Task ProcesaEntidadHijoGenerica(HttpContext context)
+    {
+        if (context.GetRouteData().Values["entidad"] == null)
+        {
+            return;
+        }
+
+        string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
+        var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
+        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+
+        if (servicio == null)
+        {
+            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+            {
+                Entidad = entidad,
+                Error = ErrorMiddlewareGenerico.ERROR_SERVICIO_NO_LOCALIZADO,
+                HttpCode = 400
+            });
+        }
+
+        var assembly = Assembly.LoadFrom(servicio.Ruta);
+        var tt = assembly.GetType(servicio.NombreEnsamblado);
+
+        if (tt == null)
+        {
+            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+            {
+                Entidad = entidad,
+                Error = ErrorMiddlewareGenerico.ERROR_ENSAMBLADO_NO_LOCALIZADO,
+                HttpCode = 400
+            });
+        }
+
+
+        var ctors = tt.GetConstructors();
+        var ps = ctors[0].GetParameters();
+        object[] paramArray = new object[ps.Length];
+        int i = 0;
+        foreach (var p in ps)
+        {
+            var s = context.RequestServices.GetService(p.ParameterType);
+            if (s != null)
+            {
+                paramArray[i] = s;
+            }
+            i++;
+        }
+
+        try
+        {
+#pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
+            var service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
+#pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
+            if (service != null)
+            {
+                var contexto = context.ObtieneContextoUsuario();
+
+#if !DEBUG
+                if (service.RequiereAutenticacion)
+                {
+                    if (string.IsNullOrEmpty(contexto.UsuarioId))
+                    {
+                        await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+                        {
+                            Entidad = entidad,
+                            Error = ErrorMiddlewareGenerico.ERROR_SIN_AUTENTICACION_BEARER,
+                            HttpCode = 401
+                        });
+                    }
+                }
+#endif
+                service.EstableceContextoUsuarioAPI(contexto);
+                context.Request.HttpContext.Items.Add(GenericAPIServiceKey, service);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(message: ex.ToString());
+            throw;
+        }
+    }
+
+
 
     /// <summary>
     /// Devulve un error en el pipeline para exepciones de entidades genéricas

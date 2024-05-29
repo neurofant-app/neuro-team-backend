@@ -49,11 +49,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "controlescolar.servicios", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "seguridad", "seguridad", "{68BB0FC7-BBC6-4E29-BB40-367C48307C42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.api", "src\pod\seguridad\seguridad.api\seguridad.api.csproj", "{C91D0939-0B2F-41BA-B231-3B04A74F16F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.api", "src\pod\seguridad\seguridad.api\seguridad.api.csproj", "{C91D0939-0B2F-41BA-B231-3B04A74F16F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.modelo", "src\pod\seguridad\seguridad.modelo\seguridad.modelo.csproj", "{5F22902C-AE79-42A0-8676-F85D54AD70DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.modelo", "src\pod\seguridad\seguridad.modelo\seguridad.modelo.csproj", "{5F22902C-AE79-42A0-8676-F85D54AD70DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "seguridad.servicios", "src\pod\seguridad\seguridad.servicios\seguridad.servicios.csproj", "{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.servicios", "src\pod\seguridad\seguridad.servicios\seguridad.servicios.csproj", "{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
