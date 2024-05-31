@@ -69,7 +69,6 @@ public abstract class ControladorBaseGenerico : ControllerBase
     /// <returns></returns>
     protected virtual string? Idioma()
     {
-
         return _httpContextAccessor.HttpContext.Request.Headers?[IDIOMAHEADER];
     }
 

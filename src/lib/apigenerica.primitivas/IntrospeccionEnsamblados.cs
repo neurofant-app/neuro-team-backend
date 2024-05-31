@@ -186,5 +186,56 @@ public static class IntrospeccionEnsamblados
 
         return l;
     }
+    /// <summary>
+    /// Devuelve una lista de las clases que implementan IEntidadAPI
+    /// </summary>
+    /// <returns></returns>
+    public static List<ServicioEntidadAPI> ObtienesServiciosIEntidadHijoAPI()
+    {
+        List<ServicioEntidadAPI> l = new();
+        string Ruta = ObtieneRutaBin();
+
+        var assemblies = Directory.GetFiles(Ruta, "*.dll", new EnumerationOptions() { RecurseSubdirectories = true });
+
+        foreach (var ensamblado in assemblies)
+        {
+            try
+            {
+                var assembly = Assembly.LoadFile(ensamblado);
+                var Tipos = assembly.GetTypes()
+                        .Where(t =>
+                        !t.IsAbstract &&
+                        typeof(IServicioEntidadHijoAPI).IsAssignableFrom(t))
+                        .ToArray();
+
+                foreach (var t in Tipos)
+                {
+                    var atributoAPI = t.GetCustomAttribute(typeof(ServicioEntidadAPIAttribute));
+                    if (atributoAPI != null)
+                    {
+                        FileInfo fi = new FileInfo(ensamblado);
+                        ServicioEntidadAPI s = new()
+                        {
+                            NombreEnsamblado = t.FullName,
+                            NombreRuteo = ((ServicioEntidadAPIAttribute)atributoAPI).Entidad.Name,
+                            Ruta = ensamblado
+                        };
+                        l.Add(s);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{ex}");
+            }
+        }
+
+        l.ForEach(i =>
+        {
+            Console.WriteLine($"{JsonSerializer.Serialize(i)}");
+        });
+
+        return l;
+    }
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.

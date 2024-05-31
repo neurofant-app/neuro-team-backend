@@ -139,19 +139,6 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijoAPI(Consulta consulta, string tipoPadre, string id)
-    {
-        var temp = await this.PaginaHijo(consulta, tipoPadre, id);
-        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-        return respuesta;
-    }
-
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijosDespliegueAPI(Consulta consulta, string tipoPadre, string id)
-    {
-        var temp = await this.PaginaHijosDespliegue(consulta, tipoPadre, id);
-        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-        return respuesta;
-    }
     #region Overrides para la personalización de la entidad LogoAplicacion
     public override async Task<ResultadoValidacion> ValidarInsertar(EntidadLogoAplicacion data)
     {

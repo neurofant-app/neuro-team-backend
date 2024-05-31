@@ -8,13 +8,13 @@ namespace apigenerica.model.reflectores;
 /// <summary>
 /// Iinterfaz para marcar las etidades que deben rutearse a través de la API genérica
 /// </summary>
-public interface IServicioEntidadAPI
+public interface IServicioEntidadHijoAPI
 {
 
     /// <summary>
     /// Determina si el servicio requiere de autenticación
     /// </summary>
-    bool RequiereAutenticacion { get; } 
+    bool RequiereAutenticacion { get; }
 
     /// <summary>
     /// Devuelve los metadatos de la entidad completa tal como se almacena en el repositorio
@@ -84,7 +84,7 @@ public interface IServicioEntidadAPI
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<object>> UnicaPorIdAPI(object  id);
+    Task<RespuestaPayload<object>> UnicaPorIdAPI(object id);
 
     /// <summary>
     /// Obtiene una entidad para despliegue del repositorio por Id
@@ -130,4 +130,14 @@ public interface IServicioEntidadAPI
     /// <param name="Tipo"></param>
     /// <returns></returns>
     Task<Entidad>? Metadatos(string Tipo);
+
+    /// <summary>
+    /// Tipo del padre expresado como string
+    /// </summary>
+    string TipoPadreId { get; set; }
+
+    /// <summary>
+    /// Identificador único del padre expresado como string
+    /// </summary>
+    string Padreid { get; set; }
 }
