@@ -13,6 +13,13 @@ using comunes.primitivas;
 using aplicaciones.services.dbcontext;
 using comunes.primitivas.configuracion.mongo;
 using MongoDB.Driver;
+using Microsoft.EntityFrameworkCore;
+using System.Text;
+using comunicaciones.modelo;
+using Microsoft.Extensions.Configuration;
+using aplicaciones.services.extensiones;
+using aplicaciones.services.proxy.abstractions;
+using System.Data.Common;
 
 
 namespace aplicaciones.services.invitacion;
@@ -23,13 +30,17 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     private readonly ILogger _logger;
 
     private readonly IReflectorEntidadesAPI reflector;
+    private readonly IConfiguration configuration;
+    private readonly IProxyComunicacionesServices _proxyComunicacionesServices;
+
     public ServicioEntidadInvitacion(ILogger<ServicioEntidadInvitacion> logger,
         IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache, IConfiguration configuration, IProxyComunicacionesServices proxyComunicacionesServices) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
-
+        this.configuration = configuration;
+        _proxyComunicacionesServices = proxyComunicacionesServices;
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_INVITACION);
         if (configuracionEntidad == null)
         {
@@ -316,6 +327,111 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
+    }
+    public override ConsultaInvitacion ADTODespliegue(EntidadInvitacion data)
+    {
+        ConsultaInvitacion invitacionDesplegar = new ConsultaInvitacion()
+        {
+            Id = data.Id,
+            AplicacionId = data.AplicacionId,
+            Fecha = data.Fecha,
+            Estado = data.Estado,
+            Email = data.Email,
+            RolId = data.RolId,
+
+        };
+        return invitacionDesplegar;
+    }
+
+    public override async Task<RespuestaPayload<ConsultaInvitacion>> Insertar(CreaInvitacion data)
+    {
+        var respuesta = new RespuestaPayload<ConsultaInvitacion>();
+
+        try
+        {
+            var resultadoValidacion = await ValidarInsertar(data);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data);
+                //para determinar el tipo de plantilla que se enviará, invitación, recuperación contraseña, etc.
+                var tipoPlantillaContenido = TipoCOntenidoPlantilla(data.Tipo);
+                var logoTipos = await DB.LogoAplicaciones.ToListAsync();
+                var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
+                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId).FirstOrDefaultAsync();
+                //EntidadLogoAplicacion logoAplicacion = await DB.LogoAplicaciones|
+                //            .Where(x => x.AplicacionId == data.AplicacionId)
+                //            .FirstOrDefaultAsync();
+                
+                byte[] bytes = Convert.FromBase64String(plantillaInvitacion.Plantilla);
+                string html = Encoding.UTF8.GetString(bytes);
+                DatosPlantillaRegistro datosPlantilla = new DatosPlantillaRegistro()
+                {
+                    Activacion = entidad.Id.ToString(),
+                    FechaLimite = entidad.Fecha.ToString(),
+                    Nombre = entidad.Nombre,
+                    Email = entidad.Email,
+                    UrlBase = configuration.LeeUrlBase(),
+                    Logo64 = logoAp.LogoURLBase64,
+                    Remitente = entidad.Nombre,
+                };
+
+
+                api.comunicaciones.MensajeEmail m = new()
+                {
+                    NombreDe = null,
+                    DireccionDe = null,
+                    DireccionPara = entidad.Email,
+                    NombrePara = entidad.Nombre,
+                    PlantillaTema = configuration.LeeTemaRegistro(),
+                    PlantillaCuerpo = html,
+                    JsonData = JsonSerializer.Serialize(datosPlantilla),
+                };
+
+                var respuestaCorreo = await _proxyComunicacionesServices.EnviarCorreo(m);
+                if (respuestaCorreo.Ok)
+                {
+                    _dbSetFull.Add(entidad);
+                    await _db.SaveChangesAsync();
+
+                    respuesta.Ok = true;
+                    respuesta.HttpCode = HttpCode.Ok;
+                    respuesta.Payload = ADTODespliegue(entidad);
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+    private TipoContenido TipoCOntenidoPlantilla(TipoComunicacion tipo)
+    {
+        switch (tipo)
+        {
+            case TipoComunicacion.Registro:
+                return TipoContenido.Invitacion;
+            case TipoComunicacion.RecuperacionContrasena:
+                return TipoContenido.RecuperacionPassword;
+            default:
+                return TipoContenido.Invitacion;
+        }
     }
 
     #endregion
