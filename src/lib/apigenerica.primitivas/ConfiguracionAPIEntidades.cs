@@ -8,6 +8,7 @@ public class ConfiguracionAPIEntidades : IConfiguracionAPIEntidades
 
     private List<ServicioEntidadAPI>? serviciosEntidad = null;
     private List<ServicioEntidadAPI>? serviciosCatalogoEntidad = null;
+    private List<ServicioEntidadAPI>? serviciosEntidadHijo = null;
     private List<string>? rutasGenericas = null;
 
 
@@ -53,5 +54,18 @@ public class ConfiguracionAPIEntidades : IConfiguracionAPIEntidades
     {
         serviciosCatalogoEntidad = IntrospeccionEnsamblados.ObtienesServiciosICatalogoAPI();
         serviciosEntidad = IntrospeccionEnsamblados.ObtienesServiciosIEntidadAPI();
+    }
+
+    /// <summary>
+    /// Devuelve una lista de servicios de entidad genérica Hijo con datos de ruteo
+    /// </summary>
+    /// <returns></returns>
+    public List<ServicioEntidadAPI> ObtienesServiciosIEntidadHijoAPI()
+    {
+        if (serviciosEntidadHijo == null)
+        {
+            serviciosEntidadHijo = IntrospeccionEnsamblados.ObtienesServiciosIEntidadHijoAPI();
+        }
+        return serviciosEntidadHijo;
     }
 }

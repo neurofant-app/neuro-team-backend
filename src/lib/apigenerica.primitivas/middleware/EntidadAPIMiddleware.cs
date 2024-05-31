@@ -45,7 +45,7 @@ public class EntidadAPIMiddleware
                 case "EntidadGenerica":
                     await ProcesaEntidadGenerica(context);
                     break;
-                case "EntidadHijoGenerica":
+                case "EntidadGenericaHijo":
                     await ProcesaEntidadHijoGenerica(context);
                     break;
 
@@ -246,7 +246,7 @@ public class EntidadAPIMiddleware
         }
 
         string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
-        var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
+        var servicios = _configuracionAPI.ObtienesServiciosIEntidadHijoAPI();
         var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
 
         if (servicio == null)
@@ -290,7 +290,7 @@ public class EntidadAPIMiddleware
         try
         {
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
-            var service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
+            var service = (IServicioEntidadHijoAPI)Activator.CreateInstance(tt, paramArray);
 #pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
             if (service != null)
             {

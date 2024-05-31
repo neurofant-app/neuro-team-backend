@@ -63,6 +63,31 @@ namespace apigenerica.model.interpretes;
         return list;
     }
 
+    public static PaginaGenerica<T> Paginado<T>(this IQueryable<T> origen, Consulta consulta)
+    {
+        var items = new List<T>();
+        int count = 0;
+        var indice = consulta.Paginado.Indice;
+        var tamano = consulta.Paginado.Tamano;
+        if (origen.Any())
+        {
+            count = origen.Count();
+            int desde = (indice * tamano);
+
+            items = origen.Skip(desde)
+                .Take(tamano).ToList();
+        }
+        var list = new PaginaGenerica<T>
+        {
+            ConsultaId = Guid.NewGuid().ToString(),
+            Elementos = items,
+            Milisegundos = 0,
+            Paginado = new Paginado() { Indice = indice, Tamano = tamano, Ordenamiento = consulta.Paginado.Ordenamiento, ColumnaOrdenamiento = consulta.Paginado.ColumnaOrdenamiento },
+            Total = count,
+        };
+
+        return list;
+    }
 
     public static MethodCallExpression getWhereExpression<T>(this Expression<Func<T, bool>> lambda,Expression dbExpresion)
         {
