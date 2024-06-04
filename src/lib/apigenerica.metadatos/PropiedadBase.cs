@@ -16,15 +16,19 @@ public abstract class PropiedadBase
     public TipoDatos Tipo { get; set; }
 
     /// <summary>
-    /// Determina si el valor es requerido para su llenado
+    /// Establace el tipo de control para el despligue en la UI
     /// </summary>
-    public bool Requerida { get; set; }
+    public TipoDespliegue TipoDespliegue { get; set; }
+
+    /// <summary>
+    /// Valor default para la propiedad expresado como el valor serializado json
+    /// </summary>
+    public string? ValorDefault { get; set; }
 
     /// <summary>
     /// Determina si la propiedad acepta valores nulos
     /// </summary>
     public bool Nullable { get; set; }
-
 
     /// <summary>
     /// Define si la propiedad acepta valores en forma de arreglos
