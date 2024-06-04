@@ -14,13 +14,12 @@ public class TablaAttribute : Attribute
 
 
     /// <summary>
-    /// 
-    /// </summary>
     /// <param name="indice">Posición relativa</param>
     /// <param name="visible">Visible u oculta</param>
     /// <param name="ancho">Ancho relateivo en unidades de UI</param>
     /// <param name="ordenable">Determina si la columna es ordenable</param>
-    /// <param name="alternable">Determina si la columna puede alternar su visibilidad</param>
+    /// <param name="alternable">Determina si la columna puede ser utilizada para búsqueda</param>
+    /// </summary>
     public TablaAttribute(int indice = 1, bool visible = true, int ancho = 1, bool ordenable = true, bool alternable = true)
     {
         _indice = indice;

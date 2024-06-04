@@ -7,7 +7,6 @@ using apigenerica.model.reflectores;
 using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
-using apigenerica.model.interpretes;
 
 namespace apigenerica.model.servicios;
 
@@ -22,29 +21,34 @@ namespace apigenerica.model.servicios;
 /// <typeparam name="DTOUpdate">DTO utilizado para actualizar</typeparam>
 /// <typeparam name="DTODespliegue">DTO utilizado para el despligue neutral en UI</typeparam>
 /// <typeparam name="TipoId">Tipo de dato utilizado para el identificador de la entidad</typeparam>
-/// <remarks>
-/// Constructor de la clase base
-/// </remarks>
-/// <param name="db"></param>
-/// <param name="dbSetFull"></param>
-/// <param name="logger"></param>
-/// <param name="reflectorEntidades"></param>
 public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate, DTODespliegue, TipoId>
-    (DbContext? db, DbSet<DTOFull>? dbSetFull, ILogger logger, IReflectorEntidadesAPI reflectorEntidades, IDistributedCache cache)
     where DTOFull : class
     where DTODespliegue : class
     where DTOUpdate : class
     where DTOInsert : class
 {
-
-    // Asignación utilizando Primary Ccosntructor
     protected IInterpreteConsulta? interpreteConsulta;
-    protected DbSet<DTOFull>? _dbSetFull = dbSetFull;
-    protected DbContext? _db = db;
+    protected DbSet<DTOFull> _dbSetFull;
+    protected DbContext _db;
     protected ContextoUsuario? _contextoUsuario;
-    protected ILogger _logger = logger;
-    protected IReflectorEntidadesAPI reflectorEntidades = reflectorEntidades;
-    protected IDistributedCache _cache = cache;
+    protected ILogger _logger;
+    protected IReflectorEntidadesAPI reflectorEntidades;
+    protected IDistributedCache _cache;
+    /// <summary>
+    /// Constructor de la clase base
+    /// </summary>
+    /// <param name="db"></param>
+    /// <param name="dbSetFull"></param>
+    /// <param name="logger"></param>
+    /// <param name="reflectorEntidades"></param>
+    public ServicioEntidadGenericaBase(DbContext db, DbSet<DTOFull> dbSetFull, ILogger logger, IReflectorEntidadesAPI reflectorEntidades, IDistributedCache cache)
+    {
+        _cache = cache;
+        _dbSetFull = dbSetFull;
+        _db = db;
+        _logger = logger;
+        this.reflectorEntidades = reflectorEntidades;
+    }
 
     public JsonSerializerOptions JsonAPIDefaults()
     {
@@ -61,9 +65,8 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-
-                _dbSetFull!.Add(entidad);
-                await _db!.SaveChangesAsync();
+                _dbSetFull.Add(entidad);
+                await _db.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -99,9 +102,17 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         else
         {
             entidad = reflectorEntidades.ObtieneEntidadUI(typeof(DTOFull), typeof(DTOInsert), typeof(DTOUpdate), typeof(DTODespliegue));
+            foreach (var propiedad in entidad.Propiedades.Where(p => p.Tipo == TipoDatos.ListaSeleccionMultiple || p.Tipo == TipoDatos.ListaSeleccionSimple))
+            {
+                if (propiedad.Lista!.DatosRemotos = false && !string.IsNullOrEmpty(propiedad.Lista.Id))
+                {
+                    propiedad.Lista.Elementos = await ObtieneListaLocal(propiedad.Lista.Id, propiedad.Lista.Ordenamiento);
+                }
+            }
+
             await _cache.SetStringAsync($"Entidad-{Tipo}", JsonSerializer.Serialize(entidad));
         }
-        return entidad;
+        return entidad!;
     }
 
     public virtual async Task<Respuesta> Actualizar(string id, DTOUpdate data)
@@ -116,7 +127,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             }
 
 
-            DTOFull actual = _dbSetFull!.Find(id);
+            DTOFull actual = _dbSetFull.Find(id);
 
             if (actual == null)
             {
@@ -128,8 +139,8 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                _dbSetFull!.Update(entidad);
-                await _db!.SaveChangesAsync();
+                _dbSetFull.Update(entidad);
+                await _db.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -165,7 +176,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
                 return respuesta;
             }
 
-            DTOFull actual = _dbSetFull!.Find(id);
+            DTOFull actual = _dbSetFull.Find(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -176,8 +187,8 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
             if (resultadoValidacion.Valido)
             {
 
-                _dbSetFull!.Remove(actual);
-                await _db!.SaveChangesAsync();
+                _dbSetFull.Remove(actual);
+                await _db.SaveChangesAsync();
 
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -204,7 +215,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         var respuesta = new RespuestaPayload<DTOFull>();
         try
         {
-            DTOFull actual = await _dbSetFull!.FindAsync(id);
+            DTOFull actual = await _dbSetFull.FindAsync(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -272,29 +283,10 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
 
-    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta)
+    public virtual async Task<(List<DTOFull> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
     {
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(DTOFull));
-        var Elementos = Enumerable.Empty<DTOFull>().AsQueryable();
 
-        if (consulta.Filtros.Count > 0)
-        {
-            var predicateBody = interpreteConsulta.CrearConsultaExpresion<DTOFull>(consulta, entidad);
-
-            if (predicateBody != null)
-            {
-                var RConsulta = _dbSetFull.AsQueryable().Provider.CreateQuery<DTOFull>(predicateBody.getWhereExpression(_dbSetFull.AsQueryable().Expression));
-
-                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? modelos.Ordenamiento.asc);
-            }
-        }
-        else
-        {
-            var RConsulta = _dbSetFull.AsQueryable();
-            Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? modelos.Ordenamiento.asc);
-
-        }
-        return await Elementos.PaginadoAsync(consulta);
+        throw new NotImplementedException();
     }
 
     public virtual ContextoUsuario? ObtieneContextoUsuario()
@@ -395,6 +387,74 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         return respuesta;
     }
 
+    public async Task<RespuestaPayload<PaginaGenerica<DTOFull>>> PaginaHijo(Consulta consulta, string tipoPadre, string id)
+    {
+        RespuestaPayload<PaginaGenerica<DTOFull>> respuesta = new RespuestaPayload<PaginaGenerica<DTOFull>>();
+        try
+        {
+            Filtro? filtro = FiltroPorEntidadPadre(tipoPadre, id);
+            if (filtro == null)
+            {
+                return new RespuestaPayload<PaginaGenerica<DTOFull>>()
+                {
+                    Error = tipoPadre.ErrorEntidadPadreNoConfigurada(),
+                    HttpCode = HttpCode.BadRequest,
+                    Ok = false
+                };
+            }
+
+            consulta ??= new Consulta();
+            consulta.Filtros.Add(filtro);
+
+            respuesta = await Pagina(consulta); ;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"PaginaHijoAPI {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+
+    public async Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaHijosDespliegue(Consulta consulta, string tipoPadre, string id)
+    {
+        RespuestaPayload<PaginaGenerica<DTODespliegue>> respuesta = new RespuestaPayload<PaginaGenerica<DTODespliegue>>();
+        try
+        {
+            Filtro? filtro = FiltroPorEntidadPadre(tipoPadre, id);
+            if (filtro == null)
+            {
+                return new RespuestaPayload<PaginaGenerica<DTODespliegue>>()
+                {
+                    Error = tipoPadre.ErrorEntidadPadreNoConfigurada(),
+                    HttpCode = HttpCode.BadRequest,
+                    Ok = false
+                };
+            }
+
+            consulta ??= new Consulta();
+            consulta.Filtros.Add(filtro);
+
+            respuesta = await PaginaDespliegue(consulta); ;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"PaginaHijosDespliegueAPI {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+
     public virtual Filtro? FiltroPorEntidadPadre(string tipoPadre, string padreId)
     {
         return null;
@@ -435,6 +495,36 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
     public virtual Entidad EntidadDespliegue()
     {
         throw new NotImplementedException();
+    }
+
+    public virtual Task<List<ElementoLista>> ObtieneListaLocal(string clave, OrdenamientoLista ordenamiento)
+    {
+
+#if DEBUG
+        return Task.FromResult(new List<ElementoLista>()
+        {
+            new ElementoLista() { Id ="1", Nombre ="Uno", Posicion = 1, Valor = "1"},
+            new ElementoLista() { Id ="2", Nombre ="Dos", Posicion = 2, Valor = "2"},
+            new ElementoLista() { Id ="3", Nombre ="Tres", Posicion = 3, Valor = "3"},
+            new ElementoLista() { Id ="4", Nombre ="Cuatro", Posicion = 4, Valor = "4"},
+            new ElementoLista() { Id ="5", Nombre ="Cinco", Posicion = 5, Valor = "5"}
+        });
+#else
+        throw new NotImplementedException();
+#endif
+
+    }
+
+
+    public virtual async Task<string> PorContar(string query)
+    {
+        if (query.Contains("ORDER"))
+        {
+            query = query.Split("ORDER")[0];
+            query = $"{query.Replace("*", "count(*)")}";
+        }
+
+        return query;
     }
 }
 
