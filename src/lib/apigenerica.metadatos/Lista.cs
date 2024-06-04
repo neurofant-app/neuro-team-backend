@@ -18,9 +18,13 @@ public class Lista
     /// </summary>
     public bool DatosRemotos { get; set; } = false;
 
+    /// <summary>
+    /// Número mínimo de elementos para consierar la selección como válida
+    /// </summary>
+    public int SeleccionMinima { get; set; } = 0;
 
     /// <summary>
-    /// DEtermina si el endpoint soporta la busqueda parcial de valores
+    /// Endpoint en la api para obtener los elementos de la lista desde el servidor mediante busqueda parcial de texto
     /// </summary>
     public bool EndpointBusqueda { get; set; } = false;
 

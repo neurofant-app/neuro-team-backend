@@ -18,12 +18,12 @@ public class InterpreteConsultaMySQL : IInterpreteConsulta
 
         if (consulta.Filtros != null)
         {
-            List<string> condiciones = new();
+            List<string> condiciones = [];
 
             consulta.Filtros.ForEach(filtro =>
             {
                 TipoDatos tipo = TipoParaCampo(filtro.Campo, entidad);
-                if (tipo != TipoDatos.Desconocido)
+                if (tipo != TipoDatos.SinAsignar)
                 {
                     string condicion = CondidionSQL(filtro, tipo);
                     if (!string.IsNullOrEmpty(condicion))
@@ -64,7 +64,7 @@ public class InterpreteConsultaMySQL : IInterpreteConsulta
 
         var propiedad = entidad.Propiedades.FirstOrDefault(p=>p.Nombre == nombre);
         if (propiedad == null) {
-            return TipoDatos.Desconocido;
+            return TipoDatos.SinAsignar;
         }
         return propiedad.Tipo;
     }
