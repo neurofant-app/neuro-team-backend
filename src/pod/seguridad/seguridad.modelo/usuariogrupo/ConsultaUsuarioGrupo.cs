@@ -3,12 +3,12 @@
 namespace seguridad.modelo.roles;
 
 [ExcludeFromCodeCoverage]
-public class ConsultaGrupoUsuarios
+public class ConsultaUsuarioGrupo
 {
 
     /// <summary>
-    /// Lista de los ID de usuarios asociados al grupo
+    /// Identificador único del usuario
     /// </summary>
-    public List<string> UsuarioIds { get; set; } = [];
+    public  string UsuarioId { get; set; }
 
 }
