@@ -1,8 +1,12 @@
 ﻿using extensibilidad.metadatos.configuraciones;
 using extensibilidad.metadatos.validadores;
+using System.Diagnostics.CodeAnalysis;
 
 namespace extensibilidad.metadatos;
-
+/// <summary>
+/// DEfine una propiedad de metadatos
+/// </summary>
+[ExcludeFromCodeCoverage]
 public class Propiedad: PropiedadBase
 {
     /// <summary>
