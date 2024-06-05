@@ -1,10 +1,13 @@
-﻿using apigenerica.model.interpretes;
+﻿#pragma warning disable CS8603 // Possible null reference return.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
-using controlescolar.modelo.alumnos;
+using controlescolar.modelo.campi;
+using controlescolar.modelo.instructores;
 using controlescolar.servicios.dbcontext;
 using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
@@ -12,28 +15,26 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
 
-
-namespace controlescolar.servicios.entidadalumno;
-[ServicioEntidadAPI(entidad: typeof(EntidadAlumno))]
-public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, CreaAlumno, ActualizaAlumno, ConsultaAlumno, string>,
-    IServicioEntidadAPI, IServicioEntidadAlumno
+namespace controlescolar.servicios;
+[ServicioEntidadAPI(entidad:typeof(EntidadInstructor))]
+public class ServicioEntidadInstructor : ServicioEntidadGenericaBase<EntidadInstructor, CreaInstructor, ActualizaInstructor, ConsultaInstructor, string>,
+    IServicioEntidadAPI, IServicioEntidadInstructor
 {
     private readonly ILogger _logger;
 
     private readonly IReflectorEntidadesAPI reflector;
-    public ServicioEntidadAlumno(ILogger<ServicioEntidadAlumno> logger,
+    public ServicioEntidadInstructor(ILogger<ServicioEntidadInstructor> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
+        reflector = Reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-
-        reflector = Reflector;
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_ALUMNOS);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_INSTRUCTORES);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_ALUMNOS}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTRUCTORES}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -41,7 +42,6 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         try
         {
             _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
-
             var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
                 ? configuracionMongo.ConexionDefault()
                 : string.IsNullOrEmpty(configuracionEntidad.Conexion)
@@ -50,12 +50,12 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContext)_db).EntidadAlumno;
+            _dbSetFull = ((MongoDbContext)_db).EntidadInstructor;
 
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_ALUMNOS}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTRUCTORES}'");
             throw;
         }
     }
@@ -90,7 +90,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<CreaAlumno>(JsonAPIDefaults());
+        var add = data.Deserialize<CreaInstructor>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -98,7 +98,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<ActualizaAlumno>(JsonAPIDefaults());
+        var update = data.Deserialize<ActualizaInstructor>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -137,22 +137,22 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         return respuesta;
     }
 
-    #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(CreaAlumno data)
+    #region Overrides para la personalización de la entidad EntidadInstructor
+    public override async Task<ResultadoValidacion> ValidarInsertar(CreaInstructor data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadAlumno original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadInstructor original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaAlumno actualizacion, EntidadAlumno original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaInstructor actualizacion, EntidadInstructor original)
     {
         ResultadoValidacion resultado = new();
 
@@ -161,7 +161,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         return resultado;
     }
 
-    public override EntidadAlumno ADTOFull(ActualizaAlumno actualizacion, EntidadAlumno actual)
+    public override EntidadInstructor ADTOFull(ActualizaInstructor actualizacion, EntidadInstructor actual)
     {
         actual.Nombre = actualizacion.Nombre;
         actual.Apellido1 = actualizacion.Apellido1;
@@ -169,11 +169,13 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
         actual.FechaNacimiento = actualizacion.FechaNacimiento;
         actual.IdNacional = actualizacion.IdNacional;
         actual.Genero = actualizacion.Genero;
+        actual.IdInterno = actualizacion.IdInterno;
         return actual;
     }
-    public override EntidadAlumno ADTOFull(CreaAlumno data)
+
+    public override EntidadInstructor ADTOFull(CreaInstructor data)
     {
-        EntidadAlumno entidadAlumno = new EntidadAlumno()
+        EntidadInstructor entidadInstructor = new EntidadInstructor()
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
@@ -182,28 +184,32 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
             FechaNacimiento = data.FechaNacimiento,
             IdNacional = data.IdNacional,
             Genero = data.Genero,
-            CampusId=data.CampusId,
+            CampusId = data.CampusId,
             IdInterno = data.IdInterno
+            
+           
         };
-        return entidadAlumno;
+        return entidadInstructor;
     }
-    public override ConsultaAlumno ADTODespliegue(EntidadAlumno data)
+
+    public override ConsultaInstructor ADTODespliegue(EntidadInstructor data)
     {
-        return new ConsultaAlumno
-        { Id=data.Id,
-         Nombre=data.Nombre,
-         Apellido1=data.Apellido1,
-         Apellido2=data.Apellido2,
-         FechaNacimiento=data.FechaNacimiento,
-         Genero=data.Genero,
-         IdInterno=data.IdInterno,
-         IdNacional=data.IdNacional
+        ConsultaInstructor entidadInstructor = new ConsultaInstructor()
+        {
+            Id = data.Id,
+            Nombre = data.Nombre,
+            Apellido1 = data.Apellido1,
+            Apellido2 = data.Apellido2,
+            FechaNacimiento = data.FechaNacimiento,
+            Genero = data.Genero,
+            IdInterno = data.IdInterno,
+            IdNacional = data.IdNacional
         };
+        return entidadInstructor;
     }
 
 
-
-public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaInstructor data)
     {
         var respuesta = new Respuesta();
         try
@@ -215,7 +221,7 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
             }
 
 
-            EntidadAlumno actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadInstructor actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -253,14 +259,12 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
     }
 
 
-
-
-public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadInstructor>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<EntidadAlumno>();
+        var respuesta = new RespuestaPayload<EntidadInstructor>();
         try
         {
-            EntidadAlumno actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            EntidadInstructor actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -294,7 +298,7 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
                 return respuesta;
             }
 
-            EntidadAlumno actual = _dbSetFull.Find(Guid.Parse(id));
+            EntidadInstructor actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -304,7 +308,6 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-
                 _dbSetFull.Remove(actual);
                 await _db.SaveChangesAsync();
 
@@ -328,7 +331,7 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
         return respuesta;
     }
     #endregion
+
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return.
-
