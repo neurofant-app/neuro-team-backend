@@ -200,13 +200,20 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-            if (id.StartsWith("00000000-0000-0000-0000"))
-            {
 
                 Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
                 if (actual == null)
-                {                   
-                    return await Insertar(data);
+                {
+                    if(id.StartsWith("00000000-0000-0000-0000"))
+                    { 
+                        return await Insertar(data);
+                    }
+                    else
+                    {
+                        respuesta.HttpCode = HttpCode.NotFound;
+                        return respuesta;
+                    }
+                
                 }
 
                 var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
@@ -224,7 +231,6 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                     respuesta.Error = resultadoValidacion.Error;
                     respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
                 }
-            }
 
         }
         catch (Exception ex)
