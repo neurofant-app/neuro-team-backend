@@ -200,29 +200,30 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
-            Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
-
-            if (actual == null)
+            if (id.StartsWith("00000000-0000-0000-0000"))
             {
-                respuesta.HttpCode = HttpCode.NotFound;
-                return respuesta;
-            }
 
-            var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
-            if (resultadoValidacion.Valido)
-            {
-                var entidad = ADTOFull(data, actual);
-                _dbSetFull.Update(entidad);
-                await _db.SaveChangesAsync();
+                Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+                if (actual == null)
+                {                   
+                    return await Insertar(data);
+                }
 
-                respuesta.Ok = true;
-                respuesta.HttpCode = HttpCode.Ok;
-            }
-            else
-            {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
+                if (resultadoValidacion.Valido)
+                {
+                    var entidad = ADTOFull(data, actual);
+                    _dbSetFull.Update(entidad);
+                    await _db.SaveChangesAsync();
+                    respuesta.Ok = true;
+                    respuesta.HttpCode = HttpCode.Ok;
+                }
+
+                else
+                {
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                }
             }
 
         }
