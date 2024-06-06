@@ -136,7 +136,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
-    #region Overrides para la personalización de la entidad LogoAplicacion
+    #region Overrides para la personalización de la entidad EntidadCampus
     public override async Task<ResultadoValidacion> ValidarInsertar(CreaCampus data)
     {
         ResultadoValidacion resultado = new();
