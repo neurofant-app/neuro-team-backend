@@ -201,29 +201,36 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 return respuesta;
             }
 
-            Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+                Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+                if (actual == null)
+                {
+                    if(id.StartsWith("00000000-0000-0000-0000"))
+                    { 
+                        return await Insertar(data);
+                    }
+                    else
+                    {
+                        respuesta.HttpCode = HttpCode.NotFound;
+                        return respuesta;
+                    }
+                
+                }
 
-            if (actual == null)
-            {
-                respuesta.HttpCode = HttpCode.NotFound;
-                return respuesta;
-            }
+                var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
+                if (resultadoValidacion.Valido)
+                {
+                    var entidad = ADTOFull(data, actual);
+                    _dbSetFull.Update(entidad);
+                    await _db.SaveChangesAsync();
+                    respuesta.Ok = true;
+                    respuesta.HttpCode = HttpCode.Ok;
+                }
 
-            var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
-            if (resultadoValidacion.Valido)
-            {
-                var entidad = ADTOFull(data, actual);
-                _dbSetFull.Update(entidad);
-                await _db.SaveChangesAsync();
-
-                respuesta.Ok = true;
-                respuesta.HttpCode = HttpCode.Ok;
-            }
-            else
-            {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-            }
+                else
+                {
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                }
 
         }
         catch (Exception ex)
