@@ -1,15 +1,11 @@
 using apigenerica.primitivas;
-using aplicaciones.api.seguridad;
 using aplicaciones.services.aplicacion;
-using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using aplicaciones.services.proxy.abstractions;
 using aplicaciones.services.proxy.implementations;
 using comunes.interservicio.primitivas;
 using comunes.primitivas.configuracion.mongo;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Quartz;
 using System.Reflection;
@@ -21,7 +17,16 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-       
+        builder.Services.AddQuartz(options =>
+        {
+            options.UseMicrosoftDependencyInjectionJobFactory();
+            options.UseSimpleTypeLoader();
+            options.UseInMemoryStore();
+        });
+
+        // Register the Quartz.NET service and configure it to block shutdown until jobs are complete.
+        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+
         // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
         builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
@@ -33,21 +38,11 @@ public class Program
         builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
         builder.Services.AddTransient<IServicioInvitacion, ServicioEntidadInvitacion>();
         builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
-        // OpenIddict offers native integration with Quartz.NET to perform scheduled tasks
-        // (like pruning orphaned authorizations/tokens from the database) at regular intervals.
-        builder.Services.AddQuartz(options =>
-        {
-            options.UseMicrosoftDependencyInjectionJobFactory();
-            options.UseSimpleTypeLoader();
-            options.UseInMemoryStore();
-        });
 
-        // Register the Quartz.NET service and configure it to block shutdown until jobs are complete.
-        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 
-        builder.Services.AddHostedService<Worker>().AddQuartz();
+        builder.Services.AddHostedService<Worker>();
+
         var app = builder.Build();
-
         // Añadir la extensión para los servicios de API genérica
         app.UseEntidadAPI();
 
