@@ -13,7 +13,7 @@ public static class ConfiguracionSeguridad
             {
                 ApplicacionId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
                 Nombre = "Aplicacion 1 Demo",
-                Descripcion = "Descripcion de la Aplicacion 1 demo actualizado",
+                Descripcion = "Descripcion de la Aplicacion 1",
                 Modulos = new List<Modulo>()
             }) ;
 
@@ -22,7 +22,7 @@ public static class ConfiguracionSeguridad
            {
                ApplicacionId = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                Nombre = "Aplicacion 2 Demo",
-               Descripcion = "Descripcion de la Aplicacion 2",
+               Descripcion = "Descripcion de la Aplicacion 2  Actualizado",
                Modulos = new List<Modulo>()
            });
         return apps;

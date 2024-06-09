@@ -1,6 +1,6 @@
 ﻿using comunes.interservicio.primitivas;
-using comunes.primitivas;
 using comunes.primitivas.seguridad;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -8,7 +8,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
 
-namespace aplicaciones.api.seguridad;
+namespace comunes.interservicio.primitivas;
 
 public class ProxySeguridad:IProxySeguridad
 {
@@ -32,6 +32,8 @@ public class ProxySeguridad:IProxySeguridad
         logger.LogDebug("ProxySeguridad- Actualizando Permisos");
         var host = configuracionAPI.ObtieneHost("seguridad");
         if (host == null)
+
+
         {
             logger.LogError($"ProxySeguridad - Host seguridad no configurado");
         }
