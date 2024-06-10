@@ -1,6 +1,7 @@
 using apigenerica.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.Extensions.Options;
+using seguridad.servicios;
 
 namespace seguridad.api
 {
@@ -28,7 +29,9 @@ namespace seguridad.api
             builder.Services.AddSwaggerGen();
             builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
             builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
-
+            builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            builder.Services.AddSingleton<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
+            builder.Services.AddSingleton<IServicioAplicacion, ServicioAplicacion>();
             builder.CreaConfiguiracionEntidadGenerica();
 
             var app = builder.Build();

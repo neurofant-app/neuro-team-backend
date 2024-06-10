@@ -7,6 +7,7 @@ using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -22,14 +23,16 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
     IServicioEntidadAPI, IServicioInstanciaAplicacion
 {
     private readonly ILogger _logger;
-
     private readonly IReflectorEntidadesAPI reflector;
+    private readonly IServicioAplicacion servicioAplicacion;
+
     public ServicioInstanciaAplicacion(ILogger<ServicioInstanciaAplicacion> logger,
         IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache,IServicioAplicacion servicioAplicacion) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
+        this.servicioAplicacion = servicioAplicacion;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION);
@@ -42,7 +45,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         try
         {
-            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
+            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} colección {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
             var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
                 ? configuracionMongo.ConexionDefault()
                 : string.IsNullOrEmpty(configuracionEntidad.Conexion)
@@ -56,7 +59,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_GRUPOUSUARIOS}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION}'");
             throw;
         }
     }
@@ -320,9 +323,46 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
         return respuesta;
     }
 
+    public async Task<List<Rol>> GetRolesUsuarioInterno(string aplicacionId, string usuarioId, string dominioId, string uOrgID)
+    {
+        List<Rol> roles = new List<Rol>();
+
+        InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_=>_.ApplicacionId==aplicacionId && dominioId==dominioId);
+        var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
+
+        if (aplicacionResult.Ok && instanciaAplicacion != null)
+        {
+            var aplicacion = (Aplicacion)aplicacionResult.Payload;
+            List<string> rolesId= instanciaAplicacion.MiembrosRol.Where(_ => _.UsuarioId.Any(u => u == usuarioId)).Select(_ => _.RolId).ToList();
+
+            foreach (var modulo in aplicacion.Modulos)
+            {
+               var rol = modulo.RolesPredefinidos.Where(_ => rolesId.Contains(_.RolId)).ToList();
+               roles.AddRange(rol);
+            }
+        }        
+        return roles;
+    }
+
+    public async Task<List<Permiso>> GetPermisosAplicacionInterno(string aplicacionId, string usuarioId, string dominioId, string uOrgID)
+    {
+        List<Permiso> permisos = new List<Permiso>();
+        InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == aplicacionId && dominioId == dominioId);
+        var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
+
+        if (aplicacionResult.Ok && instanciaAplicacion!=null)
+        {
+            var aplicacion = (Aplicacion)aplicacionResult.Payload;
+            List<string> permisosId = instanciaAplicacion.MiembrosPermiso.Where(_ => _.UsuarioId.Any(u => u == usuarioId)).Select(_ => _.PermisoId).ToList();
+            foreach (var modulo in aplicacion.Modulos)
+            {
+                var rol = modulo.Permisos.Where(_ =>permisosId.Contains(_.PermisoId)).ToList();
+                permisos.AddRange(rol);
+            }
+        }
+        return permisos;
+    }
     #endregion
-
-
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return.
