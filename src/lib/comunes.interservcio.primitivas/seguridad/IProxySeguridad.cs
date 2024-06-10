@@ -1,6 +1,7 @@
 ﻿using comunes.primitivas.seguridad;
 
-namespace aplicaciones.api.seguridad;
+namespace comunes.interservicio.primitivas;
+
 
 public interface IProxySeguridad
 {
