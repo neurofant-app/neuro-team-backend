@@ -3,6 +3,7 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
+using comunes.primitivas.atributos;
 using comunes.primitivas.configuracion.mongo;
 using controlescolar.modelo.alumnos;
 using controlescolar.servicios.dbcontext;
@@ -61,6 +62,8 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
     }
     private MongoDbContext DB { get { return (MongoDbContext)_db; } }
     public bool RequiereAutenticacion => true;
+
+    [Permiso(AppId: "control-escolar", PermisoId:  "control-escolar-p-crear") ]
     public Entidad EntidadRepoAPI()
     {
         return this.EntidadRepo();

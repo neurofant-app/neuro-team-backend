@@ -4,6 +4,13 @@ namespace aplicaciones.api.seguridad;
 
 public static class ConfiguracionSeguridad
 {
+
+    public const string APP_MANAGER_PERM_LIST= "app-manager-perm-list";
+    public const string APP_MANAGER_PERM_ADMIN = "app-manager-perm-admin";
+    public const string APP_MANAGER_ROL_ADMIN = "app-manager-rol-admin";
+
+    
+
     public static List<Aplicacion> ObtieneAplicaciones()
     {
         List<Aplicacion> apps = [];
@@ -12,10 +19,44 @@ public static class ConfiguracionSeguridad
             new Aplicacion
             {
                 ApplicacionId = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                Nombre = "Aplicacion 1 Demo",
-                Descripcion = "Descripcion de la Aplicacion 1 demo actualizado",
-                Modulos = new List<Modulo>()
-            }) ;
+                Nombre = "Gestor de aplicaciones",
+                Descripcion = "Gestor de aplicaciónes de la solución",
+                Modulos = [
+                 new Modulo()
+                 {
+                     Nombre = "Administrador de aplicaciones",
+                     Descripcion = "Permite administrar las aplicaciones de la solución",
+                     ModuloId = "app-manager",
+                     RolesPredefinidos = [
+                             new()
+                             {
+                                 Nombre = "Administrador",
+                                 Descripcion = "Todos los permisos para la administración de aplicaciones",
+                                 Permisos = [APP_MANAGER_PERM_ADMIN, APP_MANAGER_PERM_LIST],
+                                 Personalizado = false,
+                                 RolId = APP_MANAGER_ROL_ADMIN
+                             }
+
+                         ],
+                     Permisos = [
+                             new()
+                             {
+                                 Nombre = "Administrar aplicaciones",
+                                 Descripcion = "Permite crear, editar y eliminar aplciaciones",
+                                 Ambito = AmbitoPermiso.Global,
+                                 PermisoId = APP_MANAGER_PERM_ADMIN
+                             },
+                             new()
+                             {
+                                 Nombre = "Listar aplicaciones",
+                                 Descripcion = "Permite obtener la lista de aplicaciones",
+                                 Ambito = AmbitoPermiso.Global,
+                                 PermisoId = APP_MANAGER_PERM_LIST
+                             }
+                         ]
+                 }
+                ]
+            });
 
         apps.Add(
            new Aplicacion
