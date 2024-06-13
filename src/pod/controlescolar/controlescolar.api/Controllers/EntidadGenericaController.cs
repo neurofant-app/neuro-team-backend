@@ -11,4 +11,5 @@ public class EntidadGenericaController : ControladorEntidadGenerico
     {
         _logger = logger;
     }
+
 }

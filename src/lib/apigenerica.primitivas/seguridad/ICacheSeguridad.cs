@@ -1,19 +1,19 @@
 ﻿using comunes.primitivas.seguridad;
 
-namespace comunes.interservicio.primitivas;
+namespace apigenerica.primitivas.seguridad;
 
-
-public interface IProxySeguridad
+public interface ICacheSeguridad
 {
-    Task ActualizaSeguridad(List<Aplicacion> apps);
 
     /// <summary>
     /// Ontiene los roles asociados al usuario en una aplicación
     /// </summary>
     /// <param name="appId"></param>
     /// <param name="usuarioId"></param>
+    /// <param name="dominioId"></param>
+    /// <param name="unidadOrgId"></param>
     /// <returns></returns>
-    Task<Rol> RolesUsuario(string appId, string usuarioId);
+    Task<Rol> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
 
 
     /// <summary>
@@ -21,7 +21,8 @@ public interface IProxySeguridad
     /// </summary>
     /// <param name="appId"></param>
     /// <param name="usuarioId"></param>
+    /// <param name="dominioId"></param>
+    /// <param name="unidadOrgId"></param>
     /// <returns></returns>
-    Task<Permiso> PermisosUsuario(string appId, string usuarioId);
-
+    Task<Permiso> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
 }

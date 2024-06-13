@@ -32,6 +32,11 @@ public static class EntidadAPIMiddlewareExtensions
     /// </summary>
     public const string JWTAHEADER = "Authorization";
 
+    /// <summary>
+    /// Adciona servicio basicos: cache, context accesos
+    /// </summary>
+    /// <param name="services"></param>
+    /// <returns></returns>
     public static IServiceCollection AddServiciosEntidadAPI(this IServiceCollection services)
     {
         services.AddDistributedMemoryCache();
@@ -77,6 +82,10 @@ public static class EntidadAPIMiddlewareExtensions
         string? token = null;
         string? usuarioId = null;
         List<Claim>? claims = null;
+
+#if DEBUG
+        return ("roken", Guid.Empty.ToString(), new List<Claim>());
+#endif 
 
         string? authHeader = context.Request.Headers?[JWTAHEADER];
         if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer"))

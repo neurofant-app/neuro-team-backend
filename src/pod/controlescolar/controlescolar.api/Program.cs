@@ -1,5 +1,9 @@
 using apigenerica.primitivas;
+using apigenerica.primitivas.aplicacion;
+using apigenerica.primitivas.seguridad;
+using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
+using controlescolar.api.seguridad;
 using Microsoft.Extensions.Options;
 
 namespace controlescolar.api;
@@ -24,13 +28,19 @@ public class Program
         });
 
         builder.Services.AddControllers();
+
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
 
+
+        // Configuracion de los servicoos de entidad genrica y seguriad
         builder.CreaConfiguiracionEntidadGenerica();
+        builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
+        builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
+
 
         var app = builder.Build();
         // Añadir la extensión para los servicios de API genérica

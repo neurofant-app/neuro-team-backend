@@ -37,4 +37,15 @@ public class ContextoUsuario
     /// Claims de seguridad asociados al usuario
     /// </summary>
     public List<Claim>?  Clains { get; set; }
+
+
+    /// <summary>
+    /// Define los permisos del usuario en la aplicacion
+    /// </summary>
+    public List<string>? PermisosAplicacion { get; set;  }
+
+    /// <summary>
+    /// Define los roles del usuario en la aplicacion
+    /// </summary>
+    public List<string>? RolesAplicacion { get; set; }
 }

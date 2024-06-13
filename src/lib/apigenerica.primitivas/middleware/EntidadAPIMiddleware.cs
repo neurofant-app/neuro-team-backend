@@ -1,5 +1,8 @@
-﻿using apigenerica.model.reflectores;
+﻿using apigenerica.model.modelos;
+using apigenerica.model.reflectores;
+using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.modelos;
+using apigenerica.primitivas.seguridad;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
@@ -22,13 +25,18 @@ public class EntidadAPIMiddleware
 
     private readonly RequestDelegate _next;
     private readonly IConfiguracionAPIEntidades _configuracionAPI;
-    private ILogger<EntidadAPIMiddleware> _logger;
-    public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI,
-        ILogger<EntidadAPIMiddleware> logger)
+    private readonly ILogger<EntidadAPIMiddleware> _logger;
+    private readonly IProveedorAplicaciones _proveedorAplicaciones;
+    private readonly ICacheSeguridad _cacheSeguridad;
+
+    public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger,
+        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad )
     {
         _next = next;
         _configuracionAPI = configuracionAPI;
         _logger = logger;
+        _proveedorAplicaciones = proveedorAplicaciones;
+        _cacheSeguridad = cacheSeguridad;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -119,6 +127,7 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
+                contexto = await AdicionaSesuridad(contexto);
 #if !DEBUG
                 if (service.RequiereAutenticacion)
                 {
@@ -207,6 +216,7 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
+                contexto = await AdicionaSesuridad(contexto);
 
 #if !DEBUG
                 if (service.RequiereAutenticacion)
@@ -295,6 +305,7 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
+                contexto = await AdicionaSesuridad(contexto);
 
 #if !DEBUG
                 if (service.RequiereAutenticacion)
@@ -338,7 +349,23 @@ public class EntidadAPIMiddleware
         await context.Response.StartAsync();
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="contexto"></param>
+    /// <returns></returns>
+    private static async Task<ContextoUsuario> AdicionaSesuridad(ContextoUsuario contexto ) {
 
+
+        // Obtener de IProveedorAplicaciones la primera app y  usitlizando contexto.UsuarioId , contexto.DominioId y contexto.UOrgId
+        // Llamad al ICacheSeguridad para obtener los roles y permisos 
+
+        // PAra cada rol adicionar su id a la lista del contexto
+
+        // PAra cada permiso adicionar su id a la lista del contexto
+
+        return contexto;
+    }
 
 }
 #pragma warning restore CS8602 // Dereference of a possibly null reference.

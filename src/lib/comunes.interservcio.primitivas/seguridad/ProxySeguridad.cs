@@ -1,12 +1,11 @@
-﻿using comunes.interservicio.primitivas;
-using comunes.primitivas.seguridad;
+﻿using comunes.primitivas.seguridad;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json.Nodes;
+
 
 namespace comunes.interservicio.primitivas;
 
@@ -80,5 +79,15 @@ public class ProxySeguridad:IProxySeguridad
             logger.LogError(ex, $"ProxyComunicacionesServices - Error al enviar correo {ex.Message}");
         }
         
+    }
+
+    public Task<Permiso> PermisosUsuario(string appId, string usuarioId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<Rol> RolesUsuario(string appId, string usuarioId)
+    {
+        throw new NotImplementedException();
     }
 }
