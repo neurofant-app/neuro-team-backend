@@ -76,7 +76,7 @@ public class ProxySeguridad:IProxySeguridad
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"ProxyComunicacionesServices - Error al enviar correo {ex.Message}");
+            logger.LogError(ex, $"ProxyComunicacionesServices - al Actualizar Seguridad {ex.Message}");
         }
         
     }

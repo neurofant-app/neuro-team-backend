@@ -4,6 +4,7 @@ using System.Reflection.PortableExecutable;
 using apigenerica.primitivas;
 using seguridad.modelo;
 using System.ComponentModel.DataAnnotations;
+using seguridad.servicios;
 
 namespace seguridad.api.Controllers;
 
@@ -13,29 +14,28 @@ public class ControlAccesoController : ControladorBaseGenerico
 {
 
     private ILogger<ControlAccesoController> logger;
+    private readonly IServicioInstanciaAplicacion servicioInstanciaAplicacion;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="logger"></param>
     /// <param name="contextAccessor"></param>
-    public ControlAccesoController(ILogger<ControlAccesoController> logger, HttpContextAccessor contextAccessor ): base(contextAccessor ) {
+    public ControlAccesoController(ILogger<ControlAccesoController> logger, IHttpContextAccessor httpContextAccessor, IServicioInstanciaAplicacion servicioInstanciaAplicacion): base(httpContextAccessor) {
         this.logger = logger;
+        this.servicioInstanciaAplicacion = servicioInstanciaAplicacion;
     }
 
-
-    [HttpGet("interno/roles/{usuarioId}")]
-    public async Task<ActionResult<List<Rol>>> ObtieneRolesUsuarioInterno([Required]string usuarioId, [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
+    [HttpGet("interno/roles/{aplicacionId}/{usuarioId}")]
+    public async Task<ActionResult<List<Rol>>> ObtieneRolesUsuarioInterno([Required] string aplicacionId, [Required]string usuarioId, [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
-        // DEbe devolver 
-        throw new NotImplementedException();
+        return await servicioInstanciaAplicacion.GetRolesUsuarioInterno(aplicacionId, usuarioId, dominioId, uOrgID);
     }
 
     [HttpGet("interno/permisos/{aplicacionId}/{usuarioId}")]
     public async Task<ActionResult<List<Permiso>>> ObtienePermisosAplicacionInterno([Required] string aplicacionId, [Required] string usuarioId, [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
-        // DEbe devolver 
-        throw new NotImplementedException();
+        return await servicioInstanciaAplicacion.GetPermisosAplicacionInterno(aplicacionId, usuarioId, dominioId, uOrgID);
     }
 
 }

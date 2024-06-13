@@ -25,7 +25,7 @@ public class Program
         });
 
         // Register the Quartz.NET service and configure it to block shutdown until jobs are complete.
-        builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
+        builder.Services.AddQuartzHostedService(options => options.AwaitApplicationStarted = true);
 
         // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
