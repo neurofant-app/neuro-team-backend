@@ -5,6 +5,7 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
+using comunes.primitivas.atributos;
 using comunes.primitivas.configuracion.mongo;
 using controlescolar.modelo.campi;
 using controlescolar.servicios.dbcontext;
@@ -64,14 +65,17 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     {
         return this.EntidadRepo();
     }
+
     public Entidad EntidadInsertAPI()
     {
         return this.EntidadInsert();
     }
+
     public Entidad EntidadUpdateAPI()
     {
         return this.EntidadUpdate();
     }
+
     public Entidad EntidadDespliegueAPI()
     {
         return this.EntidadDespliegue();
@@ -87,6 +91,8 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return this._contextoUsuario;
     }
 
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
         var add = data.Deserialize<CreaCampus>(JsonAPIDefaults());
@@ -95,17 +101,26 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
+
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
         var update = data.Deserialize<ActualizaCampus>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
+
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<Respuesta> EliminarAPI(object id)
     {
         return await this.Eliminar((string)id);
     }
 
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
         var temp = await this.UnicaPorId((string)id);
@@ -113,6 +128,9 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -121,6 +139,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
+
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
         var temp = await this.Pagina(consulta);
@@ -129,6 +151,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
+
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
+    [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
+    [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
         var temp = await this.PaginaDespliegue(consulta);
