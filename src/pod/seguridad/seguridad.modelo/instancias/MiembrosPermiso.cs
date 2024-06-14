@@ -12,7 +12,7 @@ public class MiembrosPermiso
     /// IDentificador unico del permiso
     /// </summary>
     [BsonElement("pid")]
-    public required string RolId { get; set; }
+    public required string PermisoId { get; set; }
 
     /// <summary>
     /// Lista de los usuarios asociados al permiso
