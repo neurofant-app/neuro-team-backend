@@ -47,16 +47,26 @@ public class CacheAtributos: ICacheAtributos
                 {
                     if (metodo.CustomAttributes.Any())
                     {
-                        var atributosMetodo = metodo.CustomAttributes.Where(_ => _.AttributeType == typeof(RolAttribute) || _.AttributeType == typeof(PermisoAttribute));
-                        if (atributosMetodo.Any())
-                        {
-                            atributosFinal.Add(
+                        var atrTemp = new List<string>();
+
+                        foreach (var item in metodo.GetCustomAttributes())
+                        {                           
+                            if (item is RolAttribute r)
+                            {
+                                atrTemp.Add(r.RolId);
+                            }
+                            if (item is PermisoAttribute p)
+                            {
+                                atrTemp.Add(p.PermisoId);
+                            }
+                        }
+                        atributosFinal.Add(
                                 new AtributosMetodo()
                                 {
                                     MetodoId = metodo.Name,
-                                    atributosId = atributosMetodo.Select(_ => _.ConstructorArguments[1].Value.ToString()).ToList()
-                                });
-                        }
+                                    atributosId = atrTemp
+                                });                       
+                        
                     }
                 }
                 _cache.Set(clave, atributosFinal.ToByteArray(), cacheOptions);
