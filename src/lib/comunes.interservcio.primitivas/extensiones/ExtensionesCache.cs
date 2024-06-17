@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace comunes.interservicio.primitivas.extensiones;
 
@@ -12,11 +13,9 @@ public static class ExtensionesCache
     /// <returns></returns>
     public static byte[] ToByteArray(this object data)
     {
-        /// Implementar la conversi[on del objeto a byte array
-        /// y remover el return null
-        /// 
-
-        return null;
+        if (data == null) return null;
+        string jsonString = JsonSerializer.Serialize(data);
+        return System.Text.Encoding.UTF8.GetBytes(jsonString);
     }
 
     /// <summary>

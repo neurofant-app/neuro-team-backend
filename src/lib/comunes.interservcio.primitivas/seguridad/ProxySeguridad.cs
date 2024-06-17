@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -15,31 +16,34 @@ public class ProxySeguridad:IProxySeguridad
     private readonly IServicioAutenticacionJWT autenticacionJWT;
     private readonly ConfiguracionAPI configuracionAPI;
     private readonly HttpClient seguridadHttpClient;
+    private readonly HostInterServicio host;
 
-    public ProxySeguridad(ILogger<ProxySeguridad> logger, IServicioAutenticacionJWT autenticacionJWT,
-        IHttpClientFactory httpClientFactory, IOptions<ConfiguracionAPI> options)
+    public ProxySeguridad(IOptions<ConfiguracionAPI> options,ILogger<ProxySeguridad> logger, IServicioAutenticacionJWT autenticacionJWT,
+        IHttpClientFactory httpClientFactory)
     {
+        configuracionAPI = options.Value;
+        this.host = configuracionAPI.ObtieneHost("seguridad");
         this.logger =logger;
         this.autenticacionJWT = autenticacionJWT;
-        configuracionAPI = options.Value;
-        seguridadHttpClient = new HttpClient();
+        seguridadHttpClient = httpClientFactory.CreateClient();
+        seguridadHttpClient.DefaultRequestHeaders.Add("Accept-Language", "es-MX");
     }
-
+    private void ActualizaHeaders(string dominioId, string unidadOrgId)
+    {
+        seguridadHttpClient.DefaultRequestHeaders.Remove("x-d-id");
+        seguridadHttpClient.DefaultRequestHeaders.Remove("x-uo-id");
+        seguridadHttpClient.DefaultRequestHeaders.Add("x-d-id", dominioId);
+        seguridadHttpClient.DefaultRequestHeaders.Add("x-uo-id", unidadOrgId);
+    }
 
     public async Task ActualizaSeguridad(List<Aplicacion> apps)
     {
         logger.LogDebug("ProxySeguridad- Actualizando Permisos");
-        var host = configuracionAPI.ObtieneHost("seguridad");
         if (host == null)
-
-
         {
             logger.LogError($"ProxySeguridad - Host seguridad no configurado");
-        }
-        seguridadHttpClient.BaseAddress = new Uri(host.UrlBase.TrimEnd('/'));
-        seguridadHttpClient.DefaultRequestHeaders.Add("x-d-id","mi-dominio");
-        seguridadHttpClient.DefaultRequestHeaders.Add("x-uo-id","mi-ou");
-        seguridadHttpClient.DefaultRequestHeaders.Add("Accept-Language", "es-MX");
+        }      
+        ActualizaHeaders("mi-dominio", "x-uo-id");
         try
         {
             TokenJWT? jWT = null;
@@ -58,17 +62,17 @@ public class ProxySeguridad:IProxySeguridad
                 {
                     foreach (var app in apps)
                     {
-                        logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine(seguridadHttpClient.BaseAddress.ToString(), $"/api/Aplicacion/Entidad/{app.ApplicacionId}")}");
+                        logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine($"{host.UrlBase}/api/Aplicacion/Entidad/{app.ApplicacionId}")}");
                         var payload = new StringContent(JsonConvert.SerializeObject(app,new JsonSerializerSettings() { ContractResolver = new CamelCasePropertyNamesContractResolver() }), Encoding.UTF8, "application/json");
                         seguridadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
-                        var response = await seguridadHttpClient.PutAsync($"api/Aplicacion/Entidad/{app.ApplicacionId}", payload);
+                        var response = await seguridadHttpClient.PutAsync($"{host.UrlBase}/api/Aplicacion/Entidad/{app.ApplicacionId}", payload);
                         logger.LogDebug($"ProxySeguridad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
 
                         string? contenidoRespuesta = await response.Content.ReadAsStringAsync();
 
                         if (!response.IsSuccessStatusCode)
                          {
-                        logger.LogError($"ProxyComunicacionesServices - error llamada remota {response.ReasonPhrase} {contenidoRespuesta}");
+                        logger.LogError($"ProxySeguridad - error llamada remota {response.ReasonPhrase} {contenidoRespuesta}");
                          }          
                     }
                 }
@@ -76,18 +80,97 @@ public class ProxySeguridad:IProxySeguridad
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"ProxyComunicacionesServices - al Actualizar Seguridad {ex.Message}");
+            logger.LogError(ex, $"ProxySeguridad - al Actualizar Seguridad {ex.Message}");
         }
         
     }
 
-    public Task<Permiso> PermisosUsuario(string appId, string usuarioId)
+    public async Task<List<Permiso>> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
     {
-        throw new NotImplementedException();
+        List<Permiso> permisos= new();
+        logger.LogDebug("ProxySeguridad- Obteniendo Permisos del cache");
+        if (host == null) logger.LogError($"ProxySeguridad - Host seguridad no configurado");
+        ActualizaHeaders(dominioId, unidadOrgId);
+        try
+        {
+            TokenJWT? jWT = null;
+            if (string.IsNullOrEmpty(host.ClaveAutenticacion))
+            {
+                logger.LogError($"ProxySeguridad - No hay una clave de autencicacion definida para Seguridad");
+            }
+            else
+            {
+                jWT = await autenticacionJWT!.TokenInterproceso(host.ClaveAutenticacion);
+                if (jWT == null)
+                {
+                    logger.LogDebug("ProxySeguridad - Error al obtener el token interservicio de JWT cache de seguridad");
+                }
+                else
+                {
+
+                    logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine($"{host.UrlBase}/controlacceso/interno/permisos/{appId}/{usuarioId}")}");
+                   seguridadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
+                    var response = await seguridadHttpClient.GetAsync($"{host.UrlBase}/controlacceso/interno/permisos/{appId}/{usuarioId}");
+                    logger.LogDebug($"ProxySeguridad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
+
+                    string? contenidoRespuesta = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        logger.LogError($"ProxySeguridad - error llamada remota {response.ReasonPhrase} {contenidoRespuesta}");
+                    }
+                    permisos = JsonConvert.DeserializeObject<List<Permiso>>(contenidoRespuesta);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"ProxySeguridad - Error al obtener permisos edl Cache de Seguridad {ex.Message}");
+        }
+        return permisos;
     }
 
-    public Task<Rol> RolesUsuario(string appId, string usuarioId)
+    public async Task<List<Rol>> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
     {
-        throw new NotImplementedException();
+        List<Rol>roles = new();
+        logger.LogDebug("ProxySeguridad- obteniendo roles del cache");
+        if (host == null)logger.LogError($"ProxySeguridad - Host seguridad no configurado");
+        ActualizaHeaders(dominioId, unidadOrgId);
+        try
+        {
+            TokenJWT? jWT = null;
+            if (string.IsNullOrEmpty(host.ClaveAutenticacion))
+            {
+                logger.LogError($"ProxySeguridad - No hay una clave de autencicacion definida para Seguridad");
+            }
+            else
+            {
+                jWT = await autenticacionJWT!.TokenInterproceso(host.ClaveAutenticacion);
+                if (jWT == null)
+                {
+                    logger.LogDebug("ProxySeguridad - Error al obtener el token interservicio de JWT para cache seguridad");
+                }
+                else
+                {
+                    logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine($"{host.UrlBase}/controlacceso/interno/roles/{appId}/{usuarioId}")}");
+                    seguridadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
+                    var response = await seguridadHttpClient.GetAsync($"{host.UrlBase}/controlacceso/interno/roles/{appId}/{usuarioId}");
+                    logger.LogDebug($"ProxySeguridad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
+
+                    string? contenidoRespuesta = await response.Content.ReadAsStringAsync();
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        logger.LogError($"ProxySeguridad - error llamada remota {response.ReasonPhrase} {contenidoRespuesta}");
+                    }
+                    roles = JsonConvert.DeserializeObject<List<Rol>>(contenidoRespuesta);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, $"ProxySeguridad - al obtener Seguridad el cache {ex.Message}");
+        }
+        return roles;
     }
 }

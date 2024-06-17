@@ -238,16 +238,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
                 return respuesta;
             }
 
-            var queryElementos = await ObtienePaginaElementos(consulta);
-
-            PaginaGenerica<DTOFull> pagina = new()
-            {
-                ConsultaId = Guid.NewGuid().ToString(),
-                Elementos = queryElementos.Elementos,
-                Milisegundos = 0,
-                Paginado = new Paginado() { Indice = consulta.Paginado.Indice, Tamano = consulta.Paginado.Tamano, Ordenamiento = consulta.Paginado.Ordenamiento, ColumnaOrdenamiento = consulta.Paginado.ColumnaOrdenamiento },
-                Total = queryElementos.Total,
-            };
+            var pagina = await ObtienePaginaElementos(consulta);
 
             respuesta.Payload = pagina;
             respuesta.Ok = true;

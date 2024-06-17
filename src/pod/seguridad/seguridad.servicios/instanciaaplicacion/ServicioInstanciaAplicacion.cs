@@ -349,11 +349,11 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                         var rol = modulo.RolesPredefinidos.Where(_ => rolesId.Contains(_.RolId)).ToList();
                         roles.AddRange(rol);
                     }
-                    var expiraEn = configuration.GetValue<string>("CacheConfig:TiempoExpira");
+                    var expiraEn = configuration.GetValue<double>("CacheConfig:TiempoExpira");
                     _cache.SetString(usuarioId, JsonSerializer.Serialize(roles),
                         new DistributedCacheEntryOptions()
                         {
-                            SlidingExpiration = TimeSpan.FromSeconds(double.Parse(expiraEn))
+                            SlidingExpiration = TimeSpan.FromSeconds(expiraEn)
                         });
                 }
            
@@ -388,11 +388,11 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                         var rol = modulo.Permisos.Where(_ => permisosId.Contains(_.PermisoId)).ToList();
                         permisos.AddRange(rol);
                     }
-                    var expiraEn = configuration.GetValue<string>("CacheConfig:TiempoExpira");
+                    var expiraEn = configuration.GetValue<double>("CacheConfig:TiempoExpira");
                     _cache.SetString(usuarioId, JsonSerializer.Serialize(permisos),
                         new DistributedCacheEntryOptions()
                         {
-                            SlidingExpiration = TimeSpan.FromSeconds(double.Parse(expiraEn))
+                            SlidingExpiration = TimeSpan.FromSeconds(expiraEn)
                         });
                 }
             }
