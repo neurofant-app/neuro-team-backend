@@ -3,6 +3,12 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using comunes.interservicio.primitivas.extensiones;
 using apigenerica.primitivas.seguridad;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
+using System.Net.Http.Headers;
+using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace comunes.interservicio.primitivas.seguridad;
 
@@ -12,17 +18,15 @@ namespace comunes.interservicio.primitivas.seguridad;
 public class CacheSeguridad : ICacheSeguridad
 {
     private readonly IProxySeguridad proxySeguridad;
-    private readonly IDistributedCache cache;
+    private readonly IDistributedCache _cache;
     private readonly DistributedCacheEntryOptions cacheOptions;
  
-    public CacheSeguridad(IProxySeguridad proxySeguridad, IDistributedCache cache, IConfiguration configuration) {
-        this.proxySeguridad = proxySeguridad;
-        this.cache = cache;
+    public CacheSeguridad (IProxySeguridad proxySeguridad, IDistributedCache cache, IConfiguration configuration) {
 
-        // VErificar si esto funciona, debe dejar 5 minutos por default si no existe la entrada MinutosCacheSeguridad en el appsettings
+        this.proxySeguridad = proxySeguridad;
+        this._cache = cache;
         var minutos = configuration.GetValue<int?>("MinutosCacheSeguridad");
         cacheOptions = (minutos ?? 5).ExpiraCacheEnMinutos();
-
     }
 
     /// <summary>
@@ -34,35 +38,43 @@ public class CacheSeguridad : ICacheSeguridad
     /// <returns></returns>
     private string GeneraClaveCache(string appId, string usuarioId, string clave) => $"{appId}-{usuarioId}-{clave}";
     
-    public Task<Permiso> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
+
+    public async Task<List<Permiso>> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
     {
         string clave = GeneraClaveCache(appId, usuarioId, "permisos");
+        List<Permiso> permisos = new();
+        var permisoCache = _cache.GetString(clave);
 
-        // VErificar si existe la entrada en cache con la clave
-        // SI existe regresar el valor
-        // SI no existe llamar al proxy y almcenar el resultado (aun cuando sea una lista vacia)
-        //           Almacenar elresultado en el cache con algo simila a
-        //
-        //          cache.Set(clave, objeto.ToByteArray(), cacheOptions);
+        if (string.IsNullOrEmpty(permisoCache))
+        {
+            permisos = await proxySeguridad.PermisosUsuario(appId,usuarioId,dominioId,unidadOrgId);
+            _cache.Set(usuarioId, permisos.ToByteArray(), cacheOptions);
+        }
+        else
+        {
+            permisos = JsonConvert.DeserializeObject<List<Permiso>>(permisoCache);
+        }
+        return permisos;
 
-
-
-        throw new NotImplementedException();
     }
 
 
-    public Task<Rol> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
+    public async Task<List<Rol>> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId)
     {
         string clave = GeneraClaveCache(appId, usuarioId, "roles");
+        List<Rol> roles = new();
+        var rolesCache = _cache.GetString(clave);
 
-        // VErificar si existe la entrada en cache con la clave
-        // SI existe regresar el valor
-        // SI no existe llamar al proxy y almcenar el resultado (aun cuando sea una lista vacia)
-        //           Almacenar elresultado en el cache con algo simila a
-        //
-        //          cache.Set(clave, objeto.ToByteArray(), cacheOptions);
+        if (string.IsNullOrEmpty(rolesCache))
+        {
+            roles = await proxySeguridad.RolesUsuario(appId, usuarioId, dominioId, unidadOrgId);
+            _cache.Set(usuarioId, roles.ToByteArray(), cacheOptions);
+        }
+        else
+        {
+            roles = JsonConvert.DeserializeObject<List<Rol>>(rolesCache);
+        }
+        return roles;
 
-
-        throw new NotImplementedException();
     }
 }

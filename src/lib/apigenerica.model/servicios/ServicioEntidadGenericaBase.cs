@@ -7,6 +7,9 @@ using apigenerica.model.reflectores;
 using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using apigenerica.model.interpretes;
 
 namespace apigenerica.model.servicios;
 
@@ -249,16 +252,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
                 return respuesta;
             }
 
-            var queryElementos = await ObtienePaginaElementos(consulta);
-
-            PaginaGenerica<DTOFull> pagina = new()
-            {
-                ConsultaId = Guid.NewGuid().ToString(),
-                Elementos = queryElementos.Elementos,
-                Milisegundos = 0,
-                Paginado = new Paginado() { Indice = consulta.Paginado.Indice, Tamano = consulta.Paginado.Tamano, Ordenamiento = consulta.Paginado.Ordenamiento, ColumnaOrdenamiento = consulta.Paginado.ColumnaOrdenamiento },
-                Total = queryElementos.Total,
-            };
+            var pagina = await ObtienePaginaElementos(consulta);
 
             respuesta.Payload = pagina;
             respuesta.Ok = true;
@@ -283,10 +277,29 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
 
-    public virtual async Task<(List<DTOFull> Elementos, int? Total)> ObtienePaginaElementos(Consulta consulta)
+    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta)
     {
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(DTOFull));
+        var Elementos = Enumerable.Empty<DTOFull>().AsQueryable();
 
-        throw new NotImplementedException();
+        if (consulta.Filtros.Count > 0)
+        {
+            var predicateBody = interpreteConsulta.CrearConsultaExpresion<DTOFull>(consulta, entidad);
+
+            if (predicateBody != null)
+            {
+                var RConsulta = _dbSetFull.AsQueryable().Provider.CreateQuery<DTOFull>(predicateBody.getWhereExpression(_dbSetFull.AsQueryable().Expression));
+
+                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? modelos.Ordenamiento.asc);
+            }
+        }
+        else
+        {
+            var RConsulta = _dbSetFull.AsQueryable();
+            Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? modelos.Ordenamiento.asc);
+
+        }
+        return await Elementos.PaginadoAsync(consulta);
     }
 
     public virtual ContextoUsuario? ObtieneContextoUsuario()

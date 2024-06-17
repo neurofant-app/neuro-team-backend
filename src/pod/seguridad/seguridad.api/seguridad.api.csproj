@@ -29,6 +29,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\lib\apigenerica.primitivas\apigenerica.primitivas.csproj" />
+		<ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
 		<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
 		<ProjectReference Include="..\seguridad.modelo\seguridad.modelo.csproj" />
 		<ProjectReference Include="..\seguridad.servicios\seguridad.servicios.csproj" />

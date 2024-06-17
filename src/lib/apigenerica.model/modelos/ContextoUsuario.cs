@@ -48,4 +48,9 @@ public class ContextoUsuario
     /// Define los roles del usuario en la aplicacion
     /// </summary>
     public List<string>? RolesAplicacion { get; set; }
+
+    /// <summary>
+    /// Define Los ids de permisos y roles necesarios para cada metodo del un servicio actual
+    /// </summary>
+    public List<AtributosMetodo>? AtributosMetodos { get; set; }
 }
