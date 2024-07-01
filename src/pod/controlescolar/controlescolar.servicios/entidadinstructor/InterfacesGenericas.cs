@@ -3,6 +3,11 @@ using controlescolar.modelo.instructores;
 
 namespace controlescolar.servicios;
 
-public interface IServicioEntidadInstructor : IServicioEntidadGenerica<EntidadInstructor, CreaInstructor, ActualizaInstructor, ConsultaInstructor, string>
+public interface IServicioEntidadInstructor 
+                 : IServicioEntidadGenerica<EntidadInstructor, 
+                                            CreaInstructor, 
+                                            ActualizaInstructor, 
+                                            ConsultaInstructor, 
+                                            string>
 {
 }

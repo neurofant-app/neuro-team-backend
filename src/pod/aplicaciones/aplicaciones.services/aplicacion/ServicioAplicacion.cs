@@ -192,7 +192,6 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             };
         }
 
-
         return resultado;
     }
 
