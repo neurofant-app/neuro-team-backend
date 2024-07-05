@@ -11,6 +11,9 @@ using Quartz;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using static OpenIddict.Abstractions.OpenIddictConstants;
+using AspNetCore.Identity.MongoDbCore.Models;
+using Microsoft.Extensions.DependencyInjection;
+using identidad.api;
 
 
 namespace contabee.identity.api;
@@ -93,6 +96,7 @@ public class Program
             });
         });
 
+        builder.Services.AddTransient<IDependencyResolver, DependencyResolver>();
 
         // Add services to the container.
         //builder.Services.AddControllersWithViews();
@@ -119,10 +123,14 @@ public class Program
                     .AddDefaultTokenProviders();
                 break;
             case "mongo":
+
+
+
+
                 var connectionString = builder.Configuration.GetConnectionString("identityMongo");
 
-                builder.Services.AddIdentity<ApplicationUserMongo, ApplicationRole>()
-                    .AddMongoDbStores<ApplicationUserMongo, ApplicationRole, Guid>
+                builder.Services.AddIdentity<ApplicationUserMongo, MongoIdentityRole>()
+                    .AddMongoDbStores<ApplicationUserMongo, MongoIdentityRole, Guid>
                     (
                         connectionString, "identityMongo"
                     );
