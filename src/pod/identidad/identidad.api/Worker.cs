@@ -7,21 +7,23 @@ namespace contabee.identity.api;
 public class Worker : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
-
+    private readonly IConfiguration _configuration;
     public string dbtype { get; set; }
-    public Worker(IServiceProvider serviceProvider)
+    public Worker(IServiceProvider serviceProvider, IConfiguration configuration)
     {
-        _serviceProvider = serviceProvider;    } 
+        _serviceProvider = serviceProvider;
+        _configuration = configuration;
+    } 
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
-        
-        //if (configuration["dbtype"].Equals("mysql"))
-        //{
-        //    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        //    await context.Database.EnsureCreatedAsync();
-        //}
+
+        if (_configuration["dbtype"].Equals("mysql"))
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await context.Database.EnsureCreatedAsync();
+        }
 
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
