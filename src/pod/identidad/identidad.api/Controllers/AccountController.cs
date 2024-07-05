@@ -1,5 +1,6 @@
 ﻿using contabee.identity.api.models;
 using contabee.identity.api.viewmodels;
+using identidad.api.models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,66 +16,65 @@ namespace contabee.identity.api.Controllers;
 public class AccountController : Controller
 {
     private readonly ILogger<AccountController> logger;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly UserManager<ApplicationUserMongo> _userManager;
+    //private readonly ApplicationDbContext _applicationDbContext;
     private static bool _databaseChecked;
 
     public AccountController(ILogger<AccountController> logger,
-        UserManager<ApplicationUser> userManager,
-        ApplicationDbContext applicationDbContext)
+        UserManager<ApplicationUserMongo> userManager)
     {
         this.logger = logger;
         _userManager = userManager;
-        _applicationDbContext = applicationDbContext;
+        //_applicationDbContext = applicationDbContext;
     }
 
 
-    [SwaggerOperation("Actualiza la contraseña de un usuario utilizando su email para la búsqueda")]
-    [SwaggerResponse(statusCode: 200, description: "La contraseña ha sido actualizada")]
-    [SwaggerResponse(statusCode: 404, description: "Cuenta no localizada")]
-    [HttpPost("password/token")]
-    public async Task<IActionResult> EstablecePasswordToken([FromBody] ActualizarContrasena actualizarContrasena)
-    {
-        var user = await _userManager.FindByNameAsync(actualizarContrasena.Email);
-        if (user == null)
-        {
-            logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
-            return NotFound();
-        }
+    //[SwaggerOperation("Actualiza la contraseña de un usuario utilizando su email para la búsqueda")]
+    //[SwaggerResponse(statusCode: 200, description: "La contraseña ha sido actualizada")]
+    //[SwaggerResponse(statusCode: 404, description: "Cuenta no localizada")]
+    //[HttpPost("password/token")]
+    //public async Task<IActionResult> EstablecePasswordToken([FromBody] ActualizarContrasena actualizarContrasena)
+    //{
+    //    var user = await _userManager.FindByNameAsync(actualizarContrasena.Email);
+    //    if (user == null)
+    //    {
+    //        logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
+    //        return NotFound();
+    //    }
 
-        var result = await _userManager.ResetPasswordAsync(user, actualizarContrasena.Token, actualizarContrasena.Password);
-        if(result.Succeeded)
-        {
-            return Ok();
-        }
+    //    var result = await _userManager.ResetPasswordAsync(user, actualizarContrasena.Token, actualizarContrasena.Password);
+    //    if(result.Succeeded)
+    //    {
+    //        return Ok();
+    //    }
 
-        return BadRequest(result.Errors);
-    }
+    //    return BadRequest(result.Errors);
+    //}
 
 
-    [SwaggerOperation("Busca una cuenta por emaul")]
-    [SwaggerResponse(statusCode: 200, description: "La cuenta existe y devuelve la entidad")]
-    [SwaggerResponse(statusCode: 404, description: "La cuenta no existe")]
-    [HttpGet("password/recuperar")]
-    public async Task<ActionResult<DTORecuperacionPassword>> RecuperaPasswordEmail([FromQuery] string email)
-    {
-        var user = await _userManager.FindByNameAsync(email);
-        if (user == null)
-        {
-            logger.LogDebug($"Cuenta inexistente {email}");
-            return NotFound();
-        }
+    //[SwaggerOperation("Busca una cuenta por emaul")]
+    //[SwaggerResponse(statusCode: 200, description: "La cuenta existe y devuelve la entidad")]
+    //[SwaggerResponse(statusCode: 404, description: "La cuenta no existe")]
+    //[HttpGet("password/recuperar")]
+    //public async Task<ActionResult<DTORecuperacionPassword>> RecuperaPasswordEmail([FromQuery] string email)
+    //{
+    //    var user = await _userManager.FindByNameAsync(email);
+    //    if (user == null)
+    //    {
+    //        logger.LogDebug($"Cuenta inexistente {email}");
+    //        return NotFound();
+    //    }
 
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
+    //    var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
 
-        DTORecuperacionPassword cuenta = new ()
-        {
-            Email = user!.Email,
-            UserName = user!.UserName,
-            TokenRecuperacion = token
-        };
-        return Ok(cuenta);
-    }
+    //    DTORecuperacionPassword cuenta = new ()
+    //    {
+    //        Email = user!.Email,
+    //        UserName = user!.UserName,
+    //        TokenRecuperacion = token
+    //    };
+    //    return Ok(cuenta);
+    //}
 
 
     [SwaggerOperation("Registra un nuevo usuario")]
@@ -85,7 +85,7 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
-        EnsureDatabaseCreated(_applicationDbContext);
+        //EnsureDatabaseCreated(_applicationDbContext);
         if (ModelState.IsValid)
         {
             var user = await _userManager.FindByNameAsync(model.Email);
@@ -95,7 +95,7 @@ public class AccountController : Controller
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+            user = new ApplicationUserMongo { UserName = model.Email, Email = model.Email };
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
@@ -115,14 +115,14 @@ public class AccountController : Controller
     // not yet supported in this release.
     // Please see this http://go.microsoft.com/fwlink/?LinkID=615859 for more information on how to do deploy the database
     // when publishing your application.
-    private static void EnsureDatabaseCreated(ApplicationDbContext context)
-    {
-        if (!_databaseChecked)
-        {
-            _databaseChecked = true;
-            context.Database.EnsureCreated();
-        }
-    }
+    //private static void EnsureDatabaseCreated(ApplicationDbContext context)
+    //{
+    //    if (!_databaseChecked)
+    //    {
+    //        _databaseChecked = true;
+    //        context.Database.EnsureCreated();
+    //    }
+    //}
 
     private void AddErrors(IdentityResult result)
     {

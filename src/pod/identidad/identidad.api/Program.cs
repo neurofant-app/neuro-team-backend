@@ -1,8 +1,11 @@
 using comunes.interservicio.primitivas;
 using contabee.identity.api.helpers;
 using contabee.identity.api.models;
+using identidad.api.models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver.Core.Configuration;
+using MongoDB.Driver;
 using OpenIddict.Validation.AspNetCore;
 using Quartz;
 using System.Reflection;
@@ -94,22 +97,39 @@ public class Program
         // Add services to the container.
         //builder.Services.AddControllersWithViews();
 
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        var dbProdiver = configuration["dbtype"];
+        switch (dbProdiver)
         {
-            // Configure the context to use mysql.
-            var connectionString = builder.Configuration.GetConnectionString("identity");
-            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            case "mysql":
+                builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                {
+                    // Configure the context to use mysql.
+                    var connectionString = builder.Configuration.GetConnectionString("identityMySql");
+                    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 
-            // Register the entity sets needed by OpenIddict.
-            // Note: use the generic overload if you need
-            // to replace the default OpenIddict entities.
-            options.UseOpenIddict();
-        });
+                    // Register the entity sets needed by OpenIddict.
+                    // Note: use the generic overload if you need
+                    // to replace the default OpenIddict entities.
+                    options.UseOpenIddict();
+                });
 
-        // Register the Identity services.
-        builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
+                // Register the Identity services.
+                builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                    .AddEntityFrameworkStores<ApplicationDbContext>()
+                    .AddDefaultTokenProviders();
+                break;
+            case "mongo":
+                var connectionString = builder.Configuration.GetConnectionString("identityMongo");
+
+                builder.Services.AddIdentity<ApplicationUserMongo, ApplicationRole>()
+                    .AddMongoDbStores<ApplicationUserMongo, ApplicationRole, Guid>
+                    (
+                        connectionString, "identityMongo"
+                    );
+                break;
+            case "default":
+                break;
+        }
 
         // OpenIddict offers native integration with Quartz.NET to perform scheduled tasks
         // (like pruning orphaned authorizations/tokens from the database) at regular intervals.
@@ -128,10 +148,23 @@ public class Program
             // Register the OpenIddict core components.
             .AddCore(options =>
             {
-                // Configure OpenIddict to use the Entity Framework Core stores and models.
-                // Note: call ReplaceDefaultEntities() to replace the default OpenIddict entities.
-                options.UseEntityFrameworkCore()
-                       .UseDbContext<ApplicationDbContext>();
+                switch (dbProdiver)
+                {
+                    case "mysql":
+                        // Configure OpenIddict to use the Entity Framework Core stores and models.
+                        // Note: call ReplaceDefaultEntities() to replace the default OpenIddict entities.
+                        options.UseEntityFrameworkCore()
+                               .UseDbContext<ApplicationDbContext>();
+                        break;
+                    case "mongo":
+                        var connectionString = builder.Configuration.GetConnectionString("identityMongo");
+
+                        options.UseMongoDb()
+                        .UseDatabase(new MongoClient(connectionString).GetDatabase("identityMongo"));
+                        break;
+                    case "default":
+                        break;
+                }
 
                 // Enable Quartz.NET integration.
                 options.UseQuartz();

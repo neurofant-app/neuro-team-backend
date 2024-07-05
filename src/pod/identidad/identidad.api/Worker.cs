@@ -8,15 +8,20 @@ public class Worker : IHostedService
 {
     private readonly IServiceProvider _serviceProvider;
 
+    public string dbtype { get; set; }
     public Worker(IServiceProvider serviceProvider)
-        => _serviceProvider = serviceProvider;
+    {
+        _serviceProvider = serviceProvider;    } 
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
-
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await context.Database.EnsureCreatedAsync();
+        
+        //if (configuration["dbtype"].Equals("mysql"))
+        //{
+        //    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        //    await context.Database.EnsureCreatedAsync();
+        //}
 
         var manager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
