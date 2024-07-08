@@ -1,4 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.relaciones;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -31,4 +34,28 @@ public class Permiso
     /// </summary>
     [BsonElement("pd")]
     public string? Descripcion { get; set; }
+
+    [BsonIgnore]
+    //[NotMapped]
+    public string ModuloId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public  Modulo Modulo { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public string? RolId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public Rol Rol { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public List<PermisoGrupo> PermisoGrupo { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public List<PermisoUsuario> PermisoUsuario { get; set; }
 }

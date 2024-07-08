@@ -55,6 +55,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.modelo", "src\pod
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.servicios", "src\pod\seguridad\seguridad.servicios\seguridad.servicios.csproj", "{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "seguridad.servicios.mysql", "src\pod\seguridad\seguridad.servicios.mysql\seguridad.servicios.mysql.csproj", "{55DA03DB-138C-494B-B39D-2F56C262F01E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -137,6 +139,10 @@ Global
 		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55DA03DB-138C-494B-B39D-2F56C262F01E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55DA03DB-138C-494B-B39D-2F56C262F01E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55DA03DB-138C-494B-B39D-2F56C262F01E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55DA03DB-138C-494B-B39D-2F56C262F01E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -166,6 +172,7 @@ Global
 		{C91D0939-0B2F-41BA-B231-3B04A74F16F1} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
 		{5F22902C-AE79-42A0-8676-F85D54AD70DC} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
 		{EEA5B7DD-D9F8-4518-B63D-715A89BD44D9} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
+		{55DA03DB-138C-494B-B39D-2F56C262F01E} = {68BB0FC7-BBC6-4E29-BB40-367C48307C42}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D116441E-D88A-4B9D-8367-516131CC9D3A}

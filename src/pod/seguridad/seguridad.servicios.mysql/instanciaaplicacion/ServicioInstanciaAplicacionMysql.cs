@@ -5,7 +5,6 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
-using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -14,24 +13,22 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
-using seguridad.servicios.dbcontext;
 using System.Text.Json;
 
 
-namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion))]
-public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, string>,
-    IServicioEntidadAPI, IServicioInstanciaAplicacion
+namespace seguridad.servicios.mysql;
+[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacionMysql))]
+public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<InstanciaAplicacionMysql, InstanciaAplicacionMysql, InstanciaAplicacionMysql, InstanciaAplicacionMysql, string>,
+    IServicioEntidadAPI, IServicioInstanciaAplicacionMysql
 {
     private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
     private readonly IDistributedCache cache;
-    private readonly IServicioAplicacion servicioAplicacion;
+    private readonly IServicioAplicacionMysql servicioAplicacion;
     private readonly IConfiguration configuration;
 
-    public ServicioInstanciaAplicacion(ILogger<ServicioInstanciaAplicacion> logger,
-        IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache,IServicioAplicacion servicioAplicacion, IConfiguration configuration) : base(null, null, logger, Reflector, cache)
+    public ServicioInstanciaAplicacionMysql(DBContextMySql contex,ILogger<ServicioInstanciaAplicacionMysql> logger,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache,IServicioAplicacionMysql servicioAplicacion, IConfiguration configuration) : base(contex, contex.InstanciaAplicacion, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
@@ -39,36 +36,8 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
         this.servicioAplicacion = servicioAplicacion;
         this.configuration = configuration;
         interpreteConsulta = new InterpreteConsultaExpresiones();
-
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION);
-        if (configuracionEntidad == null)
-        {
-            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION}'";
-            _logger.LogError(err);
-            throw new Exception(err);
-        }
-
-        try
-        {
-            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} colección {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
-            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
-                ? configuracionMongo.ConexionDefault()
-                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
-                    ? configuracionMongo.ConexionDefault()
-                    : configuracionEntidad.Conexion;
-            var client = new MongoClient(cadenaConexion);
-
-            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContext)_db).instanciaAplicacion;
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION}'");
-            throw;
-        }
     }
-    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
+
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
@@ -99,7 +68,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
+        var add = data.Deserialize<InstanciaAplicacionMysql>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -107,7 +76,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
+        var update = data.Deserialize<InstanciaAplicacionMysql>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -147,21 +116,21 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
     }
 
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(InstanciaAplicacion data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(InstanciaAplicacionMysql data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, InstanciaAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, InstanciaAplicacionMysql original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, InstanciaAplicacion actualizacion, InstanciaAplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, InstanciaAplicacionMysql actualizacion, InstanciaAplicacionMysql original)
     {
         ResultadoValidacion resultado = new();
 
@@ -170,43 +139,47 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
         return resultado;
     }
 
-    public override InstanciaAplicacion ADTOFull(InstanciaAplicacion actualizacion, InstanciaAplicacion actual)
+    public override InstanciaAplicacionMysql ADTOFull(InstanciaAplicacionMysql actualizacion, InstanciaAplicacionMysql actual)
     {
         actual.DominioId = actualizacion.DominioId;
         actual.ApplicacionId = actualizacion.ApplicacionId;
         actual.RolesPersonalizados = actualizacion.RolesPersonalizados;
-        actual.MiembrosRol = actualizacion.MiembrosRol;
-        actual.MiembrosPermiso = actualizacion.MiembrosPermiso;
+        actual.PermisoGrupo = actualizacion.PermisoGrupo;
+        actual.PermisoUsuarios = actualizacion.PermisoUsuarios;
+        actual.RolGrupo = actualizacion.RolGrupo;
+        actual.RolUsuarios = actualizacion.RolUsuarios;
         return actual;
     }
 
-    public override InstanciaAplicacion ADTOFull(InstanciaAplicacion data)
+    public override InstanciaAplicacionMysql ADTOFull(InstanciaAplicacionMysql data)
     {
-        InstanciaAplicacion instanciaAplicacion = new InstanciaAplicacion()
+        InstanciaAplicacionMysql instanciaAplicacion = new InstanciaAplicacionMysql()
         {
             Id = Guid.NewGuid().ToString(),
             DominioId = data.DominioId,
             ApplicacionId = data.ApplicacionId,
             RolesPersonalizados=data.RolesPersonalizados,
-            MiembrosPermiso=data.MiembrosPermiso,
-            MiembrosRol=data.MiembrosRol
+            PermisoGrupo=data.PermisoGrupo,
+            PermisoUsuarios=data.PermisoUsuarios,
+            RolGrupo=data.RolGrupo,
+            RolUsuarios=data.RolUsuarios,
         };
         return instanciaAplicacion;
     }
-    public override InstanciaAplicacion ADTODespliegue(InstanciaAplicacion data)
+    public override InstanciaAplicacionMysql ADTODespliegue(InstanciaAplicacionMysql data)
     {
-        return new InstanciaAplicacion
+        return new InstanciaAplicacionMysql
         {
             Id=data.Id,
             DominioId = data.DominioId,
             ApplicacionId = data.ApplicacionId,
             RolesPersonalizados = data.RolesPersonalizados,
-            MiembrosPermiso = data.MiembrosPermiso,
-            MiembrosRol = data.MiembrosRol
+            RolGrupo = data.RolGrupo,
+            RolUsuarios = data.RolUsuarios,
         };
     }
 
-    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacionMysql data)
     {
         var respuesta = new Respuesta();
         try
@@ -217,7 +190,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                 return respuesta;
             }
 
-            InstanciaAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            InstanciaAplicacionMysql actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -255,12 +228,12 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
     }
 
 
-    public override async Task<RespuestaPayload<InstanciaAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<InstanciaAplicacionMysql>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<InstanciaAplicacion>();
+        var respuesta = new RespuestaPayload<InstanciaAplicacionMysql>();
         try
         {
-            InstanciaAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            InstanciaAplicacionMysql actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -294,7 +267,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                 return respuesta;
             }
 
-            InstanciaAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            InstanciaAplicacionMysql actual = _dbSetFull.Find(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -335,13 +308,13 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacionMysql instanciaAplicacion = await _dbSetFull.Include(_ => _.RolUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
             {
                 var aplicacion = (Aplicacion)aplicacionResult.Payload;
-                List<string> rolesId = instanciaAplicacion.MiembrosRol.Where(_ => _.UsuarioId.Any(u => u == usuarioId)).Select(_ => _.RolId).ToList();
+                List<string> rolesId = instanciaAplicacion.RolUsuarios.Where(_ => _.UsuarioId==usuarioId).Select(_ => _.RolId).ToList();
                 if (rolesId.Any())
                 {
                     foreach (var modulo in aplicacion.Modulos)
@@ -374,13 +347,13 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacionMysql instanciaAplicacion = await _dbSetFull.Include(_=>_.PermisoUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
             {
                 var aplicacion = (Aplicacion)aplicacionResult.Payload;
-                List<string> permisosId = instanciaAplicacion.MiembrosPermiso.Where(_ => _.UsuarioId.Any(u => u == usuarioId)).Select(_ => _.PermisoId).ToList();
+                List<string> permisosId = instanciaAplicacion.PermisoUsuarios.Where(_ => _.UsuarioId == usuarioId).Select(_ => _.PermisoId).ToList();
                 if(permisosId.Any())
                 {
                     foreach (var modulo in aplicacion.Modulos)

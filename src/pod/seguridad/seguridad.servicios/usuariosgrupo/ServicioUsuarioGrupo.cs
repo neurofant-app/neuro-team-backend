@@ -186,6 +186,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
     {
         UsuarioGrupo rol = new UsuarioGrupo()
         {
+            Id=Guid.NewGuid().ToString(),
             UsuarioId = data.UsuarioId
         };
         return rol;
@@ -244,7 +245,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
             }
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
-            respuesta.Payload = respuesta.Payload = new UsuarioGrupo() { UsuarioId = actual };
+            respuesta.Payload = respuesta.Payload = new UsuarioGrupo() {Id = Guid.NewGuid().ToString(), UsuarioId = actual };
         }
         catch (Exception ex)
         {
@@ -274,7 +275,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
                 respuesta.HttpCode = HttpCode.Ok;
                 return respuesta;
             }
-            UsuarioGrupo usuario= new UsuarioGrupo() { UsuarioId = actual };
+            UsuarioGrupo usuario= new UsuarioGrupo() { Id = Guid.NewGuid().ToString(), UsuarioId = actual };
             var resultadoValidacion = await ValidarEliminacion(id, usuario);
             if (resultadoValidacion.Valido)
             {
@@ -305,7 +306,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         var Elementos =grupo!=null && grupo.UsuarioId.Any() ? grupo.UsuarioId.AsQueryable() : new List<string>().AsQueryable();
         var ElementosFinal = new List<UsuarioGrupo>();
         var pagina = Elementos.Paginado(consulta);
-        if (pagina.Elementos.Any()) pagina.Elementos.ForEach(i => { ElementosFinal.Add(new UsuarioGrupo() { UsuarioId = i }); });
+        if (pagina.Elementos.Any()) pagina.Elementos.ForEach(i => { ElementosFinal.Add(new UsuarioGrupo() { Id = Guid.NewGuid().ToString(), UsuarioId = i }); });
         return new PaginaGenerica<UsuarioGrupo>
         {
             ConsultaId = pagina.ConsultaId,

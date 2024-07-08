@@ -1,4 +1,8 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.instancias;
+using seguridad.modelo.relaciones;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -36,4 +40,41 @@ public class Rol
     /// </summary>
     [BsonElement("rd")]
     public string? Descripcion { get; set; }
+
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public List<Permiso> RolPermisos { get; set; }
+
+    [BsonIgnore]
+    //[NotMapped]
+    public string ModuloId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public Modulo Modulo { get; set; }
+
+    [BsonIgnore]
+    //[NotMapped]
+    public string? InstanciaAplicacionId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public List<RolGrupo> RolGrupo { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public List<RolUsuario> RolUsuario { get; set; }
 }
+
+
+
+
+
+
+//crear tabla PermisoRol[id][rolid][permisoId]     

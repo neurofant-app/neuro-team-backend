@@ -1,11 +1,16 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
+using aplicaciones.api;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver.Core.Configuration;
 using seguridad.servicios;
+using seguridad.servicios.mysql;
 
 namespace seguridad.api
 {
@@ -27,6 +32,12 @@ namespace seguridad.api
                 });
             });
 
+            var connectionStringMySql = builder.Configuration.GetConnectionString("neurofant-cloud");
+            builder.Services.AddDbContext<DBContextMySql>(options =>
+            {
+                options.UseMySql(connectionStringMySql, ServerVersion.AutoDetect(connectionStringMySql));
+
+            });
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -37,16 +48,23 @@ namespace seguridad.api
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             builder.Services.AddSingleton<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
             builder.Services.AddSingleton<IServicioAplicacion, ServicioAplicacion>();
-            builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
             builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
             builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
+            builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
+            builder.Services.AddTransient<IServicioAplicacionMysql, ServicioAplicacionMysql>();
+            builder.Services.AddTransient<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
+            builder.Services.AddTransient<IServicioInstanciaAplicacionMysql, ServicioInstanciaAplicacionMysql>();
+            builder.Services.AddTransient<IProveedorAplicaciones, ConfiguracionSeguridad>();
+            builder.Services.AddTransient<ICacheSeguridad, CacheSeguridad>();
+            builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
             builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
             builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
             builder.Services.AddHttpClient();
             builder.CreaConfiguiracionEntidadGenerica();
 
             var app = builder.Build();
-            // Añadir la extensión para los servicios de API genérica
+            app.DBContextMySqlUpdateDatabase();
+            // Aï¿½adir la extensiï¿½n para los servicios de API genï¿½rica
             app.UseEntidadAPI();
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

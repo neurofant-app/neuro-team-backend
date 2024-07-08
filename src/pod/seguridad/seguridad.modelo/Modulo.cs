@@ -1,4 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -37,5 +39,13 @@ public class Modulo
     /// </summary>
     [BsonElement("md")]
     public string? Descripcion { get; set; }
+
+    [BsonIgnore]
+    //[NotMapped]
+    public  Guid ApplicacionId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public Aplicacion Aplicacion { get; set; }
 
 }

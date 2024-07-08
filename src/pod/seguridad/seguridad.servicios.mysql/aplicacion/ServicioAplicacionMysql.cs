@@ -5,61 +5,31 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
-using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using seguridad.modelo;
-using seguridad.servicios.dbcontext;
 using System.Text.Json;
 
 
-namespace seguridad.servicios;
-//[ServicioEntidadAPI(entidad: typeof(Aplicacion))]
-public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplicacion, Aplicacion, Aplicacion, string>,
-    IServicioEntidadAPI, IServicioAplicacion
+namespace seguridad.servicios.mysql;
+[ServicioEntidadAPI(entidad: typeof(Aplicacion))]
+public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, Aplicacion, Aplicacion, Aplicacion, string>,
+    IServicioEntidadAPI, IServicioAplicacionMysql
 {
     private readonly ILogger _logger;
 
     private readonly IReflectorEntidadesAPI reflector;
-    public ServicioAplicacion(ILogger<ServicioAplicacion> logger,
-        IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
+    public ServicioAplicacionMysql(ILogger<ServicioAplicacionMysql> logger, DBContextMySql context,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(context, context.Aplicacion, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_APLICACION);
-        if (configuracionEntidad == null)
-        {
-            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_APLICACION}'";
-            _logger.LogError(err);
-            throw new Exception(err);
-        }
-
-        try
-        {
-            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
-            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
-                ? configuracionMongo.ConexionDefault()
-                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
-                    ? configuracionMongo.ConexionDefault()
-                    : configuracionEntidad.Conexion;
-            var client = new MongoClient(cadenaConexion);
-
-            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContext)_db).Aplicacion;
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_APLICACION}'");
-            throw;
-        }
     }
-    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
+
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
@@ -251,7 +221,10 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         var respuesta = new RespuestaPayload<Aplicacion>();
         try
         {
-            Aplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            Aplicacion actual = await _dbSetFull.
+                Include(_=>_.Modulos).ThenInclude(_=>_.RolesPredefinidos).
+                Include(_ => _.Modulos).ThenInclude(_ => _.Permisos).
+                FirstOrDefaultAsync(_=>_.ApplicacionId==Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;

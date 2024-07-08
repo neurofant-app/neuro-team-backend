@@ -1,5 +1,8 @@
 ﻿using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.instancias;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -23,7 +26,6 @@ public class Aplicacion
     [BsonElement("am")]
     public List<Modulo> Modulos { get; set; } = [];
 
-
     /// <summary>
     /// Nombre del módulo para la UI, esto será calcolado en base al idioa
     /// </summary>
@@ -35,4 +37,9 @@ public class Aplicacion
     /// </summary>
     [BsonElement("ad")]
     public string? Descripcion { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    [NotMapped]
+    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
 }

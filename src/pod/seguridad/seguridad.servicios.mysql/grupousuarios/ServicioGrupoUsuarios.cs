@@ -1,4 +1,5 @@
-﻿#pragma warning disable CS8603 // Possible null reference return.
+﻿
+#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
@@ -9,57 +10,26 @@ using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
 using seguridad.modelo;
-using seguridad.servicios.dbcontext;
 using System.Text.Json;
 
 
-namespace seguridad.servicios;
-//[ServicioEntidadAPI(entidad: typeof(Aplicacion))]
-public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplicacion, Aplicacion, Aplicacion, string>,
-    IServicioEntidadAPI, IServicioAplicacion
+namespace seguridad.servicios.mysql;
+[ServicioEntidadAPI(entidad: typeof(GrupoUsuarios))]
+public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, string>,
+    IServicioEntidadAPI, IServicioGrupoUsuarios
 {
     private readonly ILogger _logger;
 
     private readonly IReflectorEntidadesAPI reflector;
-    public ServicioAplicacion(ILogger<ServicioAplicacion> logger,
+    public ServicioGrupoUsuarios(ILogger<ServicioGrupoUsuarios> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
-
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_APLICACION);
-        if (configuracionEntidad == null)
-        {
-            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_APLICACION}'";
-            _logger.LogError(err);
-            throw new Exception(err);
-        }
-
-        try
-        {
-            _logger.LogDebug($"Mongo DB {configuracionEntidad.Esquema} coleccioón {configuracionEntidad.Esquema} utilizando conexión default {string.IsNullOrEmpty(configuracionEntidad.Conexion)}");
-            var cadenaConexion = string.IsNullOrEmpty(configuracionEntidad.Conexion) && string.IsNullOrEmpty(configuracionMongo.ConexionDefault())
-                ? configuracionMongo.ConexionDefault()
-                : string.IsNullOrEmpty(configuracionEntidad.Conexion)
-                    ? configuracionMongo.ConexionDefault()
-                    : configuracionEntidad.Conexion;
-            var client = new MongoClient(cadenaConexion);
-
-            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContext)_db).Aplicacion;
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_APLICACION}'");
-            throw;
-        }
     }
-    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
@@ -90,7 +60,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<Aplicacion>(JsonAPIDefaults());
+        var add = data.Deserialize<GrupoUsuarios>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -98,7 +68,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<Aplicacion>(JsonAPIDefaults());
+        var update = data.Deserialize<GrupoUsuarios>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -116,7 +86,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await UnicaPorIdDespliegue((string)id);
 
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -138,21 +108,21 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
     }
 
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(Aplicacion data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(GrupoUsuarios data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Aplicacion original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, GrupoUsuarios original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Aplicacion actualizacion, Aplicacion original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, GrupoUsuarios actualizacion, GrupoUsuarios original)
     {
         ResultadoValidacion resultado = new();
 
@@ -161,36 +131,43 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
         return resultado;
     }
 
-    public override Aplicacion ADTOFull(Aplicacion actualizacion, Aplicacion actual)
+    public override GrupoUsuarios ADTOFull(GrupoUsuarios actualizacion, GrupoUsuarios actual)
     {
+        actual.DominioId = actualizacion.DominioId;
+        actual.ApplicacionId = actualizacion.ApplicacionId;
         actual.Nombre = actualizacion.Nombre;
         actual.Descripcion = actualizacion.Descripcion;
-        actual.Modulos = actualizacion.Modulos;
+        actual.UsuarioId = actualizacion.UsuarioId;
         return actual;
     }
 
-    public override Aplicacion ADTOFull(Aplicacion data)
+    public override GrupoUsuarios ADTOFull(GrupoUsuarios data)
     {
-        Aplicacion aplicacion = new Aplicacion()
+        GrupoUsuarios grupoUsuarios = new GrupoUsuarios()
         {
+            Id = Guid.NewGuid(),
+            DominioId = data.DominioId,
             ApplicacionId = data.ApplicacionId,
             Nombre = data.Nombre,
-            Descripcion=data.Descripcion,
-            Modulos = data.Modulos,
-        };
-        return aplicacion;
+            Descripcion = data.Descripcion,
+            UsuarioId = data.UsuarioId
+    };
+        return grupoUsuarios;
     }
-    public override Aplicacion ADTODespliegue(Aplicacion data)
+    public override GrupoUsuarios ADTODespliegue(GrupoUsuarios data)
     {
-        return new Aplicacion
+        return new GrupoUsuarios
         {
-            ApplicacionId=data.ApplicacionId,
+            Id = data.Id,
+            DominioId = data.DominioId,
+            ApplicacionId = data.ApplicacionId,
             Nombre = data.Nombre,
-            Descripcion=data.Descripcion,
-            Modulos=data.Modulos
+            Descripcion = data.Descripcion,
+            UsuarioId = data.UsuarioId
         };
     }
-    public override async Task<Respuesta> Actualizar(string id, Aplicacion data)
+
+    public override async Task<Respuesta> Actualizar(string id, GrupoUsuarios data)
     {
         var respuesta = new Respuesta();
         try
@@ -201,36 +178,29 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 return respuesta;
             }
 
-                Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
-                if (actual == null)
-                {
-                    if(id.StartsWith("00000000-0000-0000-0000"))
-                    { 
-                        return await Insertar(data);
-                    }
-                    else
-                    {
-                        respuesta.HttpCode = HttpCode.NotFound;
-                        return respuesta;
-                    }
-                
-                }
+            GrupoUsuarios actual = _dbSetFull.Find(Guid.Parse(id));
 
-                var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
-                if (resultadoValidacion.Valido)
-                {
-                    var entidad = ADTOFull(data, actual);
-                    _dbSetFull.Update(entidad);
-                    await _db.SaveChangesAsync();
-                    respuesta.Ok = true;
-                    respuesta.HttpCode = HttpCode.Ok;
-                }
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
 
-                else
-                {
-                    respuesta.Error = resultadoValidacion.Error;
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-                }
+            var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data, actual);
+                _dbSetFull.Update(entidad);
+                await _db.SaveChangesAsync();
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
 
         }
         catch (Exception ex)
@@ -246,12 +216,12 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
     }
 
 
-    public override async Task<RespuestaPayload<Aplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<GrupoUsuarios>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Aplicacion>();
+        var respuesta = new RespuestaPayload<GrupoUsuarios>();
         try
         {
-            Aplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            GrupoUsuarios actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -285,7 +255,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplica
                 return respuesta;
             }
 
-            Aplicacion actual = _dbSetFull.Find(Guid.Parse(id));
+            GrupoUsuarios actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
