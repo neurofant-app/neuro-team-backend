@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.roles;
-using seguridad.servicios.mysql.usuariosgrupo;
+using seguridad.modelo.servicios;
 using System.Text.Json;
 
 

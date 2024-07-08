@@ -6,9 +6,8 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver.Core.Configuration;
+using seguridad.modelo.servicios;
 using seguridad.servicios;
 using seguridad.servicios.mysql;
 
@@ -32,13 +31,8 @@ namespace seguridad.api
                 });
             });
 
-            var connectionStringMySql = builder.Configuration.GetConnectionString("neurofant-cloud");
-            builder.Services.AddDbContext<DBContextMySql>(options =>
-            {
-                options.UseMySql(connectionStringMySql, ServerVersion.AutoDetect(connectionStringMySql));
-
-            });
             builder.Services.AddControllers();
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -46,17 +40,38 @@ namespace seguridad.api
             builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
             builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
             builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            builder.Services.AddSingleton<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
-            builder.Services.AddSingleton<IServicioAplicacion, ServicioAplicacion>();
-            builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
-            builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-            builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
-            builder.Services.AddTransient<IServicioAplicacionMysql, ServicioAplicacionMysql>();
-            builder.Services.AddTransient<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
-            builder.Services.AddTransient<IServicioInstanciaAplicacionMysql, ServicioInstanciaAplicacionMysql>();
+
+            string driver = builder.Configuration.GetValue<string>("driver")!;
+
+            switch(driver.ToLower())
+            {
+
+                case "mongo":
+                    builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
+                    builder.Services.AddSingleton<IServicioInstanciaAplicacion, ServicioInstanciaAplicacion>();
+                    break;
+
+                case "mysql":
+                    var connectionStringMySql = builder.Configuration.GetConnectionString("neurofant-cloud");
+                    builder.Services.AddDbContext<DBContextMySql>(options =>
+                    {
+                        options.UseMySql(connectionStringMySql, ServerVersion.AutoDetect(connectionStringMySql));
+
+                    });
+                    builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacionMysql>();
+                    builder.Services.AddTransient<IServicioInstanciaAplicacion, ServicioInstanciaAplicacionMySql>();
+                    break;
+
+                default:
+                    throw new Exception($"Driver no válido {driver}");
+            }
+
+            
             builder.Services.AddTransient<IProveedorAplicaciones, ConfiguracionSeguridad>();
-            builder.Services.AddTransient<ICacheSeguridad, CacheSeguridad>();
+
+            builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
             builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
+
             builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
             builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
             builder.Services.AddHttpClient();

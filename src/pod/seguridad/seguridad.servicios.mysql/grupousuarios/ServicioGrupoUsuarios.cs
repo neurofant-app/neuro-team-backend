@@ -11,6 +11,7 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using seguridad.modelo;
+using seguridad.modelo.servicios;
 using System.Text.Json;
 
 

@@ -60,7 +60,7 @@ public class Rol
 
     [BsonIgnore]
     [JsonIgnore]
-    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
 
 
     [BsonIgnore]
@@ -71,10 +71,3 @@ public class Rol
     [JsonIgnore]
     public List<RolUsuario> RolUsuario { get; set; }
 }
-
-
-
-
-
-
-//crear tabla PermisoRol[id][rolid][permisoId]     

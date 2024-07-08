@@ -6,9 +6,9 @@ using seguridad.modelo.instancias;
 
 namespace seguridad.servicios.mysql;
 
-public class ConfiguracionInstanciaAplicacionMysql : IEntityTypeConfiguration<InstanciaAplicacionMysql>
+public class ConfiguracionInstanciaAplicacion : IEntityTypeConfiguration<InstanciaAplicacion>
 {
-    public void Configure(EntityTypeBuilder<InstanciaAplicacionMysql> builder)
+    public void Configure(EntityTypeBuilder<InstanciaAplicacion> builder)
     {
         builder.ToTable("seguridad$instanciaaplicacion");
         builder.HasKey(x => x.Id);

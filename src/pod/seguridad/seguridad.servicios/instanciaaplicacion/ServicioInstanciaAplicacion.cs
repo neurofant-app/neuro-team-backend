@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
 using System.Text.Json;
 

@@ -16,7 +16,7 @@ public class DBContextMySql : DbContext
 
 
     public DbSet<Aplicacion> Aplicacion { get; set; }
-    public DbSet<InstanciaAplicacionMysql> InstanciaAplicacion { get; set; }
+    public DbSet<InstanciaAplicacion> InstanciaAplicacion { get; set; }
     public DbSet<GrupoUsuarios> GrupoUsuarios { get; set; }
     public DbSet<UsuarioGrupo> UsuarioGrupo { get; set; }
     public DbSet<Rol> Rol { get; set; }
@@ -36,7 +36,7 @@ public class DBContextMySql : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new ConfiguracionAplicacion());
-        modelBuilder.ApplyConfiguration(new ConfiguracionInstanciaAplicacionMysql());
+        modelBuilder.ApplyConfiguration(new ConfiguracionInstanciaAplicacion());
         modelBuilder.ApplyConfiguration(new ConfiguracionGrupoUsuarios());
         modelBuilder.ApplyConfiguration(new ConfiguracionUsuarioGrupo());
         modelBuilder.ApplyConfiguration(new ConfiguracionRol());

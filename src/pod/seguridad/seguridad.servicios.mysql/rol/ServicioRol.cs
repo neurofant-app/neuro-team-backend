@@ -5,16 +5,15 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
-using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
+using seguridad.modelo.servicios;
 using System.Text.Json;
 
 namespace seguridad.servicios.mysql;
@@ -25,8 +24,8 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     private readonly ILogger _logger;
 
     private readonly IReflectorEntidadesAPI reflector;
-    private InstanciaAplicacionMysql? aplicacion;
-    private DbSet<InstanciaAplicacionMysql>? _dbSetAplicacion;
+    private InstanciaAplicacion? aplicacion;
+    private DbSet<InstanciaAplicacion>? _dbSetAplicacion;
     public ServicioRolMysql(DBContextMySql context, ILogger<ServicioRolMysql> logger,
         IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
     {

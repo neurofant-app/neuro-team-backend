@@ -10,9 +10,11 @@ public class PermisoUsuario
     public string Id { get; set; }
     public required string PermisoId { get; set; }
     public required string UsuarioId { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
-    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
     public Permiso Permiso { get; set; }

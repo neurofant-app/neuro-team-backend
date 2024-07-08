@@ -10,13 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using seguridad.modelo;
+using seguridad.modelo.servicios;
 using System.Text.Json;
 
 
 namespace seguridad.servicios.mysql;
 [ServicioEntidadAPI(entidad: typeof(Aplicacion))]
 public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, Aplicacion, Aplicacion, Aplicacion, string>,
-    IServicioEntidadAPI, IServicioAplicacionMysql
+    IServicioEntidadAPI, IServicioAplicacion
 {
     private readonly ILogger _logger;
 

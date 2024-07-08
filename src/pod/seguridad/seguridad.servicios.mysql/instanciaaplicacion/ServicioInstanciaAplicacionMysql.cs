@@ -13,22 +13,23 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
+using seguridad.modelo.servicios;
 using System.Text.Json;
 
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacionMysql))]
-public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<InstanciaAplicacionMysql, InstanciaAplicacionMysql, InstanciaAplicacionMysql, InstanciaAplicacionMysql, string>,
-    IServicioEntidadAPI, IServicioInstanciaAplicacionMysql
+[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion))]
+public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, string>,
+    IServicioEntidadAPI, IServicioInstanciaAplicacion
 {
     private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
     private readonly IDistributedCache cache;
-    private readonly IServicioAplicacionMysql servicioAplicacion;
+    private readonly IServicioAplicacion servicioAplicacion;
     private readonly IConfiguration configuration;
 
-    public ServicioInstanciaAplicacionMysql(DBContextMySql contex,ILogger<ServicioInstanciaAplicacionMysql> logger,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache,IServicioAplicacionMysql servicioAplicacion, IConfiguration configuration) : base(contex, contex.InstanciaAplicacion, logger, Reflector, cache)
+    public ServicioInstanciaAplicacionMySql(DBContextMySql contex, ILogger<ServicioInstanciaAplicacionMySql> logger,
+        IReflectorEntidadesAPI Reflector, IDistributedCache cache, IServicioAplicacion servicioAplicacion, IConfiguration configuration) : base(contex, contex.InstanciaAplicacion , logger, Reflector, cache)
     {
         _logger = logger;
         reflector = Reflector;
@@ -68,7 +69,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<InstanciaAplicacionMysql>(JsonAPIDefaults());
+        var add = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -76,7 +77,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<InstanciaAplicacionMysql>(JsonAPIDefaults());
+        var update = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -116,21 +117,21 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
     }
 
     #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(InstanciaAplicacionMysql data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(InstanciaAplicacion data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, InstanciaAplicacionMysql original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, InstanciaAplicacion original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, InstanciaAplicacionMysql actualizacion, InstanciaAplicacionMysql original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, InstanciaAplicacion actualizacion, InstanciaAplicacion original)
     {
         ResultadoValidacion resultado = new();
 
@@ -139,7 +140,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
         return resultado;
     }
 
-    public override InstanciaAplicacionMysql ADTOFull(InstanciaAplicacionMysql actualizacion, InstanciaAplicacionMysql actual)
+    public override InstanciaAplicacion ADTOFull(InstanciaAplicacion actualizacion, InstanciaAplicacion actual)
     {
         actual.DominioId = actualizacion.DominioId;
         actual.ApplicacionId = actualizacion.ApplicacionId;
@@ -151,9 +152,9 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
         return actual;
     }
 
-    public override InstanciaAplicacionMysql ADTOFull(InstanciaAplicacionMysql data)
+    public override InstanciaAplicacion ADTOFull(InstanciaAplicacion data)
     {
-        InstanciaAplicacionMysql instanciaAplicacion = new InstanciaAplicacionMysql()
+        InstanciaAplicacion instanciaAplicacion = new InstanciaAplicacion()
         {
             Id = Guid.NewGuid().ToString(),
             DominioId = data.DominioId,
@@ -166,9 +167,9 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
         };
         return instanciaAplicacion;
     }
-    public override InstanciaAplicacionMysql ADTODespliegue(InstanciaAplicacionMysql data)
+    public override InstanciaAplicacion ADTODespliegue(InstanciaAplicacion data)
     {
-        return new InstanciaAplicacionMysql
+        return new InstanciaAplicacion
         {
             Id=data.Id,
             DominioId = data.DominioId,
@@ -179,7 +180,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
         };
     }
 
-    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacionMysql data)
+    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacion data)
     {
         var respuesta = new Respuesta();
         try
@@ -190,7 +191,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
                 return respuesta;
             }
 
-            InstanciaAplicacionMysql actual = _dbSetFull.Find(Guid.Parse(id));
+            InstanciaAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
@@ -228,12 +229,12 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
     }
 
 
-    public override async Task<RespuestaPayload<InstanciaAplicacionMysql>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<InstanciaAplicacion>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<InstanciaAplicacionMysql>();
+        var respuesta = new RespuestaPayload<InstanciaAplicacion>();
         try
         {
-            InstanciaAplicacionMysql actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            InstanciaAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -267,7 +268,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
                 return respuesta;
             }
 
-            InstanciaAplicacionMysql actual = _dbSetFull.Find(id);
+            InstanciaAplicacion actual = _dbSetFull.Find(id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -308,7 +309,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacionMysql instanciaAplicacion = await _dbSetFull.Include(_ => _.RolUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.Include(_ => _.RolUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
@@ -347,7 +348,7 @@ public class ServicioInstanciaAplicacionMysql : ServicioEntidadGenericaBase<Inst
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacionMysql instanciaAplicacion = await _dbSetFull.Include(_=>_.PermisoUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.Include(_=>_.PermisoUsuarios).FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)

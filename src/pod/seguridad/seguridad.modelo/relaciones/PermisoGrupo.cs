@@ -14,12 +14,15 @@ public class PermisoGrupo
     public required string Id { get; set; }
     public required string PermisoId { get; set; }
     public required Guid GrupoId { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
-    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
     public GrupoUsuarios Grupo { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
     public Permiso Permiso{ get; set; }

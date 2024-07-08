@@ -41,5 +41,5 @@ public class Aplicacion
     [BsonIgnore]
     [JsonIgnore]
     [NotMapped]
-    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
 }

@@ -10,9 +10,11 @@ public class RolUsuario
     public  string Id { get; set; }
     public required string RolId { get; set; }
     public required string UsuarioId { get; set; }
+    
     [NotMapped]
     [JsonIgnore]
-    public InstanciaAplicacionMysql InstanciaAplicacion { get; set; }
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
+
     [NotMapped]
     [JsonIgnore]
     public Rol Rol { get; set; }

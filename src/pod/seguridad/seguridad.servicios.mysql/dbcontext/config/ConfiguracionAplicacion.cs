@@ -16,6 +16,6 @@ public class ConfiguracionAplicacion : IEntityTypeConfiguration<Aplicacion>
         builder.Property(e => e.Nombre).HasMaxLength(100);
         builder.Property(e => e.Descripcion);
         builder.HasMany(x => x.Modulos).WithOne(y => y.Aplicacion).HasForeignKey(z => z.ApplicacionId).OnDelete(DeleteBehavior.Cascade);
-        builder.HasOne(x => x.InstanciaAplicacion).WithOne(y => y.Aplicacion).HasForeignKey<InstanciaAplicacionMysql>(z => z.ApplicacionId);
+        builder.HasOne(x => x.InstanciaAplicacion).WithOne(y => y.Aplicacion).HasForeignKey<InstanciaAplicacion>(z => z.ApplicacionId);
     }
 }

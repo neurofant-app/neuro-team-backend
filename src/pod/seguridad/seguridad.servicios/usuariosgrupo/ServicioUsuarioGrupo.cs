@@ -10,17 +10,12 @@ using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using seguridad.modelo;
-using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
-using seguridad.servicios.usuariosgrupo;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace seguridad.servicios;
