@@ -1,4 +1,8 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.instancias;
+using seguridad.modelo.relaciones;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -36,4 +40,28 @@ public class Rol
     /// </summary>
     [BsonElement("rd")]
     public string? Descripcion { get; set; }
+
+
+    [BsonIgnore]
+    public List<Permiso> RolPermisos { get; set; }
+
+    [BsonIgnore]
+    public string ModuloId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public Modulo Modulo { get; set; }
+
+    [BsonIgnore]
+    public string? InstanciaAplicacionId { get; set; }
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public InstanciaAplicacion InstanciaAplicacion { get; set; }
+
+    [BsonIgnore]
+    public List<RolGrupo> RolGrupo { get; set; }
+
+    [BsonIgnore]
+    public List<RolUsuario> RolUsuario { get; set; }
 }

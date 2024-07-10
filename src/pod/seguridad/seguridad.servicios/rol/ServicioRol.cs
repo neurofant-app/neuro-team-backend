@@ -10,19 +10,17 @@ using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(Rol))]
+[ServicioEntidadAPI(entidad: typeof(Rol), driver: Constantes.MONGODB)]
 public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
     IServicioEntidadHijoAPI, IServicioRol
 {

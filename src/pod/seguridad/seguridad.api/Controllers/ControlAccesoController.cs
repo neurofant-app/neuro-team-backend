@@ -1,10 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection.PortableExecutable;
+﻿using Microsoft.AspNetCore.Mvc;
 using apigenerica.primitivas;
 using seguridad.modelo;
 using System.ComponentModel.DataAnnotations;
-using seguridad.servicios;
+using seguridad.modelo.servicios;
 
 namespace seguridad.api.Controllers;
 
@@ -15,15 +13,17 @@ public class ControlAccesoController : ControladorBaseGenerico
 
     private ILogger<ControlAccesoController> logger;
     private readonly IServicioInstanciaAplicacion servicioInstanciaAplicacion;
+    private readonly string? _driver;
 
     /// <summary>
     /// 
     /// </summary>
     /// <param name="logger"></param>
     /// <param name="contextAccessor"></param>
-    public ControlAccesoController(ILogger<ControlAccesoController> logger, IHttpContextAccessor httpContextAccessor, IServicioInstanciaAplicacion servicioInstanciaAplicacion): base(httpContextAccessor) {
+    public ControlAccesoController(ILogger<ControlAccesoController> logger, IHttpContextAccessor httpContextAccessor, IServicioInstanciaAplicacion servicioInstanciaAplicacion, IConfiguration configuration) : base(httpContextAccessor) {
         this.logger = logger;
         this.servicioInstanciaAplicacion = servicioInstanciaAplicacion;
+        this._driver = configuration.GetValue<string>("driver")!;
     }
 
     [HttpGet("interno/roles/{aplicacionId}/{usuarioId}")]
@@ -37,5 +37,4 @@ public class ControlAccesoController : ControladorBaseGenerico
     {
         return await servicioInstanciaAplicacion.GetPermisosAplicacionInterno(aplicacionId, usuarioId, dominioId, uOrgID);
     }
-
 }

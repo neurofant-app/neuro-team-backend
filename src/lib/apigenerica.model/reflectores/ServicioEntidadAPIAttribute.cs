@@ -7,13 +7,15 @@
 public class ServicioEntidadAPIAttribute: Attribute
 {
     private Type _entidad;
+    private string? _driver;
 
     /// <summary>
     /// Crea una instancia del atributo de entidades
     /// </summary>
     /// <param name="NombreEntidad">Tipo asociado a la entidad para el ruteo en el comtrolador</param>
-    public ServicioEntidadAPIAttribute(Type entidad) {
+    public ServicioEntidadAPIAttribute(Type entidad,string? driver=null) {
         _entidad = entidad;
+        _driver = driver;
     }
 
     /// <summary>
@@ -24,4 +26,12 @@ public class ServicioEntidadAPIAttribute: Attribute
         get { return _entidad; }
     }
 
+ 
+    /// <summary>
+    /// Nombre del contexto cpn el que trabaja
+    /// </summary>
+    public virtual string Driver
+    {
+        get { return _driver; }
+    }
 }

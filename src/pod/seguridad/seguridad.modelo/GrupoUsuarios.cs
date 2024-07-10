@@ -1,5 +1,8 @@
 ﻿using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.relaciones;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace seguridad.modelo;
 
@@ -44,4 +47,18 @@ public class GrupoUsuarios
     /// </summary>
     [BsonElement("d")]
     public string? Descripcion { get; set; }
+
+
+    [BsonIgnore]
+    [JsonIgnore]
+    public Aplicacion Aplicacion { get; set; }
+
+    [BsonIgnore]
+    public List<UsuarioGrupo> UsuariosId { get; set; }
+
+    [BsonIgnore]
+    public List<PermisoGrupo> PermisoGrupo { get; set; }
+
+    [BsonIgnore]
+    public List<RolGrupo> RolGrupo { get; set; }
 }

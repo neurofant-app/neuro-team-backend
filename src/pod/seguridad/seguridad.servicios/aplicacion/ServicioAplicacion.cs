@@ -11,12 +11,13 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
 using System.Text.Json;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(Aplicacion))]
+[ServicioEntidadAPI(entidad: typeof(Aplicacion), driver: Constantes.MONGODB)]
 public class ServicioAplicacion : ServicioEntidadGenericaBase<Aplicacion, Aplicacion, Aplicacion, Aplicacion, string>,
     IServicioEntidadAPI, IServicioAplicacion
 {

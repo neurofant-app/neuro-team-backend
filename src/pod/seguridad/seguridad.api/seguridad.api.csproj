@@ -25,12 +25,15 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
 		<PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+	    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\lib\apigenerica.primitivas\apigenerica.primitivas.csproj" />
+		<ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
 		<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
 		<ProjectReference Include="..\seguridad.modelo\seguridad.modelo.csproj" />
+		<ProjectReference Include="..\seguridad.servicios.mysql\seguridad.servicios.mysql.csproj" />
 		<ProjectReference Include="..\seguridad.servicios\seguridad.servicios.csproj" />
 	</ItemGroup>
 

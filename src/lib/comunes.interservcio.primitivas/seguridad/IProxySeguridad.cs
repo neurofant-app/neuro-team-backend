@@ -13,7 +13,7 @@ public interface IProxySeguridad
     /// <param name="appId"></param>
     /// <param name="usuarioId"></param>
     /// <returns></returns>
-    Task<Rol> RolesUsuario(string appId, string usuarioId);
+    Task<List<Rol>> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
 
 
     /// <summary>
@@ -22,6 +22,6 @@ public interface IProxySeguridad
     /// <param name="appId"></param>
     /// <param name="usuarioId"></param>
     /// <returns></returns>
-    Task<Permiso> PermisosUsuario(string appId, string usuarioId);
+    Task<List<Permiso>> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
 
 }

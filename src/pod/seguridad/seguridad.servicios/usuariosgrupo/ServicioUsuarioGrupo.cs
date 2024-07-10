@@ -10,21 +10,16 @@ using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Linq;
 using seguridad.modelo;
-using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
-using seguridad.servicios.usuariosgrupo;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo))]
+[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo), driver: Constantes.MONGODB)]
 public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>,
     IServicioEntidadHijoAPI, IServicioUsuarioGrupo
 {
@@ -186,6 +181,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
     {
         UsuarioGrupo rol = new UsuarioGrupo()
         {
+            Id=Guid.NewGuid().ToString(),
             UsuarioId = data.UsuarioId
         };
         return rol;
@@ -244,7 +240,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
             }
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
-            respuesta.Payload = respuesta.Payload = new UsuarioGrupo() { UsuarioId = actual };
+            respuesta.Payload = respuesta.Payload = new UsuarioGrupo() {Id = Guid.NewGuid().ToString(), UsuarioId = actual };
         }
         catch (Exception ex)
         {
@@ -274,7 +270,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
                 respuesta.HttpCode = HttpCode.Ok;
                 return respuesta;
             }
-            UsuarioGrupo usuario= new UsuarioGrupo() { UsuarioId = actual };
+            UsuarioGrupo usuario= new UsuarioGrupo() { Id = Guid.NewGuid().ToString(), UsuarioId = actual };
             var resultadoValidacion = await ValidarEliminacion(id, usuario);
             if (resultadoValidacion.Valido)
             {
@@ -305,7 +301,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         var Elementos =grupo!=null && grupo.UsuarioId.Any() ? grupo.UsuarioId.AsQueryable() : new List<string>().AsQueryable();
         var ElementosFinal = new List<UsuarioGrupo>();
         var pagina = Elementos.Paginado(consulta);
-        if (pagina.Elementos.Any()) pagina.Elementos.ForEach(i => { ElementosFinal.Add(new UsuarioGrupo() { UsuarioId = i }); });
+        if (pagina.Elementos.Any()) pagina.Elementos.ForEach(i => { ElementosFinal.Add(new UsuarioGrupo() { Id = Guid.NewGuid().ToString(), UsuarioId = i }); });
         return new PaginaGenerica<UsuarioGrupo>
         {
             ConsultaId = pagina.ConsultaId,

@@ -1,6 +1,7 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
+using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using controlescolar.api.seguridad;
@@ -38,10 +39,13 @@ public class Program
 
         // Configuracion de los servicoos de entidad genrica y seguriad
         builder.CreaConfiguiracionEntidadGenerica();
+        builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
         builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
-
-
+        builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
+        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
+        builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddHttpClient();
         var app = builder.Build();
         // Añadir la extensión para los servicios de API genérica
         app.UseEntidadAPI();

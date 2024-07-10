@@ -14,12 +14,13 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
+using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
 using System.Text.Json;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion))]
+[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion), driver: Constantes.MONGODB)]
 public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, string>,
     IServicioEntidadAPI, IServicioInstanciaAplicacion
 {
@@ -335,7 +336,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == aplicacionId && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
@@ -349,11 +350,11 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                         var rol = modulo.RolesPredefinidos.Where(_ => rolesId.Contains(_.RolId)).ToList();
                         roles.AddRange(rol);
                     }
-                    var expiraEn = configuration.GetValue<string>("CacheConfig:TiempoExpira");
+                    var expiraEn = configuration.GetValue<double>("CacheConfig:TiempoExpira");
                     _cache.SetString(usuarioId, JsonSerializer.Serialize(roles),
                         new DistributedCacheEntryOptions()
                         {
-                            SlidingExpiration = TimeSpan.FromSeconds(double.Parse(expiraEn))
+                            SlidingExpiration = TimeSpan.FromSeconds(expiraEn)
                         });
                 }
            
@@ -374,7 +375,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == aplicacionId && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
@@ -388,11 +389,11 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                         var rol = modulo.Permisos.Where(_ => permisosId.Contains(_.PermisoId)).ToList();
                         permisos.AddRange(rol);
                     }
-                    var expiraEn = configuration.GetValue<string>("CacheConfig:TiempoExpira");
+                    var expiraEn = configuration.GetValue<double>("CacheConfig:TiempoExpira");
                     _cache.SetString(usuarioId, JsonSerializer.Serialize(permisos),
                         new DistributedCacheEntryOptions()
                         {
-                            SlidingExpiration = TimeSpan.FromSeconds(double.Parse(expiraEn))
+                            SlidingExpiration = TimeSpan.FromSeconds(expiraEn)
                         });
                 }
             }

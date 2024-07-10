@@ -1,4 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using seguridad.modelo.instancias;
+using seguridad.modelo.relaciones;
+using System.Diagnostics.CodeAnalysis;
 
 namespace seguridad.modelo.roles;
 
@@ -19,4 +22,17 @@ public class ActualizaRol
     /// Descripción del rol para la UI, esto será calcolado en base al idioma o bien al crear roles personalizados
     /// </summary>
     public string? Descripcion { get; set; }
+
+    [BsonIgnore]
+    public string ModuloId { get; set; }
+
+
+    [BsonIgnore]
+    public string? InstanciaAplicacionId { get; set; }
+
+    [BsonIgnore]
+    public List<RolGrupo> RolGrupo { get; set; }
+
+    [BsonIgnore]
+    public List<RolUsuario> RolUsuario { get; set; }
 }

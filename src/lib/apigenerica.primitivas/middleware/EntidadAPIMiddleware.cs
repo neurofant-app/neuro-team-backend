@@ -3,8 +3,10 @@ using apigenerica.model.reflectores;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.modelos;
 using apigenerica.primitivas.seguridad;
+using comunes.primitivas.atributos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text;
@@ -28,15 +30,19 @@ public class EntidadAPIMiddleware
     private readonly ILogger<EntidadAPIMiddleware> _logger;
     private readonly IProveedorAplicaciones _proveedorAplicaciones;
     private readonly ICacheSeguridad _cacheSeguridad;
+    private readonly ICacheAtributos _cacheAtributos;
+    private readonly string? driver;
 
     public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger,
-        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad )
+        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad, ICacheAtributos cacheAtributos, IConfiguration configuration )
     {
         _next = next;
         _configuracionAPI = configuracionAPI;
         _logger = logger;
         _proveedorAplicaciones = proveedorAplicaciones;
         _cacheSeguridad = cacheSeguridad;
+        this._cacheAtributos = cacheAtributos;
+        this.driver = configuration.GetValue<string>("driver")!;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -127,7 +133,8 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
-                contexto = await AdicionaSesuridad(contexto);
+                contexto = await AdicionaSeguridad(contexto);
+                contexto = await AdicionaAtributosMetodo(contexto, tt);
 #if !DEBUG
                 if (service.RequiereAutenticacion)
                 {
@@ -168,7 +175,16 @@ public class EntidadAPIMiddleware
 
         string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
-        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        ServicioEntidadAPI? servicio = null;
+        if(string.IsNullOrEmpty(driver))
+        {
+             servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+        {
+            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
         if (servicio == null)
         {
@@ -207,7 +223,7 @@ public class EntidadAPIMiddleware
             }
             i++;
         }
-
+        
         try
         {
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
@@ -216,8 +232,8 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
-                contexto = await AdicionaSesuridad(contexto);
-
+                contexto = await AdicionaSeguridad(contexto);
+                contexto = await AdicionaAtributosMetodo(contexto,tt);
 #if !DEBUG
                 if (service.RequiereAutenticacion)
                 {
@@ -305,7 +321,8 @@ public class EntidadAPIMiddleware
             if (service != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
-                contexto = await AdicionaSesuridad(contexto);
+                contexto = await AdicionaSeguridad(contexto);
+                contexto = await AdicionaAtributosMetodo(contexto, tt);
 
 #if !DEBUG
                 if (service.RequiereAutenticacion)
@@ -354,16 +371,26 @@ public class EntidadAPIMiddleware
     /// </summary>
     /// <param name="contexto"></param>
     /// <returns></returns>
-    private static async Task<ContextoUsuario> AdicionaSesuridad(ContextoUsuario contexto ) {
+    private async Task<ContextoUsuario> AdicionaSeguridad(ContextoUsuario contexto) {
 
+        
+        var aplicacion = await _proveedorAplicaciones.ObtieneApliaciones();
+            var roles = await _cacheSeguridad.RolesUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
+            var permisos = await _cacheSeguridad.PermisosUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
+            contexto.RolesAplicacion = roles.Select(_ => _.RolId).ToList();
+            contexto.PermisosAplicacion = permisos.Select(_ => _.PermisoId).ToList();
+        return contexto;
+    }
 
-        // Obtener de IProveedorAplicaciones la primera app y  usitlizando contexto.UsuarioId , contexto.DominioId y contexto.UOrgId
-        // Llamad al ICacheSeguridad para obtener los roles y permisos 
-
-        // PAra cada rol adicionar su id a la lista del contexto
-
-        // PAra cada permiso adicionar su id a la lista del contexto
-
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="contexto"></param>
+    /// <returns></returns>
+    private async Task<ContextoUsuario> AdicionaAtributosMetodo(ContextoUsuario contexto, Type tipoServicio)
+    {
+      contexto.AtributosMetodos= await _cacheAtributos.AtributosServicio(tipoServicio);
+       
         return contexto;
     }
 

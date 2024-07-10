@@ -13,7 +13,7 @@ public interface ICacheSeguridad
     /// <param name="dominioId"></param>
     /// <param name="unidadOrgId"></param>
     /// <returns></returns>
-    Task<Rol> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
+    Task<List<Rol>> RolesUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
 
 
     /// <summary>
@@ -24,5 +24,6 @@ public interface ICacheSeguridad
     /// <param name="dominioId"></param>
     /// <param name="unidadOrgId"></param>
     /// <returns></returns>
-    Task<Permiso> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
+    Task<List<Permiso>> PermisosUsuario(string appId, string usuarioId, string dominioId, string unidadOrgId);
+
 }

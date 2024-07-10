@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace seguridad.modelo.roles;
 
@@ -14,4 +15,10 @@ public class CreaRol
     /// Descripción del rol para la UI, esto será calcolado en base al idioma o bien al crear roles personalizados
     /// </summary>
     public string? Descripcion { get; set; }
+
+    [BsonIgnore]
+    public string? InstanciaAplicacionId { get; set; }
+
+    [BsonIgnore]
+    public string? ModuloId { get; set; }
 }

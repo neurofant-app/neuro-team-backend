@@ -13,6 +13,8 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 
@@ -90,11 +92,26 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     {
         return this._contextoUsuario;
     }
+    private bool permisosValidos(string appId, [CallerMemberName] string metodoId = null)
+    {
+        var metodoActual = _contextoUsuario.AtributosMetodos.FirstOrDefault(_ => _.MetodoId == metodoId);
+
+        if (metodoActual == null) { return false;}
+        foreach (var id in metodoActual.atributosId)
+        {
+            if (!_contextoUsuario.RolesAplicacion.Contains(id) && !_contextoUsuario.PermisosAplicacion.Contains(id)) return false;
+        }
+        return true;
+    }
 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var add = data.Deserialize<CreaCampus>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
@@ -106,6 +123,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new Respuesta { HttpCode = HttpCode.FORBIDDEN };
+        }
         var update = data.Deserialize<ActualizaCampus>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
@@ -115,6 +136,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
     public async Task<Respuesta> EliminarAPI(object id)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new Respuesta { HttpCode = HttpCode.FORBIDDEN };
+        }
         return await this.Eliminar((string)id);
     }
 
@@ -123,6 +148,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -133,6 +162,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var temp = await this.UnicaPorIdDespliegue((string)id);
 
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
@@ -145,6 +178,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new RespuestaPayload<PaginaGenerica<object>> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
 
@@ -157,6 +194,10 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+                if (!permisosValidos(Constantes.AplicacionId))
+        {
+            return new RespuestaPayload<PaginaGenerica<object>> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;

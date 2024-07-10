@@ -19,4 +19,10 @@ public class ServicioEntidadAPI
     /// Nombre commpleto del ensamblado
     /// </summary>
     public string NombreEnsamblado { get; set; }
+
+
+    /// <summary>
+    /// Nombre del contexto con el que trabaja el servico
+    /// </summary>
+    public string? Driver { get; set; }
 }
