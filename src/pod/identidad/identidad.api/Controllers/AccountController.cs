@@ -38,7 +38,7 @@ public class AccountController : Controller
     public async Task<IActionResult> EstablecePasswordToken([FromBody] ActualizarContrasena actualizarContrasena)
     {
         IdentityResult result = new();
-        var dbtype = _configuration["dptype"];
+        var dbtype = _configuration["dbtype"];
         switch (dbtype)
         {
             case "mysql":
