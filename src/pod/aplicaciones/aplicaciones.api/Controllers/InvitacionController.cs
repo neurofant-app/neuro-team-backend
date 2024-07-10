@@ -17,11 +17,11 @@ namespace aplicaciones.api.Controllers;
 [ApiController]
 public class InvitacionController : ControladorJwt
 {
-    private readonly IServicioInvitacion _servicioInvitacion;
+    private readonly IServicioEntidadInvitacion _servicioInvitacion;
     private readonly IProxyIdentityServices _proxyIdentityServices;
     private readonly ILogger<InvitacionController> _logger;
 
-    public InvitacionController(ILogger<InvitacionController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices):base(logger) {
+    public InvitacionController(ILogger<InvitacionController> logger, IServicioEntidadInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices):base(logger) {
         _servicioInvitacion = ServicioInvitacion;
         _proxyIdentityServices = proxyIdentityServices;        
         _logger = logger;

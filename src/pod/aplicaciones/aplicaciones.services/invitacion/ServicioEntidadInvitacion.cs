@@ -25,7 +25,7 @@ using System.Data.Common;
 namespace aplicaciones.services.invitacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadInvitacion))]
 public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvitacion, CreaInvitacion, ActualizaInvitacion, ConsultaInvitacion, string>,
-    IServicioEntidadAPI, IServicioInvitacion
+    IServicioEntidadAPI, IServicioEntidadInvitacion
 {
     private readonly ILogger _logger;
 
@@ -147,7 +147,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    #region Overrides para la personalización de la entidad LogoAplicacion
+    #region Overrides para la personalización de la entidad Invitacion
     public override async Task<ResultadoValidacion> ValidarInsertar(CreaInvitacion data)
     {
         ResultadoValidacion resultado = new();

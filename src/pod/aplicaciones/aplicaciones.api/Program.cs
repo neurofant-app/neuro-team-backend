@@ -36,7 +36,7 @@ public class Program
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
         builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
-        builder.Services.AddTransient<IServicioInvitacion, ServicioEntidadInvitacion>();
+        builder.Services.AddTransient<IServicioEntidadInvitacion, ServicioEntidadInvitacion>();
         builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
 
 

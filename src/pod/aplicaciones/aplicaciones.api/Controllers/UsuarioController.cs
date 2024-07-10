@@ -20,21 +20,17 @@ namespace aplicaciones.api.Controllers;
 [Authorize]
 public class UsuarioController : ControladorJwt
 {
-    private MongoDbContextAplicaciones _localContext;
-    private readonly IServicioInvitacion _servicioInvitacion;
     private readonly IProxyIdentityServices _proxyIdentityServices;
+    private readonly IServicioEntidadInvitacion _servicioEntidadInvitacion;
     private readonly ILogger<UsuarioController> _logger;
-    public UsuarioController(MongoDbContextAplicaciones
-        context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
+    public UsuarioController(ILogger<UsuarioController> logger, IProxyIdentityServices proxyIdentityServices, IServicioEntidadInvitacion servicioEntidadInvitacion) : base(logger)
     {
-        _localContext = context;
-        _servicioInvitacion = ServicioInvitacion;
         _proxyIdentityServices = proxyIdentityServices;
+        this._servicioEntidadInvitacion = servicioEntidadInvitacion;
         _logger = logger;
     }
 
     [HttpPost("password/recuperar")]
-    [AllowAnonymous]
     [SwaggerOperation("Inicia el proceso de recupración de la contraseña de un usuario")]
     [SwaggerResponse(statusCode: 200, type: typeof(DTORecuperacionPassword), description: "Se envió una invitación al usuario vía email")]
     [SwaggerResponse(statusCode: 404, description: "Usuario inexistente")]
@@ -52,14 +48,14 @@ public class UsuarioController : ControladorJwt
                 DTORecuperacionPassword dto = (DTORecuperacionPassword)respuestaUsuario.Payload;
                 CreaInvitacion invInsertar = new CreaInvitacion()
                 {
-                    AplicacionId = new Guid("00000000-0000-0000-0000-000000000000"),
+                    AplicacionId = new Guid("4b703240-0c2d-411d-b301-4702f8289c84"),
                     Email = dto.Email,
                     RolId = 0,
                     Nombre = dto.UserName,
                     Tipo = TipoComunicacion.RecuperacionContrasena,
                     Token = dto.TokenRecuperacion
                 };
-                var inv = await _servicioInvitacion.Insertar(invInsertar);
+                var inv = await this._servicioEntidadInvitacion.Insertar(invInsertar);
                 if(inv.Ok)
                 {
                     return Ok(inv.Payload);
@@ -80,7 +76,6 @@ public class UsuarioController : ControladorJwt
     }
 
     [HttpPost("password/restablecer/token")]
-    [AllowAnonymous]
     [SwaggerOperation("Realiza el cambio de contraseña utilizando un token")]
     [SwaggerResponse(statusCode: 200, type: typeof(Respuesta), description: "La contraeña ha sido restablecida satisfactoriamente")]
     [SwaggerResponse(statusCode: 404, description: "Invitacion inexistente")]
@@ -88,14 +83,15 @@ public class UsuarioController : ControladorJwt
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
         // Verificar que la invitacion exista con los datos del DTO, si no existe devolver NotFound()
-        EntidadInvitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
-        if(invitacion != null)
+        RespuestaPayload<EntidadInvitacion> respuesta = await this._servicioEntidadInvitacion.UnicaPorId(dtoReset.InvitacionId.ToString());
+        if(respuesta != null)
         {
+            var invitacion = (EntidadInvitacion)respuesta.Payload;
             ActualizarContrasena actualizarContrasena = new ActualizarContrasena() { Email = invitacion.Email, Password = dtoReset.NuevoPassword, Token = invitacion.Token };
             var response = await _proxyIdentityServices.EstablecePasswordToken(actualizarContrasena);
             if (response.Ok)
             {
-                var r = await _servicioInvitacion.Eliminar(invitacion.Id.ToString());
+                var r = await this._servicioEntidadInvitacion.Eliminar(invitacion.Id.ToString());
                 if (!r.Ok)
                 {
                     _logger.LogWarning($"La invitacion {invitacion.Id} no pudo ser eliminada ");
