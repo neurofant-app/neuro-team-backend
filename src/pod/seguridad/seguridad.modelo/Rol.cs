@@ -43,11 +43,9 @@ public class Rol
 
 
     [BsonIgnore]
-    [JsonIgnore]
     public List<Permiso> RolPermisos { get; set; }
 
     [BsonIgnore]
-    //[NotMapped]
     public string ModuloId { get; set; }
 
     [BsonIgnore]
@@ -55,19 +53,15 @@ public class Rol
     public Modulo Modulo { get; set; }
 
     [BsonIgnore]
-    //[NotMapped]
     public string? InstanciaAplicacionId { get; set; }
 
     [BsonIgnore]
     [JsonIgnore]
     public InstanciaAplicacion InstanciaAplicacion { get; set; }
 
-
     [BsonIgnore]
-    [JsonIgnore]
     public List<RolGrupo> RolGrupo { get; set; }
 
     [BsonIgnore]
-    [JsonIgnore]
     public List<RolUsuario> RolUsuario { get; set; }
 }

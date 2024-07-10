@@ -18,5 +18,6 @@ public class ConfiguracionRol : IEntityTypeConfiguration<Rol>
         builder.HasMany(x => x.RolPermisos).WithOne(y => y.Rol).HasForeignKey(z => z.RolId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.RolGrupo).WithOne(y => y.Rol).HasForeignKey(z => z.RolId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.RolUsuario).WithOne(y => y.Rol).HasForeignKey(z => z.RolId).OnDelete(DeleteBehavior.Cascade);
+        builder.Ignore(x => x.Permisos);
     }
 }

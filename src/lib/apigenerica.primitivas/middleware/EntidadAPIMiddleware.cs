@@ -6,6 +6,7 @@ using apigenerica.primitivas.seguridad;
 using comunes.primitivas.atributos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.Text;
@@ -30,9 +31,10 @@ public class EntidadAPIMiddleware
     private readonly IProveedorAplicaciones _proveedorAplicaciones;
     private readonly ICacheSeguridad _cacheSeguridad;
     private readonly ICacheAtributos _cacheAtributos;
+    private readonly string? driver;
 
     public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger,
-        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad, ICacheAtributos cacheAtributos )
+        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad, ICacheAtributos cacheAtributos, IConfiguration configuration )
     {
         _next = next;
         _configuracionAPI = configuracionAPI;
@@ -40,6 +42,7 @@ public class EntidadAPIMiddleware
         _proveedorAplicaciones = proveedorAplicaciones;
         _cacheSeguridad = cacheSeguridad;
         this._cacheAtributos = cacheAtributos;
+        this.driver = configuration.GetValue<string>("driver")!;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -172,7 +175,16 @@ public class EntidadAPIMiddleware
 
         string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
-        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        ServicioEntidadAPI? servicio = null;
+        if(string.IsNullOrEmpty(driver))
+        {
+             servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+        {
+            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
         if (servicio == null)
         {

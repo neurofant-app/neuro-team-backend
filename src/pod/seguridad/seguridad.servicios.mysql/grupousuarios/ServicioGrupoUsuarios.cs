@@ -11,12 +11,14 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using seguridad.modelo;
+using seguridad.modelo.relaciones;
 using seguridad.modelo.servicios;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(GrupoUsuarios))]
+[ServicioEntidadAPI(entidad: typeof(GrupoUsuarios), driver: "mysql")]
 public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, string>,
     IServicioEntidadAPI, IServicioGrupoUsuarios
 {
@@ -138,7 +140,9 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
         actual.ApplicacionId = actualizacion.ApplicacionId;
         actual.Nombre = actualizacion.Nombre;
         actual.Descripcion = actualizacion.Descripcion;
-        actual.UsuarioId = actualizacion.UsuarioId;
+        actual.PermisoGrupo = actualizacion.PermisoGrupo;
+        actual.RolGrupo = actualizacion.RolGrupo;
+        actual.UsuariosId = actualizacion.UsuariosId;
         return actual;
     }
 
@@ -151,8 +155,10 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
             ApplicacionId = data.ApplicacionId,
             Nombre = data.Nombre,
             Descripcion = data.Descripcion,
-            UsuarioId = data.UsuarioId
-    };
+            PermisoGrupo = data.PermisoGrupo,
+            RolGrupo = data.RolGrupo,
+            UsuariosId = data.UsuariosId
+        };
         return grupoUsuarios;
     }
     public override GrupoUsuarios ADTODespliegue(GrupoUsuarios data)
@@ -164,7 +170,9 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
             ApplicacionId = data.ApplicacionId,
             Nombre = data.Nombre,
             Descripcion = data.Descripcion,
-            UsuarioId = data.UsuarioId
+            PermisoGrupo = data.PermisoGrupo,
+            RolGrupo = data.RolGrupo,
+            UsuariosId = data.UsuariosId
         };
     }
 

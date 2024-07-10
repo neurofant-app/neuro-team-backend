@@ -26,5 +26,6 @@ public class UsuarioGrupo
     public Guid GrupoId { get; set; }
 
     [BsonIgnore]
+    [JsonIgnore]
     public GrupoUsuarios GrupoUsuarios { get; set; }
 }

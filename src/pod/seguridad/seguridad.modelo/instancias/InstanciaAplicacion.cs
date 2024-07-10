@@ -50,25 +50,22 @@ public class InstanciaAplicacion
     public virtual List<MiembrosPermiso> MiembrosPermiso { get; set; } = [];
 
     #region MySQL
-    // Propeidades relaionales utilziadas por MySQL
+    // Propeidades relacionales utilizadas por MySQL
 
     [JsonIgnore]
     [BsonIgnore]
     public Aplicacion? Aplicacion { get; set; }
 
-    [JsonIgnore]
+
     [BsonIgnore]
     public List<RolGrupo>? RolGrupo { get; set; }
 
-    [JsonIgnore]
     [BsonIgnore]
     public List<RolUsuario>? RolUsuarios { get; set; }
 
-    [JsonIgnore]
     [BsonIgnore]
     public List<PermisoGrupo>? PermisoGrupo { get; set; }
-
-    [JsonIgnore]
+ 
     [BsonIgnore]
     public List<PermisoUsuario>? PermisoUsuarios { get; set; }
     

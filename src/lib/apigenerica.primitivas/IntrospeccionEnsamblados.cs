@@ -167,7 +167,8 @@ public static class IntrospeccionEnsamblados
                         {
                             NombreEnsamblado = t.FullName,
                             NombreRuteo = ((ServicioEntidadAPIAttribute)atributoAPI).Entidad.Name,
-                            Ruta = ensamblado
+                            Ruta = ensamblado,
+                            Driver= ((ServicioEntidadAPIAttribute)atributoAPI).Driver,
                         };
                         l.Add(s);
                     }

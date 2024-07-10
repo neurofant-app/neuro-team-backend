@@ -19,8 +19,6 @@ public class ConfiguracionInstanciaAplicacion : IEntityTypeConfiguration<Instanc
         builder.HasMany(x => x.PermisoGrupo).WithOne(y => y.InstanciaAplicacion).HasForeignKey(z => z.Id).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.RolUsuarios).WithOne(y => y.InstanciaAplicacion).HasForeignKey(z => z.Id).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.PermisoUsuarios).WithOne(y => y.InstanciaAplicacion).HasForeignKey(z => z.Id).OnDelete(DeleteBehavior.Cascade);
-
-        builder.Ignore(x => x.RolesPersonalizados);
         builder.Ignore(x => x.MiembrosRol);
         builder.Ignore(x => x.MiembrosPermiso);
     }

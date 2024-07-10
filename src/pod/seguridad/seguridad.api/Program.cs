@@ -64,21 +64,26 @@ namespace seguridad.api
 
                 default:
                     throw new Exception($"Driver no válido {driver}");
-            }
-
-            
+            }            
             builder.Services.AddTransient<IProveedorAplicaciones, ConfiguracionSeguridad>();
-
             builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
             builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
-
             builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
             builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
             builder.Services.AddHttpClient();
             builder.CreaConfiguiracionEntidadGenerica();
 
             var app = builder.Build();
-            app.DBContextMySqlUpdateDatabase();
+            switch (driver.ToLower())
+            {
+
+                case "mysql":
+                    app.DBContextMySqlUpdateDatabase();
+                    break;
+
+                default:
+                    break;
+            }
             // A�adir la extensi�n para los servicios de API gen�rica
             app.UseEntidadAPI();
             // Configure the HTTP request pipeline.

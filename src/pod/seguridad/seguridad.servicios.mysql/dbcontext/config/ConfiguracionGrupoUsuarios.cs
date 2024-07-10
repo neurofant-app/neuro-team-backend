@@ -18,6 +18,7 @@ public class ConfiguracionGrupoUsuarios: IEntityTypeConfiguration<GrupoUsuarios>
         builder.HasMany(x => x.UsuariosId).WithOne(y => y.GrupoUsuarios).HasForeignKey(z => z.GrupoId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.RolGrupo).WithOne(y => y.Grupo).HasForeignKey(z => z.GrupoId).OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.PermisoGrupo).WithOne(y => y.Grupo).HasForeignKey(z => z.GrupoId).OnDelete(DeleteBehavior.Cascade);
+        builder.Ignore(x => x.UsuarioId);
 
     }
 }

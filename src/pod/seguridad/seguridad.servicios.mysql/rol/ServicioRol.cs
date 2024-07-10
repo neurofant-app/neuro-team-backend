@@ -17,7 +17,7 @@ using seguridad.modelo.servicios;
 using System.Text.Json;
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(Rol))]
+[ServicioEntidadAPI(entidad: typeof(Rol), driver: "mysql")]
 public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
     IServicioEntidadHijoAPI, IServicioRol
 {
@@ -149,6 +149,10 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     {
             actual.Nombre = actualizacion.Nombre;
             actual.Descripcion = actualizacion.Descripcion;
+            actual.InstanciaAplicacionId = actualizacion.InstanciaAplicacionId;
+            actual.ModuloId = actualizacion.ModuloId;
+            actual.RolGrupo = actualizacion.RolGrupo;
+            actual.RolUsuario = actualizacion.RolUsuario;
         
         return actual;
     }
@@ -160,8 +164,9 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
                 RolId = Guid.NewGuid().ToString(),
                 Nombre = data.Nombre,
                 Descripcion = data.Descripcion,
-                Permisos = new List<string>(),
-                Personalizado = false
+                Personalizado = false,
+                InstanciaAplicacionId=data.InstanciaAplicacionId,
+                ModuloId=data.ModuloId                   
             };          
         return rol;
     }
@@ -173,7 +178,9 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
              Nombre = data.Nombre,
              Descripcion = data.Descripcion,
              Permisos=data.Permisos,
-             Personalizado=data.Personalizado
+             Personalizado=data.Personalizado,
+             InstanciaAplicacionId = data.InstanciaAplicacionId,
+             ModuloId = data.ModuloId
         };
     }
     public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)

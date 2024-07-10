@@ -18,7 +18,7 @@ using System.Text.Json;
 
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo))]
+[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo), driver: "mysql")]
 public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>,
     IServicioEntidadHijoAPI, IServicioUsuarioGrupo
 {

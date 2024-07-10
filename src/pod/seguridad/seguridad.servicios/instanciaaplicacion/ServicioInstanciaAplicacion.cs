@@ -20,7 +20,7 @@ using System.Text.Json;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion))]
+[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion), driver: "mongo")]
 public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, string>,
     IServicioEntidadAPI, IServicioInstanciaAplicacion
 {

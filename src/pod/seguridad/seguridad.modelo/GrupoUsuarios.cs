@@ -57,10 +57,8 @@ public class GrupoUsuarios
     public List<UsuarioGrupo> UsuariosId { get; set; }
 
     [BsonIgnore]
-    [JsonIgnore]
     public List<PermisoGrupo> PermisoGrupo { get; set; }
 
     [BsonIgnore]
-    [JsonIgnore]
     public List<RolGrupo> RolGrupo { get; set; }
 }

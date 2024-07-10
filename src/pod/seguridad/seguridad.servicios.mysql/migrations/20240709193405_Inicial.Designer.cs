@@ -12,8 +12,8 @@ using seguridad.servicios.mysql;
 namespace seguridad.servicios.mysql.migrations
 {
     [DbContext(typeof(DBContextMySql))]
-    [Migration("20240705221902_Inicial2")]
-    partial class Inicial2
+    [Migration("20240709193405_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

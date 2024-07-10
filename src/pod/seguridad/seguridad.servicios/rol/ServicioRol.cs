@@ -20,7 +20,7 @@ using System.Text.Json;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(Rol))]
+[ServicioEntidadAPI(entidad: typeof(Rol), driver: "mongo")]
 public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
     IServicioEntidadHijoAPI, IServicioRol
 {
