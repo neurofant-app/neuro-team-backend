@@ -26,17 +26,12 @@ public class EntidadAPIMiddleware
     private readonly RequestDelegate _next;
     private readonly IConfiguracionAPIEntidades _configuracionAPI;
     private readonly ILogger<EntidadAPIMiddleware> _logger;
-    private readonly IProveedorAplicaciones _proveedorAplicaciones;
-    private readonly ICacheSeguridad _cacheSeguridad;
 
-    public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger,
-        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad )
+    public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger )
     {
         _next = next;
         _configuracionAPI = configuracionAPI;
         _logger = logger;
-        _proveedorAplicaciones = proveedorAplicaciones;
-        _cacheSeguridad = cacheSeguridad;
     }
 
     public async Task InvokeAsync(HttpContext context)
