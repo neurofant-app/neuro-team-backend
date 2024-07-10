@@ -18,7 +18,7 @@ using System.Text.Json;
 
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion),driver:"mysql")]
+[ServicioEntidadAPI(entidad: typeof(InstanciaAplicacion),driver: Constantes.MYSQL)]
 public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, InstanciaAplicacion, string>,
     IServicioEntidadAPI, IServicioInstanciaAplicacion
 {

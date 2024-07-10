@@ -19,7 +19,7 @@ using System.Text.Json;
 
 
 namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo), driver: "mongo")]
+[ServicioEntidadAPI(entidad: typeof(UsuarioGrupo), driver: Constantes.MONGODB)]
 public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>,
     IServicioEntidadHijoAPI, IServicioUsuarioGrupo
 {

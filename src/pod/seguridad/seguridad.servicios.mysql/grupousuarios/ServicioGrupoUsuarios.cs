@@ -18,7 +18,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(GrupoUsuarios), driver: "mysql")]
+[ServicioEntidadAPI(entidad: typeof(GrupoUsuarios), driver: Constantes.MYSQL)]
 public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, GrupoUsuarios, string>,
     IServicioEntidadAPI, IServicioGrupoUsuarios
 {

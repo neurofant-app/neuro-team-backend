@@ -17,7 +17,7 @@ using seguridad.modelo.servicios;
 using System.Text.Json;
 
 namespace seguridad.servicios.mysql;
-[ServicioEntidadAPI(entidad: typeof(Rol), driver: "mysql")]
+[ServicioEntidadAPI(entidad: typeof(Rol), driver: Constantes.MYSQL)]
 public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
     IServicioEntidadHijoAPI, IServicioRol
 {
