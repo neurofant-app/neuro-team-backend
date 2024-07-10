@@ -344,7 +344,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 var tipoPlantillaContenido = TipoCOntenidoPlantilla(data.Tipo);
                 var logoTipos = await DB.LogoAplicaciones.ToListAsync();
                 var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
-                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId).FirstOrDefaultAsync();
+                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == TipoContenido.RecuperacionPassword).FirstOrDefaultAsync();
                 //EntidadLogoAplicacion logoAplicacion = await DB.LogoAplicaciones|
                 //            .Where(x => x.AplicacionId == data.AplicacionId)
                 //            .FirstOrDefaultAsync();

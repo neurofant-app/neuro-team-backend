@@ -123,17 +123,13 @@ public class Program
                     .AddDefaultTokenProviders();
                 break;
             case "mongo":
-
-
-
-
                 var connectionString = builder.Configuration.GetConnectionString("identityMongo");
 
                 builder.Services.AddIdentity<ApplicationUserMongo, MongoIdentityRole>()
                     .AddMongoDbStores<ApplicationUserMongo, MongoIdentityRole, Guid>
                     (
                         connectionString, "identityMongo"
-                    );
+                    ).AddDefaultTokenProviders();
                 break;
             case "default":
                 break;
