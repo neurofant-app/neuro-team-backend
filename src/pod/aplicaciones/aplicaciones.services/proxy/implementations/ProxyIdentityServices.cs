@@ -181,7 +181,6 @@ public class ProxyIdentityServices : IProxyIdentityServices
                         identityHttpClient.BaseAddress = new Uri(host.UrlBase.TrimEnd('/'));
                         logger.LogDebug($"ProxyIdentityServices - LLamado remoto a {Path.Combine(identityHttpClient.BaseAddress.ToString(), "/account/password/recuperar")}");
 
-                        var payload = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
                         identityHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.access_token);
                         var response = await identityHttpClient.GetAsync($"/account/password/recuperar?email=" + email);
 
