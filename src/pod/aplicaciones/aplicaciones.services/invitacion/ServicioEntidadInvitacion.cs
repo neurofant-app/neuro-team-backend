@@ -325,6 +325,8 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             Estado = data.Estado,
             Email = data.Email,
             RolId = data.RolId,
+            Tipo = data.Tipo,
+            Token = data.Token,
 
         };
         return invitacionDesplegar;
@@ -345,9 +347,6 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 var logoTipos = await DB.LogoAplicaciones.ToListAsync();
                 var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
                 EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == TipoContenido.RecuperacionPassword).FirstOrDefaultAsync();
-                //EntidadLogoAplicacion logoAplicacion = await DB.LogoAplicaciones|
-                //            .Where(x => x.AplicacionId == data.AplicacionId)
-                //            .FirstOrDefaultAsync();
                 
                 byte[] bytes = Convert.FromBase64String(plantillaInvitacion.Plantilla);
                 string html = Encoding.UTF8.GetString(bytes);
@@ -375,20 +374,14 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 };
 
                 var respuestaCorreo = await _proxyComunicacionesServices.EnviarCorreo(m);
-                if (respuestaCorreo.Ok)
-                {
+
                     _dbSetFull.Add(entidad);
                     await _db.SaveChangesAsync();
 
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                     respuesta.Payload = ADTODespliegue(entidad);
-            }
-            else
-            {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-            }
+
         }
             else
             {

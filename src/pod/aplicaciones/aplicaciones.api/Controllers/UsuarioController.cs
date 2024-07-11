@@ -49,7 +49,7 @@ public class UsuarioController : ControladorJwt
                 DTORecuperacionPassword dto = (DTORecuperacionPassword)respuestaUsuario.Payload;
                 CreaInvitacion invInsertar = new CreaInvitacion()
                 {
-                    AplicacionId = new Guid("73a936a4-25a7-40a5-896a-4abccdfa08bf"),
+                    AplicacionId = new Guid("3a1b8fd8-3818-4f64-95a9-492c7db3435d"),
                     Email = dto.Email,
                     RolId = 0,
                     Nombre = dto.UserName,
@@ -72,8 +72,7 @@ public class UsuarioController : ControladorJwt
             //    enviar una invitación de recuperación utilizando el mismo template  de interforos y el PROXY de comunicaciones
             //    devolver OK
         }
-
-        return Ok();
+        return BadRequest();
     }
 
     [HttpPost("password/restablecer/token")]
