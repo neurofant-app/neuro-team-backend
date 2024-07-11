@@ -38,11 +38,8 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RecuperarContrasena([FromQuery] string email)
     {
-        // Verifica que el correo venga en un formato válido si no es asi devolver 400
         if (ValidaEmail(email))
         {
-            // Utilizando el proxy de identidad realizar una llamada a RecuperaPasswordEmail y si devuelve cualquier codigo 
-            //    diferente a 200 revolver 404
             var respuestaUsuario = await _proxyIdentityServices.RecuperaPasswordEmail(email);
             if (respuestaUsuario.Ok)
             {
@@ -66,11 +63,6 @@ public class UsuarioController : ControladorJwt
             {
                 return NotFound();
             }
-
-            // En caso de existir
-            //    añadir un nuevo resgtrso de invitación con Tipo = RecuperacionContrasena y añadiendo el Token recibido
-            //    enviar una invitación de recuperación utilizando el mismo template  de interforos y el PROXY de comunicaciones
-            //    devolver OK
         }
         return BadRequest();
     }
@@ -83,7 +75,6 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
-        // Verificar que la invitacion exista con los datos del DTO, si no existe devolver NotFound()
         RespuestaPayload<EntidadInvitacion> respuesta = await _servicioInvitacion.UnicaPorId(dtoReset.InvitacionId.ToString());
         if (respuesta != null)
         {
@@ -109,10 +100,6 @@ public class UsuarioController : ControladorJwt
         {
             return NotFound();
         }
-        // Si llamar al proxy de identidad para el método EstablecePasswordTokem con el valor del email 
-        //          y token de la invitación y el nuevo password del DTO
-        // Si el codigo de retorno es diferente de 200 devolver el error con statuscode
-        // devolver OK si la contraseña ha sido restablecida
     }
 
 }

@@ -112,8 +112,8 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return true;
     }
 
-    [Rol("00000000-0000-0000-0000-000000000001", "APP_MANAGER_ROL_ADMIN")]
-    [Permiso("00000000-0000-0000-0000-000000000001", "APP_MANAGER_PERM_ADMIN")]
+    [Rol("00000000-0000-0000-0000-000000000001", "app-manager-rol-admin")]
+    [Permiso("00000000-0000-0000-0000-000000000001", "app-manager-perm-admin")]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
         if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
@@ -395,14 +395,22 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
 
                 var respuestaCorreo = await _proxyComunicacionesServices.EnviarCorreo(m);
 
+                if (respuestaCorreo.Ok)
+                {
                     _dbSetFull.Add(entidad);
                     await _db.SaveChangesAsync();
 
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                     respuesta.Payload = ADTODespliegue(entidad);
+                }
+                else
+                {
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                }
 
-        }
+            }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;

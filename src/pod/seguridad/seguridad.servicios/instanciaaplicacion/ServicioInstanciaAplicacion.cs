@@ -347,7 +347,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
                 {
                     foreach (var modulo in aplicacion.Modulos)
                     {
-                        var rol = modulo.RolesPredefinidos.Where(_ => rolesId.Contains(_.RolId)).ToList();
+                        var rol = modulo.RolesPredefinidos.Where(_ =>  rolesId.Contains(_.RolId)).ToList();
                         roles.AddRange(rol);
                     }
                     var expiraEn = configuration.GetValue<double>("CacheConfig:TiempoExpira");
