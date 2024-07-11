@@ -1,17 +1,18 @@
-﻿using comunes.primitivas.seguridad;
+﻿using apigenerica.primitivas.aplicacion;
+using comunes.primitivas.seguridad;
 
 namespace aplicaciones.api.seguridad;
 
-public static class ConfiguracionSeguridad
+public class ConfiguracionSeguridad : IProveedorAplicaciones
 {
 
     public const string APP_MANAGER_PERM_LIST= "app-manager-perm-list";
     public const string APP_MANAGER_PERM_ADMIN = "app-manager-perm-admin";
     public const string APP_MANAGER_ROL_ADMIN = "app-manager-rol-admin";
 
-    
 
-    public static List<Aplicacion> ObtieneAplicaciones()
+
+    public Task<List<Aplicacion>> ObtieneApliaciones()
     {
         List<Aplicacion> apps = [];
 
@@ -66,6 +67,7 @@ public static class ConfiguracionSeguridad
                Descripcion = "Descripcion de la Aplicacion 2  Actualizado",
                Modulos = new List<Modulo>()
            });
-        return apps;
+
+        return Task.FromResult(apps);
     }
 }

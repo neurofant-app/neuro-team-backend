@@ -20,6 +20,8 @@ using Microsoft.Extensions.Configuration;
 using aplicaciones.services.extensiones;
 using aplicaciones.services.proxy.abstractions;
 using System.Data.Common;
+using comunes.primitivas.atributos;
+using System.Runtime.CompilerServices;
 
 
 namespace aplicaciones.services.invitacion;
@@ -98,8 +100,26 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return this._contextoUsuario;
     }
 
+    private bool permisosValidos(string appId, [CallerMemberName] string metodoId = null)
+    {
+        var metodoActual = _contextoUsuario.AtributosMetodos.FirstOrDefault(_ => _.MetodoId == metodoId);
+
+        if (metodoActual == null) { return false; }
+        foreach (var id in metodoActual.atributosId)
+        {
+            if (!_contextoUsuario.RolesAplicacion.Contains(id) && !_contextoUsuario.PermisosAplicacion.Contains(id)) return false;
+        }
+        return true;
+    }
+
+    [Rol("00000000-0000-0000-0000-000000000001", "APP_MANAGER_ROL_ADMIN")]
+    [Permiso("00000000-0000-0000-0000-000000000001", "APP_MANAGER_PERM_ADMIN")]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
+        {
+            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var add = data.Deserialize<CreaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
@@ -346,7 +366,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 var tipoPlantillaContenido = TipoCOntenidoPlantilla(data.Tipo);
                 var logoTipos = await DB.LogoAplicaciones.ToListAsync();
                 var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
-                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == TipoContenido.RecuperacionPassword).FirstOrDefaultAsync();
+                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == tipoPlantillaContenido).FirstOrDefaultAsync();
                 
                 byte[] bytes = Convert.FromBase64String(plantillaInvitacion.Plantilla);
                 string html = Encoding.UTF8.GetString(bytes);
