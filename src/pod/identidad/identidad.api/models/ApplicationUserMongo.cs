@@ -1,24 +1,21 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AspNetCore.Identity.MongoDbCore.Models;
 
-namespace contabee.identity.api.models;
-
-public enum EstadoCuenta { 
+namespace identidad.api.models;
+public enum EstadoCuenta
+{
     PendienteConfirmacion = 0,
     Activo = 1,
     BajaCliente = 2,
     InactivoPago = 3,
 }
 
-
-// Add profile data for application users by adding properties to the ApplicationUser class
-public class ApplicationUser : IdentityUser
+public class ApplicationUserMongo : MongoIdentityUser
 {
-
     /// <summary>
     /// Estado de la cuenta
     /// </summary>
     public EstadoCuenta Estado { get; set; } = EstadoCuenta.PendienteConfirmacion;
-    
+
     /// <summary>
     /// Fecha en que el usuario realizó la solicitud de inscripción
     /// </summary>

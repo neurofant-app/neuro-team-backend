@@ -1,5 +1,7 @@
 ﻿using contabee.identity.api.models;
 using contabee.identity.api.viewmodels;
+using identidad.api;
+using identidad.api.models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,17 +17,17 @@ namespace contabee.identity.api.Controllers;
 public class AccountController : Controller
 {
     private readonly ILogger<AccountController> logger;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly IConfiguration _configuration;
     private static bool _databaseChecked;
+    private readonly IDependencyResolver _dependencyResolver;
 
     public AccountController(ILogger<AccountController> logger,
-        UserManager<ApplicationUser> userManager,
-        ApplicationDbContext applicationDbContext)
+        IDependencyResolver dependencyResolver,
+        IConfiguration configuration)
     {
         this.logger = logger;
-        _userManager = userManager;
-        _applicationDbContext = applicationDbContext;
+        _dependencyResolver = dependencyResolver;
+        _configuration = configuration;
     }
 
 
@@ -35,15 +37,35 @@ public class AccountController : Controller
     [HttpPost("password/token")]
     public async Task<IActionResult> EstablecePasswordToken([FromBody] ActualizarContrasena actualizarContrasena)
     {
-        var user = await _userManager.FindByNameAsync(actualizarContrasena.Email);
-        if (user == null)
+        IdentityResult result = new();
+        var dbtype = _configuration["dbtype"];
+        switch (dbtype)
         {
-            logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
-            return NotFound();
-        }
+            case "mysql":
+                var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                var user = await _userManager.FindByNameAsync(actualizarContrasena.Email);
+                if (user == null)
+                {
+                    logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
+                    return NotFound();
+                }
 
-        var result = await _userManager.ResetPasswordAsync(user, actualizarContrasena.Token, actualizarContrasena.Password);
-        if(result.Succeeded)
+                result = await _userManager.ResetPasswordAsync(user, actualizarContrasena.Token, actualizarContrasena.Password);
+                break;
+            case "mongo":
+                var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                var userMongo = await _userManagerMongo.FindByNameAsync(actualizarContrasena.Email);
+                if (userMongo == null)
+                {
+                    logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
+                    return NotFound();
+                }
+
+                result = await _userManagerMongo.ResetPasswordAsync(userMongo, actualizarContrasena.Token, actualizarContrasena.Password);
+                break;
+        }
+        
+        if (result.Succeeded)
         {
             return Ok();
         }
@@ -58,21 +80,50 @@ public class AccountController : Controller
     [HttpGet("password/recuperar")]
     public async Task<ActionResult<DTORecuperacionPassword>> RecuperaPasswordEmail([FromQuery] string email)
     {
-        var user = await _userManager.FindByNameAsync(email);
-        if (user == null)
+        DTORecuperacionPassword cuenta = new();
+        var dbtype = _configuration["dbtype"];
+        switch (dbtype)
         {
-            logger.LogDebug($"Cuenta inexistente {email}");
-            return NotFound();
+            case "mysql":
+                var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                var user = await _userManager.FindByNameAsync(email);
+                if (user == null)
+                {
+                    logger.LogDebug($"Cuenta inexistente {email}");
+                    return NotFound();
+                }
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
+
+                DTORecuperacionPassword cuentaMysql = new()
+                {
+                    Email = user!.Email,
+                    UserName = user!.UserName,
+                    TokenRecuperacion = token
+                };
+                cuenta = cuentaMysql;
+                break;
+            case "mongo":
+                var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                var userMongo = await _userManagerMongo.FindByNameAsync(email);
+                if (userMongo == null)
+                {
+                    logger.LogDebug($"Cuenta inexistente {email}");
+                    return NotFound();
+                }
+
+                var tokenMongo = await _userManagerMongo.GeneratePasswordResetTokenAsync(userMongo!);
+
+                DTORecuperacionPassword cuentaMongo = new()
+                {
+                    Email = userMongo!.Email,
+                    UserName = userMongo!.UserName,
+                    TokenRecuperacion = tokenMongo
+                };
+                cuenta = cuentaMongo;
+                break;
         }
-
-        var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
-
-        DTORecuperacionPassword cuenta = new ()
-        {
-            Email = user!.Email,
-            UserName = user!.UserName,
-            TokenRecuperacion = token
-        };
+        
         return Ok(cuenta);
     }
 
@@ -85,23 +136,48 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
-        EnsureDatabaseCreated(_applicationDbContext);
+        var dbtype = _configuration["dbtype"];
+        if (dbtype.Equals("mysql"))
+        {
+            var _applicationDbContext = _dependencyResolver.GetService<ApplicationDbContext>();
+            EnsureDatabaseCreated(_applicationDbContext);
+        }
+
         if (ModelState.IsValid)
         {
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user != null)
+            IdentityResult identityResult = new();
+            switch (dbtype)
             {
-                logger.LogDebug($"Cuenta existente {model.Email}");
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
+                case "mysql":
+                    var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                    var user = await _userManager.FindByNameAsync(model.Email);
+                    if (user != null)
+                    {
+                        logger.LogDebug($"Cuenta existente {model.Email}");
+                        return StatusCode(StatusCodes.Status409Conflict);
+                    }
 
-            user = new ApplicationUser { UserName = model.Email, Email = model.Email };
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
+                    user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                    identityResult = await _userManager.CreateAsync(user, model.Password);
+                    break;
+                case "mongo":
+                    var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                    var userMongo = await _userManagerMongo.FindByNameAsync(model.Email);
+                    if (userMongo != null)
+                    {
+                        logger.LogDebug($"Cuenta existente {model.Email}");
+                        return StatusCode(StatusCodes.Status409Conflict);
+                    }
+
+                    userMongo = new ApplicationUserMongo { UserName = model.Email, Email = model.Email };
+                    identityResult = await _userManagerMongo.CreateAsync(userMongo, model.Password);
+                    break;
+            }
+            if (identityResult.Succeeded)
             {
                 return Ok();
             }
-            AddErrors(result);
+            AddErrors(identityResult);
         }
 
         logger.LogDebug($"No es valido el usuario");

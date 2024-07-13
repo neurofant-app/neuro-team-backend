@@ -7,10 +7,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using contabee.identity.api.helpers;
 using contabee.identity.api.models;
+using identidad.api;
+using identidad.api.models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -26,22 +29,21 @@ namespace contabee.identity.api.Controllers;
 public class AuthorizationController : Controller
 {
     private readonly ILogger<AuthorizationController> logger;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
     private readonly IOpenIddictApplicationManager _applicationManager;
     private readonly IOpenIddictScopeManager _scopeManager;
-
+    private readonly IDependencyResolver _dependencyResolver;
+    private readonly IConfiguration _configuration;
     public AuthorizationController(
         ILogger<AuthorizationController> logger,
-        SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager,
-        IOpenIddictApplicationManager applicationManager, IOpenIddictScopeManager scopeManager)
+        IOpenIddictApplicationManager applicationManager, IOpenIddictScopeManager scopeManager,
+        IDependencyResolver dependencyResolver,
+        IConfiguration configuration)
     {
         this.logger = logger;
-        _signInManager = signInManager;
-        _userManager = userManager;
         _applicationManager = applicationManager;
         _scopeManager = scopeManager;
+        _dependencyResolver = dependencyResolver;
+        _configuration = configuration;
     }
     /// <summary>
     /// Gnenera un JWT
@@ -96,44 +98,95 @@ public class AuthorizationController : Controller
 
         if (request.IsPasswordGrantType())
         {
-            var user = await _userManager.FindByNameAsync(request.Username);
-            if (user == null)
+            ClaimsIdentity identity = null;
+            var dbtype = _configuration["dbtype"];
+            switch (dbtype)
             {
-                var properties = new AuthenticationProperties(new Dictionary<string, string>
-                {
-                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-                        "The username/password couple is invalid."
-                });
-                logger.LogDebug($"El username/password no es valido");
-                return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                case "mysql":
+                    var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                    var user = await _userManager.FindByNameAsync(request.Username);
+                    if (user == null)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                                "The username/password couple is invalid."
+                        });
+                        logger.LogDebug($"El username/password no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    // Validate the username/password parameters and ensure the account is not locked out.
+                    var _signInManager = _dependencyResolver.GetService<SignInManager<ApplicationUser>>();
+                    var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+                    if (!result.Succeeded)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                                "The username/password couple is invalid."
+                        });
+                        logger.LogDebug($"El par username/password no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    // Create the claims-based identity that will be used by OpenIddict to generate tokens.
+                    identity = new ClaimsIdentity(
+                        authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                        nameType: Claims.Name,
+                        roleType: Claims.Role);
+
+                    // Add the claims that will be persisted in the tokens.
+                    identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user))
+                            .SetClaim(Claims.Email, await _userManager.GetEmailAsync(user))
+                            .SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user))
+                            .SetClaims(Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
+                    break;
+                case "mongo":
+                    var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                    var userMongo = await _userManagerMongo.FindByNameAsync(request.Username);
+                    if (userMongo == null)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                                "The username/password couple is invalid."
+                        });
+                        logger.LogDebug($"El username/password no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    // Validate the username/password parameters and ensure the account is not locked out.
+                    var _signInManagerMongo = _dependencyResolver.GetService<SignInManager<ApplicationUserMongo>>();
+                    var resultMongo = await _signInManagerMongo.CheckPasswordSignInAsync(userMongo, request.Password, lockoutOnFailure: true);
+                    if (!resultMongo.Succeeded)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
+                                "The username/password couple is invalid."
+                        });
+                        logger.LogDebug($"El par username/password no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    // Create the claims-based identity that will be used by OpenIddict to generate tokens.
+                    identity = new ClaimsIdentity(
+                        authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                        nameType: Claims.Name,
+                        roleType: Claims.Role);
+
+                    // Add the claims that will be persisted in the tokens.
+                    identity.SetClaim(Claims.Subject, await _userManagerMongo.GetUserIdAsync(userMongo))
+                            .SetClaim(Claims.Email, await _userManagerMongo.GetEmailAsync(userMongo))
+                            .SetClaim(Claims.Name, await _userManagerMongo.GetUserNameAsync(userMongo))
+                            .SetClaims(Claims.Role, (await _userManagerMongo.GetRolesAsync(userMongo)).ToImmutableArray());
+                    break;
             }
-
-            // Validate the username/password parameters and ensure the account is not locked out.
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-            if (!result.Succeeded)
-            {
-                var properties = new AuthenticationProperties(new Dictionary<string, string>
-                {
-                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
-                        "The username/password couple is invalid."
-                });
-                logger.LogDebug($"El par username/password no es valido");
-                return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
-
-            // Create the claims-based identity that will be used by OpenIddict to generate tokens.
-            var identity = new ClaimsIdentity(
-                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-                nameType: Claims.Name,
-                roleType: Claims.Role);
-
-            // Add the claims that will be persisted in the tokens.
-            identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user))
-                    .SetClaim(Claims.Email, await _userManager.GetEmailAsync(user))
-                    .SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user))
-                    .SetClaims(Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
 
             // Note: in this sample, the granted scopes match the requested scope
             // but you may want to allow the user to uncheck specific scopes.
@@ -147,44 +200,93 @@ public class AuthorizationController : Controller
 
         else if (request.IsRefreshTokenGrantType())
         {
-            // Retrieve the claims principal stored in the refresh token.
-            var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-
-            // Retrieve the user profile corresponding to the refresh token.
-            var user = await _userManager.FindByIdAsync(result.Principal.GetClaim(Claims.Subject));
-            if (user == null)
+            ClaimsIdentity identity = null;
+            var dbtype = _configuration["dbtype"];
+            switch (dbtype)
             {
-                var properties = new AuthenticationProperties(new Dictionary<string, string>
-                {
-                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
-                });
-                logger.LogDebug($"El token de refresco ya no es valido");
-                return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                case "mysql":
+                    // Retrieve the claims principal stored in the refresh token.
+                    var result = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                    // Retrieve the user profile corresponding to the refresh token.
+                    var user = await _userManager.FindByIdAsync(result.Principal.GetClaim(Claims.Subject));
+                    if (user == null)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
+                        });
+                        logger.LogDebug($"El token de refresco ya no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+                    var _signInManager = _dependencyResolver.GetService<SignInManager<ApplicationUser>>();
+
+                    // Ensure the user is still allowed to sign in.
+                    if (!await _signInManager.CanSignInAsync(user))
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
+                        });
+                        logger.LogDebug($"El usuario ya no puede iniciar sesión.");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    identity = new ClaimsIdentity(result.Principal.Claims,
+                        authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                        nameType: Claims.Name,
+                        roleType: Claims.Role);
+
+                    // Override the user claims present in the principal in case they changed since the refresh token was issued.
+                    identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user))
+                            .SetClaim(Claims.Email, await _userManager.GetEmailAsync(user))
+                            .SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user))
+                            .SetClaims(Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
+                    break;
+                case "mongo":
+                    // Retrieve the claims principal stored in the refresh token.
+                    var resultMongo = await HttpContext.AuthenticateAsync(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                    // Retrieve the user profile corresponding to the refresh token.
+                    var userMongo = await _userManagerMongo.FindByIdAsync(resultMongo.Principal.GetClaim(Claims.Subject));
+                    if (userMongo == null)
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
+                        });
+                        logger.LogDebug($"El token de refresco ya no es valido");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+                    var _signInManagerMongo = _dependencyResolver.GetService<SignInManager<ApplicationUserMongo>>();
+
+                    // Ensure the user is still allowed to sign in.
+                    if (!await _signInManagerMongo.CanSignInAsync(userMongo))
+                    {
+                        var properties = new AuthenticationProperties(new Dictionary<string, string>
+                        {
+                            [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
+                            [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
+                        });
+                        logger.LogDebug($"El usuario ya no puede iniciar sesión.");
+                        return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+                    }
+
+                    identity = new ClaimsIdentity(resultMongo.Principal.Claims,
+                        authenticationType: TokenValidationParameters.DefaultAuthenticationType,
+                        nameType: Claims.Name,
+                        roleType: Claims.Role);
+
+                    // Override the user claims present in the principal in case they changed since the refresh token was issued.
+                    identity.SetClaim(Claims.Subject, await _userManagerMongo.GetUserIdAsync(userMongo))
+                            .SetClaim(Claims.Email, await _userManagerMongo.GetEmailAsync(userMongo))
+                            .SetClaim(Claims.Name, await _userManagerMongo.GetUserNameAsync(userMongo))
+                            .SetClaims(Claims.Role, (await _userManagerMongo.GetRolesAsync(userMongo)).ToImmutableArray());
+                    break;
             }
-
-            // Ensure the user is still allowed to sign in.
-            if (!await _signInManager.CanSignInAsync(user))
-            {
-                var properties = new AuthenticationProperties(new Dictionary<string, string>
-                {
-                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
-                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
-                });
-                logger.LogDebug($"El usuario ya no puede iniciar sesión.");
-                return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-            }
-
-            var identity = new ClaimsIdentity(result.Principal.Claims,
-                authenticationType: TokenValidationParameters.DefaultAuthenticationType,
-                nameType: Claims.Name,
-                roleType: Claims.Role);
-
-            // Override the user claims present in the principal in case they changed since the refresh token was issued.
-            identity.SetClaim(Claims.Subject, await _userManager.GetUserIdAsync(user))
-                    .SetClaim(Claims.Email, await _userManager.GetEmailAsync(user))
-                    .SetClaim(Claims.Name, await _userManager.GetUserNameAsync(user))
-                    .SetClaims(Claims.Role, (await _userManager.GetRolesAsync(user)).ToImmutableArray());
 
             identity.SetDestinations(GetDestinations);
 

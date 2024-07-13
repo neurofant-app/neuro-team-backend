@@ -20,12 +20,14 @@ using Microsoft.Extensions.Configuration;
 using aplicaciones.services.extensiones;
 using aplicaciones.services.proxy.abstractions;
 using System.Data.Common;
+using comunes.primitivas.atributos;
+using System.Runtime.CompilerServices;
 
 
 namespace aplicaciones.services.invitacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadInvitacion))]
 public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvitacion, CreaInvitacion, ActualizaInvitacion, ConsultaInvitacion, string>,
-    IServicioEntidadAPI, IServicioInvitacion
+    IServicioEntidadAPI, IServicioEntidadInvitacion
 {
     private readonly ILogger _logger;
 
@@ -98,8 +100,26 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return this._contextoUsuario;
     }
 
+    private bool permisosValidos(string appId, [CallerMemberName] string metodoId = null)
+    {
+        var metodoActual = _contextoUsuario.AtributosMetodos.FirstOrDefault(_ => _.MetodoId == metodoId);
+
+        if (metodoActual == null) { return false; }
+        foreach (var id in metodoActual.atributosId)
+        {
+            if (!_contextoUsuario.RolesAplicacion.Contains(id) && !_contextoUsuario.PermisosAplicacion.Contains(id)) return false;
+        }
+        return true;
+    }
+
+    [Rol("00000000-0000-0000-0000-000000000001", "app-manager-rol-admin")]
+    [Permiso("00000000-0000-0000-0000-000000000001", "app-manager-perm-admin")]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
+        {
+            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+        }
         var add = data.Deserialize<CreaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
@@ -147,7 +167,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    #region Overrides para la personalización de la entidad LogoAplicacion
+    #region Overrides para la personalización de la entidad Invitacion
     public override async Task<ResultadoValidacion> ValidarInsertar(CreaInvitacion data)
     {
         ResultadoValidacion resultado = new();
@@ -325,6 +345,8 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             Estado = data.Estado,
             Email = data.Email,
             RolId = data.RolId,
+            Tipo = data.Tipo,
+            Token = data.Token,
 
         };
         return invitacionDesplegar;
@@ -344,10 +366,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 var tipoPlantillaContenido = TipoCOntenidoPlantilla(data.Tipo);
                 var logoTipos = await DB.LogoAplicaciones.ToListAsync();
                 var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
-                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId).FirstOrDefaultAsync();
-                //EntidadLogoAplicacion logoAplicacion = await DB.LogoAplicaciones|
-                //            .Where(x => x.AplicacionId == data.AplicacionId)
-                //            .FirstOrDefaultAsync();
+                EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == tipoPlantillaContenido).FirstOrDefaultAsync();
                 
                 byte[] bytes = Convert.FromBase64String(plantillaInvitacion.Plantilla);
                 string html = Encoding.UTF8.GetString(bytes);
@@ -375,6 +394,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 };
 
                 var respuestaCorreo = await _proxyComunicacionesServices.EnviarCorreo(m);
+
                 if (respuestaCorreo.Ok)
                 {
                     _dbSetFull.Add(entidad);
@@ -383,13 +403,14 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                     respuesta.Payload = ADTODespliegue(entidad);
+                }
+                else
+                {
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                }
+
             }
-            else
-            {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-            }
-        }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;

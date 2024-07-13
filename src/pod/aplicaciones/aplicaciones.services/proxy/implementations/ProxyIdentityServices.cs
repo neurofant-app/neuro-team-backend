@@ -14,14 +14,15 @@ namespace aplicaciones.services.proxy.implementations;
 /// <summary>
 /// Agrupa las llamadas remotas al servicio de identidad
 /// </summary>
-public class ProxyIdentityServices: IProxyIdentityServices
+public class ProxyIdentityServices : IProxyIdentityServices
 {
     private readonly ILogger<ProxyIdentityServices> logger;
     private readonly IServicioAutenticacionJWT autenticacionJWT;
     private readonly ConfiguracionAPI configuracionAPI;
     private readonly HttpClient identityHttpClient;
-    public ProxyIdentityServices(ILogger<ProxyIdentityServices> logger, IServicioAutenticacionJWT autenticacionJWT, 
-        IHttpClientFactory httpClientFactory, IOptions<ConfiguracionAPI> options) { 
+    public ProxyIdentityServices(ILogger<ProxyIdentityServices> logger, IServicioAutenticacionJWT autenticacionJWT,
+        IHttpClientFactory httpClientFactory, IOptions<ConfiguracionAPI> options)
+    {
         this.logger = logger;
         this.autenticacionJWT = autenticacionJWT;
         configuracionAPI = options.Value;
@@ -36,22 +37,25 @@ public class ProxyIdentityServices: IProxyIdentityServices
         {
             logger.LogDebug("ProxyIdentityServices - Creando usuario");
             var host = configuracionAPI.ObtieneHost("identity");
-            if(host== null)
+            if (host == null)
             {
-                respuesta.Error = new ErrorProceso() { Mensaje = $"ProxyIdentityServices - Host identity no configurado", Codigo = "", HttpCode = HttpCode.UnprocessableEntity } ;
-            } else
+                respuesta.Error = new ErrorProceso() { Mensaje = $"ProxyIdentityServices - Host identity no configurado", Codigo = "", HttpCode = HttpCode.UnprocessableEntity };
+            }
+            else
             {
                 TokenJWT? jwt = null;
                 if (string.IsNullOrEmpty(host.ClaveAutenticacion))
                 {
                     respuesta.Error = new ErrorProceso() { Mensaje = $"ProxyIdentityServices - No hay una clave de autenticacion definida para identity", Codigo = "", HttpCode = HttpCode.UnprocessableEntity };
                 }
-                else {
+                else
+                {
                     jwt = await autenticacionJWT!.TokenInterproceso(host.ClaveAutenticacion);
                     if (jwt == null)
                     {
                         logger.LogDebug("ProxyIdentityServices - Error al obtener el token interservicio de JWT para Identity");
-                    } else
+                    }
+                    else
                     {
                         identityHttpClient.BaseAddress = new Uri(host.UrlBase.TrimEnd('/'));
                         logger.LogDebug($"ProxyIdentityServices - LLamado remoto a {Path.Combine(identityHttpClient.BaseAddress.ToString(), "/account/Register")}");
@@ -68,7 +72,8 @@ public class ProxyIdentityServices: IProxyIdentityServices
                         {
                             respuesta.Ok = true;
 
-                        } else
+                        }
+                        else
                         {
                             respuesta.Error = new ErrorProceso() { Mensaje = $"ProxyIdentityServices - error llamaa remota {response.ReasonPhrase} {contenidoRespuesta}", Codigo = "", HttpCode = (HttpCode)response.StatusCode };
 
@@ -138,7 +143,7 @@ public class ProxyIdentityServices: IProxyIdentityServices
                 }
             }
         }
-        catch(Exception ex) 
+        catch (Exception ex)
         {
             logger.LogError(ex, $"ProxyIdentityServices - Error al enviar correo {ex.Message}");
             respuesta.Error = new ErrorProceso() { Mensaje = $"{ex.Message}", Codigo = "", HttpCode = HttpCode.ServerError };
@@ -176,9 +181,8 @@ public class ProxyIdentityServices: IProxyIdentityServices
                         identityHttpClient.BaseAddress = new Uri(host.UrlBase.TrimEnd('/'));
                         logger.LogDebug($"ProxyIdentityServices - LLamado remoto a {Path.Combine(identityHttpClient.BaseAddress.ToString(), "/account/password/recuperar")}");
 
-                        var payload = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
                         identityHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt.access_token);
-                        var response = await identityHttpClient.GetAsync($"/account/password/recuperar?email="+email);
+                        var response = await identityHttpClient.GetAsync($"/account/password/recuperar?email=" + email);
 
                         logger.LogDebug($"ProxyIdentityServices - Respuesta {response.StatusCode} {response.ReasonPhrase}");
 

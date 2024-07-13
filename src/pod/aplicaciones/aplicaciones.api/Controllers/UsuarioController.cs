@@ -20,14 +20,11 @@ namespace aplicaciones.api.Controllers;
 [Authorize]
 public class UsuarioController : ControladorJwt
 {
-    private MongoDbContextAplicaciones _localContext;
-    private readonly IServicioInvitacion _servicioInvitacion;
+    private readonly IServicioEntidadInvitacion _servicioInvitacion;
     private readonly IProxyIdentityServices _proxyIdentityServices;
     private readonly ILogger<UsuarioController> _logger;
-    public UsuarioController(MongoDbContextAplicaciones
-        context, ILogger<UsuarioController> logger, IServicioInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
+    public UsuarioController(ILogger<UsuarioController> logger, IServicioEntidadInvitacion ServicioInvitacion, IProxyIdentityServices proxyIdentityServices) : base(logger)
     {
-        _localContext = context;
         _servicioInvitacion = ServicioInvitacion;
         _proxyIdentityServices = proxyIdentityServices;
         _logger = logger;
@@ -41,18 +38,15 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RecuperarContrasena([FromQuery] string email)
     {
-        // Verifica que el correo venga en un formato válido si no es asi devolver 400
         if (ValidaEmail(email))
         {
-            // Utilizando el proxy de identidad realizar una llamada a RecuperaPasswordEmail y si devuelve cualquier codigo 
-            //    diferente a 200 revolver 404
             var respuestaUsuario = await _proxyIdentityServices.RecuperaPasswordEmail(email);
             if (respuestaUsuario.Ok)
             {
                 DTORecuperacionPassword dto = (DTORecuperacionPassword)respuestaUsuario.Payload;
                 CreaInvitacion invInsertar = new CreaInvitacion()
                 {
-                    AplicacionId = new Guid("00000000-0000-0000-0000-000000000000"),
+                    AplicacionId = new Guid("3a1b8fd8-3818-4f64-95a9-492c7db3435d"),
                     Email = dto.Email,
                     RolId = 0,
                     Nombre = dto.UserName,
@@ -60,7 +54,7 @@ public class UsuarioController : ControladorJwt
                     Token = dto.TokenRecuperacion
                 };
                 var inv = await _servicioInvitacion.Insertar(invInsertar);
-                if(inv.Ok)
+                if (inv.Ok)
                 {
                     return Ok(inv.Payload);
                 }
@@ -69,14 +63,8 @@ public class UsuarioController : ControladorJwt
             {
                 return NotFound();
             }
-
-            // En caso de existir
-            //    añadir un nuevo resgtrso de invitación con Tipo = RecuperacionContrasena y añadiendo el Token recibido
-            //    enviar una invitación de recuperación utilizando el mismo template  de interforos y el PROXY de comunicaciones
-            //    devolver OK
         }
-
-        return Ok();
+        return BadRequest();
     }
 
     [HttpPost("password/restablecer/token")]
@@ -87,10 +75,10 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
-        // Verificar que la invitacion exista con los datos del DTO, si no existe devolver NotFound()
-        EntidadInvitacion invitacion = await _localContext.Invitaciones.Where(x => x.Id== dtoReset.InvitacionId).FirstOrDefaultAsync();
-        if(invitacion != null)
+        RespuestaPayload<EntidadInvitacion> respuesta = await _servicioInvitacion.UnicaPorId(dtoReset.InvitacionId.ToString());
+        if (respuesta != null)
         {
+            var invitacion = (EntidadInvitacion)respuesta.Payload;
             ActualizarContrasena actualizarContrasena = new ActualizarContrasena() { Email = invitacion.Email, Password = dtoReset.NuevoPassword, Token = invitacion.Token };
             var response = await _proxyIdentityServices.EstablecePasswordToken(actualizarContrasena);
             if (response.Ok)
@@ -112,10 +100,6 @@ public class UsuarioController : ControladorJwt
         {
             return NotFound();
         }
-        // Si llamar al proxy de identidad para el método EstablecePasswordTokem con el valor del email 
-        //          y token de la invitación y el nuevo password del DTO
-        // Si el codigo de retorno es diferente de 200 devolver el error con statuscode
-        // devolver OK si la contraseña ha sido restablecida
     }
 
 }

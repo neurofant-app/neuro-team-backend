@@ -19,7 +19,8 @@ public class Worker : IHostedService
         await using var scope = _serviceProvider.CreateAsyncScope();
 
         var manager = scope.ServiceProvider.GetRequiredService<IProxySeguridad>();
-        await manager.ActualizaSeguridad(ConfiguracionSeguridad.ObtieneAplicaciones());
+        ConfiguracionSeguridad configuracionSeguridad = new();
+        await manager.ActualizaSeguridad(await configuracionSeguridad.ObtieneApliaciones());
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

@@ -1,10 +1,14 @@
 using apigenerica.primitivas;
+using apigenerica.primitivas.aplicacion;
+using apigenerica.primitivas.seguridad;
+using aplicaciones.api.seguridad;
 using aplicaciones.services.aplicacion;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using aplicaciones.services.proxy.abstractions;
 using aplicaciones.services.proxy.implementations;
 using comunes.interservicio.primitivas;
+using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.Extensions.Options;
 using Quartz;
@@ -36,8 +40,14 @@ public class Program
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
         builder.Services.AddTransient<IServicioAplicacion, ServicioAplicacion>();
-        builder.Services.AddTransient<IServicioInvitacion, ServicioEntidadInvitacion>();
-        builder.Services.AddTransient<IProxySeguridad, ProxySeguridad>();
+        builder.Services.AddTransient<IServicioEntidadInvitacion, ServicioEntidadInvitacion>();
+        builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
+        builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
+        builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
+        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
+        builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddHttpClient();
+
 
 
         builder.Services.AddHostedService<Worker>();
