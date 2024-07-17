@@ -1,7 +1,5 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-using Amazon.Runtime.Internal.Util;
-using apigenerica.model.abstracciones;
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
@@ -14,7 +12,6 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using System.Data.Common;
 using System.Text.Json;
 
 namespace aprendizaje.services;
@@ -165,7 +162,6 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     }
     public override Temario ADTOFull(Temario actualizacion, Temario actual)
     {
-        actual.Id = actualizacion.Id;
         actual.EspacioTrabajoId = actualizacion.EspacioTrabajoId;
         actual.Idiomas = actualizacion.Idiomas;
         actual.Nombre = actualizacion.Nombre;
@@ -186,11 +182,30 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             Idiomas = data.Idiomas,
             Nombre = data.Nombre,
             Publico = data.Publico,
+            Temas = data.Temas,
             EstadoPublicacion = data.EstadoPublicacion,
             Version = data.Version,
             TemarioDerivadoId = data.TemarioDerivadoId
         };
         return inv;
+    }
+
+    public override Temario ADTODespliegue(Temario data)
+    {
+        Temario temario = new Temario()
+        {
+            Id = data.Id,
+            EspacioTrabajoId = data.EspacioTrabajoId,
+            Idiomas = data.Idiomas,
+            Nombre = data.Nombre,
+            Publico = data.Publico,
+            Temas = data.Temas,
+            EstadoPublicacion = data.EstadoPublicacion,
+            Version = data.Version,
+            TemarioDerivadoId = data.TemarioDerivadoId
+
+        };
+        return temario;
     }
 
     public override async Task<Respuesta> Actualizar(string id, Temario data)

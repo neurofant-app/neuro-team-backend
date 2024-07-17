@@ -29,14 +29,11 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\lib\apigenerica.primitivas\apigenerica.primitivas.csproj" />
-		<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />		
+		<ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
+		<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
 		<ProjectReference Include="..\aprendizaje.model\aprendizaje.model.csproj" />
 		<ProjectReference Include="..\aprendizaje.services\aprendizaje.services.csproj" />
 
 	</ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
 
 </Project>

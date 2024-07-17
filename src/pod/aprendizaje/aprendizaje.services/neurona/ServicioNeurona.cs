@@ -1,7 +1,5 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-using Amazon.Runtime.Internal.Util;
-using apigenerica.model.abstracciones;
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
@@ -13,7 +11,6 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using System.Data.Common;
 using System.Text.Json;
 
 namespace aprendizaje.services;
@@ -164,7 +161,6 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
     }
     public override Neurona ADTOFull(Neurona actualizacion, Neurona actual)
     {
-        actual.Id = actualizacion.Id;
         actual.EspacioTrabajoId = actualizacion.EspacioTrabajoId;
         actual.Idiomas = actualizacion.Idiomas;
         actual.Nombre = actualizacion.Nombre;
@@ -189,7 +185,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
 
     public override Neurona ADTOFull(Neurona data)
     {
-        Neurona inv = new Neurona()
+        Neurona neurona = new Neurona()
         {
             Id = Guid.NewGuid(),
             EspacioTrabajoId = data.EspacioTrabajoId,
@@ -200,7 +196,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             EstadoPublicacion = data.EstadoPublicacion,
             Version = data.Version,
             NeuronaDerivadaId = data.NeuronaDerivadaId,
-            FechaCreacion = data.FechaCreacion,
+            FechaCreacion = DateTime.UtcNow,
             FechaActualizacion = data.FechaActualizacion,
             FechaConsulta = data.FechaConsulta,
             AlmacenamientoId = data.AlmacenamientoId,
@@ -212,8 +208,38 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             FlashCardIds = data.FlashCardIds,
             ActividadesIds = data.ActividadesIds,
         };
-        return inv;
+        return neurona;
     }
+
+    public override Neurona ADTODespliegue(Neurona data)
+    {
+        Neurona neurona = new Neurona()
+        {
+            Id = data.Id,
+            EspacioTrabajoId = data.EspacioTrabajoId,
+            Idiomas = data.Idiomas,
+            Nombre = data.Nombre,
+            Descripcion = data.Descripcion,
+            TemarioId = data.TemarioId,
+            EstadoPublicacion = data.EstadoPublicacion,
+            Version = data.Version,
+            NeuronaDerivadaId = data.NeuronaDerivadaId,
+            FechaCreacion = DateTime.UtcNow,
+            FechaActualizacion = data.FechaActualizacion,
+            FechaConsulta = data.FechaConsulta,
+            AlmacenamientoId = data.AlmacenamientoId,
+            TipoLicencia = data.TipoLicencia,
+            ConteoFlashcards = data.ConteoFlashcards,
+            ConteoActividdades = data.ConteoActividdades,
+            ConteoDescargas = data.ConteoDescargas,
+            SecuenciaObjetos = data.SecuenciaObjetos,
+            FlashCardIds = data.FlashCardIds,
+            ActividadesIds = data.ActividadesIds,
+
+        };
+        return neurona;
+    }
+
 
     public override async Task<Respuesta> Actualizar(string id, Neurona data)
     {
