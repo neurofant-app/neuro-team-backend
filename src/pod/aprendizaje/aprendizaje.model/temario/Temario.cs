@@ -35,7 +35,7 @@ public class Temario
     /// Nombre de la neurona por idioma, este nombre será utilziado por la búsqeuda 
     /// de texto en el mercado de neurofant
     /// </summary>
-    public List<ValorI18N> Nombre { get; set; } = [];
+    public List<ValorI18N<string>> Nombre { get; set; } = [];
 
 
     /// <summary>

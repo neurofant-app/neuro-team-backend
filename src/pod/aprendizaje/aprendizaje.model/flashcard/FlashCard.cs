@@ -37,13 +37,13 @@ public abstract class FlashCard
     /// <summary>
     /// Concepto del flashcard 
     /// </summary>
-    public List<ValorI18N> Concepto { get; set; } = [];
+    public List<ValorI18N<string>> Concepto { get; set; } = [];
 
 
     /// <summary>
     /// Contenido del flashcard 
     /// </summary>
-    public List<ValorI18N> Comtenido { get; set; } = [];
+    public List<ValorI18N<string>> Comtenido { get; set; } = [];
 
 
     /// <summary>

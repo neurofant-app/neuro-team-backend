@@ -26,7 +26,7 @@ public class Tema
     /// <summary>
     /// Nombre de del tema de aceuerdo al idioma
     /// </summary>
-    public List<ValorI18N> Nombre { get; set; } = [];
+    public List<ValorI18N<string>> Nombre { get; set; } = [];
 
     /// <summary>
     /// Identificador único del tema padre, aquellas entidades con padreID Guid.Empty 

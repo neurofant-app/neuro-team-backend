@@ -7,7 +7,7 @@ namespace aprendizaje.model;
 /// Repreesenta una cadena de texto localizada para un idiona
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class ValorI18N
+public class ValorI18N<T>
 {
     /// <summary>
     /// Idioma del texto, este corresponde a la combinación del código ISO_639-3 de idioma 
@@ -18,7 +18,7 @@ public class ValorI18N
     public required string Idioma { get; set; }
 
     /// <summary>
-    /// Valor expresado como texto en el idioma definido por la propiedad
+    /// Valor expresado en el idioma definido por la propiedad
     /// </summary>
-    public string? Valor { get; set; }
+    public T? Valor { get; set; }
 }

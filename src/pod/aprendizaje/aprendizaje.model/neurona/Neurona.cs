@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using aprendizaje.model.precios;
 
 namespace aprendizaje.model.neurona;
 
@@ -34,13 +35,13 @@ public class Neurona
     /// Nombre de la neurona por idioma, este nombre será utilziado por la búsqeuda 
     /// de texto en el mercado de neurofant
     /// </summary>
-    public List<ValorI18N> Nombre { get; set; } = [];
+    public List<ValorI18N<string>> Nombre { get; set; } = [];
 
     /// <summary>
     /// Descripción de la neurona por idioma, esta descripción será utilziado por la búsqeuda 
     /// de texto en el mercado de neurofant
     /// </summary>
-    public List<ValorI18N> Descripcion { get; set; } = [];
+    public List<ValorI18N<string>> Descripcion { get; set; } = [];
 
     /// <summary>
     /// Identificador único del temario que utiliza la neurona como plan de estudios
@@ -55,9 +56,9 @@ public class Neurona
 
 
     /// <summary>
-    /// Versión de la neurona
+    /// Versión de la neurona, este valor se incremente en cada publicación de manera automática
     /// </summary>
-    public string Version { get; set; } = "";
+    public int Version { get; set; } = 0;
 
     /// <summary>
     /// Identificador de la neurona a partir del cual se derivó la actual
@@ -123,4 +124,13 @@ public class Neurona
     /// </summary>
     public List<long> ActividadesIds { get; set; } = [];
 
+    /// <summary>
+    /// Lista de eentos asociados a la neurona
+    /// </summary>
+    public List<EventoNeurona> Eventos { get; set; } = [];
+
+    /// <summary>
+    /// Lista de precios asociada a la neurona
+    /// </summary>
+    public List<Precio> Precios { get; set; } = [];
 }
