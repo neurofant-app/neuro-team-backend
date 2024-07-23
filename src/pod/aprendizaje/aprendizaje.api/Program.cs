@@ -1,10 +1,10 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
+using aprendizaje.api;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
-using controlescolar.api.seguridad;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
@@ -22,11 +22,6 @@ public class Program
         builder.CreaConfiguiracionEntidadGenerica();
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
-        builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
-        builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
-        builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
-        builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

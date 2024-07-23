@@ -5,5 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
+  <ItemGroup>
+	<PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+  </ItemGroup>
+  <ItemGroup>
+	<ProjectReference Include="..\..\..\lib\apigenerica.metadatos\extensibilidad.metadatos.csproj" />
+	<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
+  </ItemGroup>
 </Project>
