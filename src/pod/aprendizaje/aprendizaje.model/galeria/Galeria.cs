@@ -54,4 +54,10 @@ public class Galeria
     [BsonElement("ev")]
     public List<Guid> EspaciosVinculadosLextura { get; set; } = [];
 
+    /// <summary>
+    /// Lista de los temas galeria que tienen acceso a la galería
+    /// </summary>
+    [BsonElement("ltg")]
+    public List<TemaGaleria> ListaTemasGaleria { get; set; } = [];
+
 }

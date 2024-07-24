@@ -25,7 +25,6 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
     IServicioEntidadHijoAPI, IServicioRol
 {
     private readonly ILogger _logger;
-
     private readonly IReflectorEntidadesAPI reflector;
     private InstanciaAplicacion? aplicacion;
     private DbSet<InstanciaAplicacion>? _dbSetAplicacion;
@@ -225,7 +224,6 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
             }
             else
             {
-
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
             }
         }

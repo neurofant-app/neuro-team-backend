@@ -5,11 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace aprendizaje.services;
 
@@ -43,5 +38,8 @@ public class MongoDbContextAprendizaje(DbContextOptions<MongoDbContextAprendizaj
 
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Temario>().ToCollection(NOMBRE_COLECCION_TEMARIO);
+
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Galeria>().ToCollection(NOMBRE_COLECCION_GALERIA);
     }
 }

@@ -147,7 +147,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
         return respuesta;
     }
 
-    #region Overrides para la personalización de la entidad LogoAplicacion
+    #region Overrides para la personalización de la entidad InstanciaAplicacion
     public override async Task<ResultadoValidacion> ValidarInsertar(InstanciaAplicacion data)
     {
         ResultadoValidacion resultado = new();
