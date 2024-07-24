@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model;
 
@@ -15,10 +16,12 @@ public class ValorI18N<T>
     /// es-MX, es-ES, en-US, cuando no se cuente con el código de país será utilizado ccomo idioma
     /// por defecto ISO_639-3
     /// </summary>
+    [BsonElement("i")]
     public required string Idioma { get; set; }
 
     /// <summary>
     /// Valor expresado en el idioma definido por la propiedad
     /// </summary>
+    [BsonElement("v")]
     public T? Valor { get; set; }
 }

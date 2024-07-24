@@ -1,10 +1,11 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using Amazon.Runtime.Internal.Util;
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
-using aprendizaje.model.neurona;
+using aprendizaje.model.galeria;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
@@ -13,24 +14,24 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
 
-namespace aprendizaje.services;
-[ServicioEntidadAPI(entidad: typeof(Neurona))]
-public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neurona, Neurona, string>,
-    IServicioEntidadAPI, IServicioNeurona
+namespace aprendizaje.services.galeria;
+[ServicioEntidadAPI(entidad: typeof(Galeria))]
+public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Galeria, Galeria, string>,
+    IServicioEntidadAPI, IServicioGaleria
 {
-    private readonly ILogger<ServicioNeurona> _logger;
+    private readonly ILogger<ServicioGaleria> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
-    public ServicioNeurona(ILogger<ServicioNeurona> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector,
+    public ServicioGaleria(ILogger<ServicioGaleria> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector,
         IDistributedCache cache) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
         _reflector = reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -46,21 +47,22 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContextAprendizaje.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextAprendizaje)_db).Neurona;
+            _dbSetFull = ((MongoDbContextAprendizaje)_db).Galeria;
 
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA}'");
             throw;
         }
     }
+
     private MongoDbContextAprendizaje DB { get { return (MongoDbContextAprendizaje)_db; } }
     public bool RequiereAutenticacion => true;
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<Neurona>(JsonAPIDefaults());
+        var update = data.Deserialize<Galeria>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -96,7 +98,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<Neurona>(JsonAPIDefaults());
+        var add = data.Deserialize<Galeria>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -141,107 +143,65 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
     }
 
     #region Overrides para la personalización de la ENTIDAD => NEURONA
-    public override async Task<ResultadoValidacion> ValidarInsertar(Neurona data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(Galeria data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Neurona original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Galeria original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Neurona actualizacion, Neurona original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Galeria actualizacion, Galeria original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override Neurona ADTOFull(Neurona actualizacion, Neurona actual)
+
+    public override Galeria ADTOFull(Galeria actualizacion, Galeria actual)
     {
         actual.EspacioTrabajoId = actualizacion.EspacioTrabajoId;
-        actual.Idiomas = actualizacion.Idiomas;
         actual.Nombre = actualizacion.Nombre;
-        actual.Descripcion = actualizacion.Descripcion;
-        actual.TemarioId = actualizacion.TemarioId;
-        actual.EstadoPublicacion = actualizacion.EstadoPublicacion;
-        actual.Version = actualizacion.Version;
-        actual.NeuronaDerivadaId = actualizacion.NeuronaDerivadaId;
-        actual.FechaCreacion = actualizacion.FechaCreacion;
-        actual.FechaActualizacion = actualizacion.FechaActualizacion;
-        actual.FechaConsulta = actualizacion.FechaConsulta;
-        actual.AlmacenamientoId = actualizacion.AlmacenamientoId;
-        actual.TipoLicencia = actualizacion.TipoLicencia;
-        actual.ConteoFlashcards = actualizacion.ConteoFlashcards;
-        actual.ConteoActividdades = actualizacion.ConteoActividdades;
-        actual.ConteoDescargas = actualizacion.ConteoDescargas;
-        actual.SecuenciaObjetos = actualizacion.SecuenciaObjetos;
-        actual.FlashCardIds = actualizacion.FlashCardIds;
-        actual.ActividadesIds = actualizacion.ActividadesIds;
+        actual.Contenido = actualizacion.Contenido;
+        actual.Publica = actualizacion.Publica;
+        actual.EspaciosVinculadosLextura = actualizacion.EspaciosVinculadosLextura;
         return actual;
     }
 
-    public override Neurona ADTOFull(Neurona data)
+    public override Galeria ADTOFull(Galeria data)
     {
-        Neurona neurona = new Neurona()
-        {
-            Id = Guid.NewGuid(),
-            EspacioTrabajoId = data.EspacioTrabajoId,
-            Idiomas = data.Idiomas,
-            Nombre = data.Nombre,
-            Descripcion = data.Descripcion,
-            TemarioId = data.TemarioId,
-            EstadoPublicacion = data.EstadoPublicacion,
-            Version = data.Version,
-            NeuronaDerivadaId = data.NeuronaDerivadaId,
-            FechaCreacion = DateTime.UtcNow,
-            FechaActualizacion = data.FechaActualizacion,
-            FechaConsulta = data.FechaConsulta,
-            AlmacenamientoId = data.AlmacenamientoId,
-            TipoLicencia = data.TipoLicencia,
-            ConteoFlashcards = data.ConteoFlashcards,
-            ConteoActividdades = data.ConteoActividdades,
-            ConteoDescargas = data.ConteoDescargas,
-            SecuenciaObjetos = data.SecuenciaObjetos,
-            FlashCardIds = data.FlashCardIds,
-            ActividadesIds = data.ActividadesIds,
-        };
-        return neurona;
-    }
-
-    public override Neurona ADTODespliegue(Neurona data)
-    {
-        Neurona neurona = new Neurona()
+        Galeria galeria = new Galeria()
         {
             Id = data.Id,
             EspacioTrabajoId = data.EspacioTrabajoId,
-            Idiomas = data.Idiomas,
             Nombre = data.Nombre,
-            Descripcion = data.Descripcion,
-            TemarioId = data.TemarioId,
-            EstadoPublicacion = data.EstadoPublicacion,
-            Version = data.Version,
-            NeuronaDerivadaId = data.NeuronaDerivadaId,
-            FechaCreacion = DateTime.UtcNow,
-            FechaActualizacion = data.FechaActualizacion,
-            FechaConsulta = data.FechaConsulta,
-            AlmacenamientoId = data.AlmacenamientoId,
-            TipoLicencia = data.TipoLicencia,
-            ConteoFlashcards = data.ConteoFlashcards,
-            ConteoActividdades = data.ConteoActividdades,
-            ConteoDescargas = data.ConteoDescargas,
-            SecuenciaObjetos = data.SecuenciaObjetos,
-            FlashCardIds = data.FlashCardIds,
-            ActividadesIds = data.ActividadesIds,
-
+            Contenido = data.Contenido,
+            Publica = data.Publica,
+            EspaciosVinculadosLextura = data.EspaciosVinculadosLextura
         };
-        return neurona;
+        return galeria;
     }
 
+    public override Galeria ADTODespliegue(Galeria data)
+    {
+        Galeria galeria = new Galeria() 
+        { 
+            Id = data.Id,
+            EspacioTrabajoId = data.EspacioTrabajoId,
+            Nombre = data.Nombre,
+            Fecha = data.Fecha,
+            Contenido = data.Contenido,
+            Publica = data.Publica,
+            EspaciosVinculadosLextura = data.EspaciosVinculadosLextura
+        };
+        return galeria;
+    }
 
-    public override async Task<Respuesta> Actualizar(string id, Neurona data)
+    public override async Task<Respuesta> Actualizar(string id, Galeria data)
     {
         var respuesta = new Respuesta();
         try
@@ -252,14 +212,13 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
                 return respuesta;
             }
 
-
-            Neurona actual = _dbSetFull.Find(Guid.Parse(id));
-
+            Galeria actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
+
 
             var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
             if (resultadoValidacion.Valido)
@@ -286,23 +245,20 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
-
         return respuesta;
     }
 
-
-    public override async Task<RespuestaPayload<Neurona>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Galeria>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Neurona>();
+        var respuesta = new RespuestaPayload<Galeria>();
         try
         {
-            Neurona actual = await _dbSetFull.FindAsync(Guid.Parse(id));
+            Galeria actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
-                respuesta.HttpCode = HttpCode.NotFound;
+                respuesta.HttpCode = HttpCode.Ok;
                 return respuesta;
             }
-
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
             respuesta.Payload = actual;
@@ -330,7 +286,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
                 return respuesta;
             }
 
-            Neurona actual = _dbSetFull.Find(Guid.Parse(id));
+            Galeria actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -364,6 +320,5 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
     }
     #endregion
 }
-
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return

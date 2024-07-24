@@ -1,4 +1,5 @@
-﻿using aprendizaje.model.neurona;
+﻿using aprendizaje.model.galeria;
+using aprendizaje.model.neurona;
 using aprendizaje.model.temario;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson.Serialization.Conventions;
@@ -16,9 +17,11 @@ public class MongoDbContextAprendizaje(DbContextOptions<MongoDbContextAprendizaj
 {
     public const string NOMBRE_COLECCION_NEURONA = "neurona";
     public const string NOMBRE_COLECCION_TEMARIO = "temario";
+    public const string NOMBRE_COLECCION_GALERIA = "galeria";
 
     public DbSet<Neurona> Neurona { get; set; }
     public DbSet<Temario> Temario { get; set; }
+    public DbSet<Galeria> Galeria { get; set; }
 
     public static MongoDbContextAprendizaje Create(IMongoDatabase database)
     {
