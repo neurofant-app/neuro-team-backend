@@ -223,7 +223,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                 respuesta.Payload = ADTODespliegue(entidad);
             }
             else
-            {
+            { 
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
             }
         }

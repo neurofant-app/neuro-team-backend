@@ -361,29 +361,31 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         return respuesta;
     }
 
-    public virtual async Task<PaginaGenerica<TemaGaleria>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<TemaGaleria>> ObtienePaginaElementos(Consulta consulta)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(TemaGaleria));
         var Elementos = Enumerable.Empty<TemaGaleria>().AsQueryable();
-
-        if (consulta.Filtros.Count > 0)
+        if (galeria != null)
         {
-            var predicateBody = interpreteConsulta.CrearConsultaExpresion<TemaGaleria>(consulta, entidad);
-
-            if (predicateBody != null)
+            if (consulta.Filtros.Count > 0)
             {
-                var RConsulta = galeria.ListaTemasGaleria.AsQueryable().Provider.CreateQuery<TemaGaleria>(predicateBody.getWhereExpression(galeria.ListaTemasGaleria.AsQueryable().Expression));
+                var predicateBody = interpreteConsulta.CrearConsultaExpresion<TemaGaleria>(consulta, entidad);
 
+                if (predicateBody != null)
+                {
+                    var RConsulta = galeria.ListaTemasGaleria.AsQueryable().Provider.CreateQuery<TemaGaleria>(predicateBody.getWhereExpression(galeria.ListaTemasGaleria.AsQueryable().Expression));
+
+                    Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
+                }
+            }
+            else
+            {
+                var RConsulta = galeria.ListaTemasGaleria.AsQueryable();
                 Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
+
             }
         }
-        else
-        {
-            var RConsulta = galeria.ListaTemasGaleria.AsQueryable();
-            Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
-
-        }
-        return await Elementos.PaginadoAsync(consulta);
+        return Elementos.Paginado(consulta);
     }
     #endregion
 }
