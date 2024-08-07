@@ -66,11 +66,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "conversaciones.services", "conversaciones.services\conversaciones.services.csproj", "{6811C8D6-7C3F-4917-84CD-1BF926B3247F}"
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aprendizaje", "aprendizaje", "{646A3BA5-435D-4A77-AAB8-03FA7BCACF29}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aprendizaje.api", "src\pod\aprendizaje\aprendizaje.api\aprendizaje.api.csproj", "{348EA498-9DB8-4889-86B2-8B55AC6E0003}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "conversaciones.api", "conversaciones.api\conversaciones.api.csproj", "{E8D83549-199B-445D-9098-7AFFCFD1DA72}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aprendizaje.model", "src\pod\aprendizaje\aprendizaje.model\aprendizaje.model.csproj", "{66930967-6DAD-4577-91D2-C6E305E4EADD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "conversaciones.model", "conversaciones.model\conversaciones.model.csproj", "{8D0F0CBE-DF79-4CB2-B883-AC13CD1DAA8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aprendizaje.services", "src\pod\aprendizaje\aprendizaje.services\aprendizaje.services.csproj", "{D89A9B84-2BCA-477E-94C7-181B32C28579}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "conversaciones.services", "conversaciones.services\conversaciones.services.csproj", "{6811C8D6-7C3F-4917-84CD-1BF926B3247F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
