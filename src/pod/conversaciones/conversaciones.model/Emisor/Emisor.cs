@@ -1,8 +1,8 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace comunicaciones.model;
+namespace conversaciones.model;
 
-public class Participante
+public class Emisor
 {
     /// <summary>
     /// Identificador único del emisor

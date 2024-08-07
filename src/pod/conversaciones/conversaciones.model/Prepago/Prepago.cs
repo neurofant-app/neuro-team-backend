@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace comunicaciones.model;
+namespace conversaciones.model;
 
 public class Prepago
 {

@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace comunicaciones.model;
+namespace conversaciones.model;
 /// <summary>
 /// Es un contenedor de mensajes para uno o más destinatarios participantes.
 /// </summary>
