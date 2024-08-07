@@ -4,6 +4,7 @@ using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
+using aprendizaje.model.galeria;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
@@ -11,35 +12,31 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using seguridad.modelo;
-using seguridad.modelo.instancias;
-using seguridad.modelo.roles;
-using seguridad.modelo.servicios;
-using seguridad.servicios.dbcontext;
+using Polly.Timeout;
+using System.Numerics;
 using System.Text.Json;
 
-
-namespace seguridad.servicios;
-[ServicioEntidadAPI(entidad: typeof(Rol), driver: Constantes.MONGODB)]
-public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
-    IServicioEntidadHijoAPI, IServicioRol
+namespace aprendizaje.services.galeria.temagaleria;
+[ServicioEntidadAPI(entidad: typeof(TemaGaleria))]
+public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, TemaGaleria, TemaGaleria, TemaGaleria, string>,
+    IServicioEntidadHijoAPI,IServicioTemaGaleria
 {
-    private readonly ILogger _logger;
-    private readonly IReflectorEntidadesAPI reflector;
-    private InstanciaAplicacion? aplicacion;
-    private DbSet<InstanciaAplicacion>? _dbSetAplicacion;
-    public ServicioRol(ILogger<ServicioRol> logger,
-        IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache cache) : base(null, null, logger, Reflector, cache)
+    private readonly ILogger<ServicioTemaGaleria> _logger;
+    private readonly IReflectorEntidadesAPI _reflector;
+    private Galeria? galeria;
+    private DbSet<Galeria> _dbSetGaleria;
+    public ServicioTemaGaleria(ILogger<ServicioTemaGaleria> logger, 
+        IServicionConfiguracionMongo configuracionMongo, 
+        IReflectorEntidadesAPI reflector, IDistributedCache cache) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
-        reflector = Reflector;
+        _reflector = reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -53,38 +50,55 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                     ? configuracionMongo.ConexionDefault()
                     : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
- 
-            _db = MongoDbContext.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetAplicacion = ((MongoDbContext)_db).instanciaAplicacion;
-            
+
+            _db = MongoDbContextAprendizaje.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetGaleria = ((MongoDbContextAprendizaje)_db).Galeria;
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContext.NOMBRE_COLECCION_INSTANCIAAPLICAION}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextAprendizaje.NOMBRE_COLECCION_GALERIA}'");
             throw;
         }
     }
-    private MongoDbContext DB { get { return (MongoDbContext)_db; } }
-    public bool RequiereAutenticacion => true;
 
+    private MongoDbContextAprendizaje DB { get { return (MongoDbContextAprendizaje)_db; } }
+    
+    public bool RequiereAutenticacion => true;
+    
     string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-    string IServicioEntidadHijoAPI.Padreid { get => this.aplicacion.Id ?? null; set => EstableceDbSet(value); }
+    
+    string IServicioEntidadHijoAPI.Padreid { get => this.galeria.Id.ToString() ?? null; set => EstableceDbSet(value); }
+    
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    {
+        var update = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
+        return await this.Actualizar((string)id, update);
+    }
+
+    public async Task<Respuesta> EliminarAPI(object id)
+    {
+        return await this.Eliminar((string)id);
+    }
+
+    public Entidad EntidadDespliegueAPI()
+    {
+        return this.EntidadDespliegue();
+    }
+
+    public Entidad EntidadInsertAPI()
+    {
+        return this.EntidadInsert();
+    }
 
     public Entidad EntidadRepoAPI()
     {
         return this.EntidadRepo();
     }
-    public Entidad EntidadInsertAPI()
-    {
-        return this.EntidadInsert();
-    }
+
     public Entidad EntidadUpdateAPI()
     {
         return this.EntidadUpdate();
-    }
-    public Entidad EntidadDespliegueAPI()
-    {
-        return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
@@ -94,31 +108,35 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
 
     public void EstableceDbSet(string padreId)
     {
-        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid= aplicacion != null?aplicacion.Id:null;
+        galeria = _dbSetGaleria.FirstOrDefault(_ => _.Id == new Guid(padreId));
+        this.Padreid = galeria != null ? galeria.Id.ToString() : null;
     }
+
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    {
+        var add = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
+        var temp = await this.Insertar(add);
+        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        return respuesta;
+    }
+
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
-        var add = data.Deserialize<CreaRol>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
-        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        var temp = await this.Pagina(consulta);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
-        var update = data.Deserialize<ActualizaRol>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
-    }
-
-    public async Task<Respuesta> EliminarAPI(object id)
-    {
-        return await this.Eliminar((string)id);
+        var temp = await this.PaginaDespliegue(consulta);
+        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
@@ -131,83 +149,59 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
-    {
-        var temp = await this.Pagina(consulta);
-        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
-        return respuesta;
-    }
-
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
-    {
-        var temp = await this.PaginaDespliegue(consulta);
-        RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-        return respuesta;
-    }
-
-    #region Overrides para la personalización de la entidad LogoAplicacion
-    public override async Task<ResultadoValidacion> ValidarInsertar(CreaRol data)
+    #region Overrides para la personalización de la ENTIDAD => TEMAGALERIA
+    public override async Task<ResultadoValidacion> ValidarInsertar(TemaGaleria data)
     {
         ResultadoValidacion resultado = new();
-        resultado.Valido = aplicacion != null && !aplicacion.RolesPersonalizados.Any(_ => _.Nombre == data.Nombre);
+        resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Rol original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, TemaGaleria original)
     {
         ResultadoValidacion resultado = new();
-        resultado.Valido = aplicacion != null ? true : false;
+        resultado.Valido = true;
+        return resultado;
+    }
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, TemaGaleria actualizacion, TemaGaleria original)
+    {
+        ResultadoValidacion resultado = new();
+        resultado.Valido = true;
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaRol actualizacion, Rol original)
+    public override TemaGaleria ADTOFull(TemaGaleria actualizacion, TemaGaleria actual)
     {
-        ResultadoValidacion resultado = new();
-
-        resultado.Valido = aplicacion != null && !aplicacion.RolesPersonalizados.Any(_ => _.Nombre == actualizacion.Nombre && _.RolId!=actualizacion.RolId);
-
-        return resultado;
-    }
-
-    public override Rol ADTOFull(ActualizaRol actualizacion, Rol actual)
-    {
-            actual.Nombre = actualizacion.Nombre;
-            actual.Descripcion = actualizacion.Descripcion;
-        
+        actual.Nombre = actualizacion.Nombre;
         return actual;
     }
 
-    public override Rol ADTOFull(CreaRol data)
+    public override TemaGaleria ADTOFull(TemaGaleria data)
     {
-            Rol rol = new Rol()
-            {
-                RolId = Guid.NewGuid().ToString(),
-                Nombre = data.Nombre,
-                Descripcion = data.Descripcion,
-                Permisos = new List<string>(),
-                Personalizado = false
-            };          
-        return rol;
-    }
-    public override ConsultaRol ADTODespliegue(Rol data)
-    {
-        return new ConsultaRol
+        TemaGaleria temaGaleria = new TemaGaleria()
         {
-             RolId=data.RolId,
-             Nombre = data.Nombre,
-             Descripcion = data.Descripcion,
-             Permisos=data.Permisos,
-             Personalizado=data.Personalizado
+            Id = data.Id,
+            Nombre = data.Nombre
         };
+        return temaGaleria;
     }
-    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)
+
+    public override TemaGaleria ADTODespliegue(TemaGaleria data)
     {
-        var respuesta = new RespuestaPayload<ConsultaRol>();
+        TemaGaleria temaGaleria = new TemaGaleria()
+        {
+            Id = data.Id,
+            Nombre = data.Nombre
+        };
+        return temaGaleria;
+    }
+
+    public virtual async Task<RespuestaPayload<TemaGaleria>> Insertar(TemaGaleria data)
+    {
+        var respuesta = new RespuestaPayload<TemaGaleria>();
 
         try
         {
@@ -215,15 +209,15 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                aplicacion.RolesPersonalizados.Add(entidad);
-                _dbSetAplicacion.Update(aplicacion);
+                galeria.ListaTemasGaleria.Add(entidad);
+                _dbSetGaleria.Update(galeria);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
                 respuesta.Payload = ADTODespliegue(entidad);
             }
             else
-            { 
+            {
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
             }
         }
@@ -238,7 +232,8 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
 
         return respuesta;
     }
-    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data)
+
+    public override async Task<Respuesta> Actualizar(string id, TemaGaleria data)
     {
         var respuesta = new Respuesta();
         try
@@ -249,33 +244,33 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                 return respuesta;
             }
 
-            Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_=>_.RolId==data.RolId);
-
+            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
 
+
             var resultadoValidacion = await ValidarActualizar(id.ToString(), data, actual);
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                var index = aplicacion.RolesPersonalizados.IndexOf(entidad);
-                
-                if(index>=0)
+                var index = galeria.ListaTemasGaleria.IndexOf(entidad);
+                if(index == 0)
                 {
-                    aplicacion.RolesPersonalizados[index] = entidad;
-                    _dbSetAplicacion.Update(aplicacion);
+                    galeria.ListaTemasGaleria[0] = entidad;
+                    _dbSetGaleria.Update(galeria);
                     await _db.SaveChangesAsync();
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                 }
                 else
-                    {
+                {
                     respuesta.Error = resultadoValidacion.Error;
                     respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-                    }               
+                }
+                
             }
             else
             {
@@ -286,36 +281,33 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"Actualizar {ex.Message}");
             _logger.LogError($"{ex}");
 
             respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
-
         return respuesta;
     }
 
-
-    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<TemaGaleria>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Rol>();
+        var respuesta = new RespuestaPayload<TemaGaleria>();
         try
         {
-            Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_ => _.RolId == id);
+            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == int.Parse(id));
             if (actual == null)
             {
-                respuesta.HttpCode = HttpCode.NotFound;
+                respuesta.HttpCode = HttpCode.Ok;
                 return respuesta;
             }
-
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
             respuesta.Payload = actual;
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"UnicaPorId {ex.Message}");
             _logger.LogError($"{ex}");
 
             respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
@@ -336,19 +328,18 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                 return respuesta;
             }
 
-            Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_=>_.RolId==id);
+            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_=>_.Id == int.Parse(id));
             if (actual == null)
             {
-                respuesta.Ok = true;
-                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
 
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-                aplicacion.RolesPersonalizados.Remove(actual);
-                _dbSetAplicacion.Update(aplicacion);
+                galeria.ListaTemasGaleria.Remove(actual);
+                _dbSetGaleria.Update(galeria);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -369,34 +360,34 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         }
         return respuesta;
     }
-    public override async Task<PaginaGenerica<Rol>> ObtienePaginaElementos(Consulta consulta)
+
+    public override async Task<PaginaGenerica<TemaGaleria>> ObtienePaginaElementos(Consulta consulta)
     {
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Rol));
-        var Elementos = Enumerable.Empty<Rol>().AsQueryable();
-        if (aplicacion != null)
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(TemaGaleria));
+        var Elementos = Enumerable.Empty<TemaGaleria>().AsQueryable();
+        if (galeria != null)
         {
             if (consulta.Filtros.Count > 0)
             {
-                var predicateBody = interpreteConsulta.CrearConsultaExpresion<Rol>(consulta, entidad);
+                var predicateBody = interpreteConsulta.CrearConsultaExpresion<TemaGaleria>(consulta, entidad);
 
                 if (predicateBody != null)
                 {
-                    var RConsulta = aplicacion.RolesPersonalizados.AsQueryable().Provider.CreateQuery<Rol>(predicateBody.getWhereExpression(aplicacion.RolesPersonalizados.AsQueryable().Expression));
+                    var RConsulta = galeria.ListaTemasGaleria.AsQueryable().Provider.CreateQuery<TemaGaleria>(predicateBody.getWhereExpression(galeria.ListaTemasGaleria.AsQueryable().Expression));
 
                     Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
                 }
             }
             else
             {
-                var RConsulta = aplicacion.RolesPersonalizados.AsQueryable();
+                var RConsulta = galeria.ListaTemasGaleria.AsQueryable();
                 Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
 
             }
         }
         return Elementos.Paginado(consulta);
     }
-
     #endregion
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning restore CS8603 // Possible null reference return.
+#pragma warning restore CS8603 // Possible null reference return

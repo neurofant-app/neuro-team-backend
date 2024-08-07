@@ -10,7 +10,7 @@ using System.Text.Json;
 namespace apigenerica.primitivas;
 
 
-/// La api generica utiliza el parámetro {entidad} con propósitos asignación de servicion el em Middleware
+/// La api generica utiliza el parámetro {entidad} con propósitos asignación de servicion en el Middleware
 #pragma warning disable IDE0060 // Quitar el parámetro no utilizado
 
 /// <summary>
