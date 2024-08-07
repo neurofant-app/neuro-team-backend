@@ -1,4 +1,4 @@
-﻿namespace comunicaciones.model;
+﻿namespace conversaciones.model;
 
 /// <summary>
 /// Canales de comunicación por el que se envían los mensajes

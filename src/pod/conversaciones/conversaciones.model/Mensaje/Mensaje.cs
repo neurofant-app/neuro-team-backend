@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace comunicaciones.model;
+namespace conversaciones.model;
 /// <summary>
 /// Contiene la información a intercambiar y será enviado por un canal en base
 /// a la lista de canales disponibles

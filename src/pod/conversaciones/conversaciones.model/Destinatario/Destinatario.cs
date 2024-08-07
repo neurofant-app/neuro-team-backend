@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace comunicaciones.model;
+namespace conversaciones.model;
 
 /// <summary>
 /// Identificador único de una persona dependiendo del tipo de medio
