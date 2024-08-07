@@ -9,7 +9,7 @@ public class Prepago
     /// <summary>
     /// Indica si el prepago tiene vigencia, sin vigencia , mensual o trimestral.
     /// </summary>
-    [BsonElement("v")]
+    [BsonElement("t")]
     public TipoVigencia Vigencia { get; set; }
     /// <summary>
     /// Fecha de vigencia del prepago
