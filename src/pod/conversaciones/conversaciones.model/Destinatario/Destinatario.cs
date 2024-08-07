@@ -12,7 +12,7 @@ public class Destinatario
     /// En el caso de Correo Electrónico será el Email.
     /// </summary>
     [BsonId]
-    public  string  MedioId { get; set; }
+    public string MedioId { get; set; }
     /// <summary>
     /// Describe quién será el participante
     /// </summary>

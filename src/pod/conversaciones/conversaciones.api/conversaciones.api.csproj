@@ -13,13 +13,13 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Folder Include="Controllers\" />
-	</ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controllers\" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
-		<ProjectReference Include="..\conversaciones.services\conversaciones.services.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
+    <ProjectReference Include="..\conversaciones.services\conversaciones.services.csproj" />
+  </ItemGroup>
 
 </Project>

@@ -6,7 +6,7 @@
 public enum TipoCanal
 {
     CorreoElectronico = 0,
-    WhatsApp= 1,
+    WhatsApp = 1,
     SMS = 2,
     Telegram = 3,
     Web = 4,

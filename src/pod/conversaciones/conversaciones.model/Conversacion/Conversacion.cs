@@ -14,7 +14,7 @@ public class Conversacion
     [BsonElement("e")]
     public Participante? Emisor { get; set; }
     [BsonElement("lp")]
-    public List<Participante> Participantes{ get; set; }
+    public List<Participante> Participantes { get; set; }
     [BsonElement("c")]
     public TipoCanal Canal { get; set; }
     [BsonElement("n")]

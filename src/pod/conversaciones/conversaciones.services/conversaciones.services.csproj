@@ -9,7 +9,8 @@
 		<PackageReference Include="MongoDB.Driver" Version="2.25.0" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.0.0" />
 	</ItemGroup>
+	
 	<ItemGroup>
-		<ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
+	  <ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
 	</ItemGroup>
 </Project>
