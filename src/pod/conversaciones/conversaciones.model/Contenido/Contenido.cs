@@ -6,7 +6,7 @@ public class Contenido
 {
     [BsonId]
     public string Id { get; set; }
-    [BsonElement("tc")]
+    [BsonElement("t")]
     public TipoCanal Canal { get; set; }
     [BsonElement("c")]
     public string Cuerpo { get; set; }
