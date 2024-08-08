@@ -11,6 +11,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <ProjectReference Include="..\..\..\lib\apigenerica.model\apigenerica.model.csproj" />
+	  <ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
 	  <ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
 	</ItemGroup>
 </Project>

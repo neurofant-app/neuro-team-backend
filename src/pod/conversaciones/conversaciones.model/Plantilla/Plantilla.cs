@@ -1,9 +1,11 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace conversaciones.model;
 /// <summary>
 /// Plantilla para envio de mensaje
 /// </summary>
+[EntidadDB]
 public class Plantilla
 {
     /// <summary>
@@ -31,6 +33,4 @@ public class Plantilla
     public string? UsuarioId { get; set; }
     [BsonElement("fc")]
     public DateTime FechaCreacion { get; set; }
-    [BsonElement("fe")]
-    public DateTime? FechaEnvio { get; set; }
 }

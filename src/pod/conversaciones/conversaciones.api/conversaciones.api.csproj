@@ -10,14 +10,14 @@
 	<ItemGroup>
 		<PackageReference Include="MongoDB.Driver" Version="2.25.0" />
 		<PackageReference Include="MongoDB.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
 	</ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\..\lib\apigenerica.model\apigenerica.model.csproj" />
+    <ProjectReference Include="..\..\..\lib\apigenerica.primitivas\apigenerica.primitivas.csproj" />
+    <ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
+    <ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
     <ProjectReference Include="..\conversaciones.model\conversaciones.model.csproj" />
     <ProjectReference Include="..\conversaciones.services\conversaciones.services.csproj" />
   </ItemGroup>
