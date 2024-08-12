@@ -202,6 +202,168 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         return contenido;
     }
 
+    public virtual async Task<RespuestaPayload<Contenido>> Insertar(Contenido data)
+    {
+        var respuesta = new RespuestaPayload<Contenido>();
+
+        try
+        {
+            var resultadoValidacion = await ValidarInsertar(data);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data);
+                plantilla.Contenidos.Add(entidad);
+                _dbSetPlantilla.Update(plantilla);
+                await _db.SaveChangesAsync();
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Payload = ADTODespliegue(entidad);
+            }
+            else
+            {
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+    public override async Task<Respuesta> Actualizar(string id, Contenido data)
+    {
+        var respuesta = new Respuesta();
+        try
+        {
+            if (string.IsNullOrEmpty(id.ToString()) || data == null)
+            {
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
+            }
+
+            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == data.Id);
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+
+            var resultadoValidacion = await ValidarActualizar(id, data, actual);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data, actual);
+                var index = plantilla.Contenidos.IndexOf(entidad);
+                if (index == 0)
+                {
+                    plantilla.Contenidos[0] = entidad;
+                    _dbSetPlantilla.Update(plantilla);
+                    await _db.SaveChangesAsync();
+                    respuesta.Ok = true;
+                    respuesta.HttpCode = HttpCode.Ok;
+                }
+                else
+                {
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                }
+
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Actualizar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
+    public override async Task<RespuestaPayload<Contenido>> UnicaPorId(string id)
+    {
+        var respuesta = new RespuestaPayload<Contenido>();
+        try
+        {
+            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.Ok;
+                return respuesta;
+            }
+            respuesta.Ok = true;
+            respuesta.HttpCode = HttpCode.Ok;
+            respuesta.Payload = actual;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"UnicaPorId {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
+    public override async Task<Respuesta> Eliminar(string id)
+    {
+        var respuesta = new Respuesta();
+        try
+        {
+
+            if (string.IsNullOrEmpty(id))
+            {
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
+            }
+
+            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
+            if (actual == null)
+            {
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            var resultadoValidacion = await ValidarEliminacion(id, actual);
+            if (resultadoValidacion.Valido)
+            {
+                plantilla.Contenidos.Remove(actual);
+                _dbSetPlantilla.Update(plantilla);
+                await _db.SaveChangesAsync();
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"{ex}");
+
+            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
     public override async Task<PaginaGenerica<Contenido>> ObtienePaginaElementos(Consulta consulta)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Contenido));

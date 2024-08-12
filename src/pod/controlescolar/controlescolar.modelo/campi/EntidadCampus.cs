@@ -18,6 +18,7 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
 
     public virtual Guid Id { get; set; }
 
+
     /// <summary>
     /// Identificador único de la cuenta que administra el campus
     /// Se obtiene del contexto por ejemplo un claim de JWT

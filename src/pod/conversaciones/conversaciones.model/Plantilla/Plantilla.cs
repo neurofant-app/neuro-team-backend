@@ -1,10 +1,12 @@
 ﻿using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace conversaciones.model;
 /// <summary>
 /// Plantilla para envio de mensaje
 /// </summary>
+[ExcludeFromCodeCoverage]
 [EntidadDB]
 public class Plantilla
 {

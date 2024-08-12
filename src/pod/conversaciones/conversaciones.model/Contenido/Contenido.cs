@@ -1,7 +1,10 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace conversaciones.model;
-
+[ExcludeFromCodeCoverage]
+[EntidadDB]
 public class Contenido
 {
     [BsonId]
