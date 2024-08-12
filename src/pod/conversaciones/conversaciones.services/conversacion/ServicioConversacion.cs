@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
@@ -7,34 +8,34 @@ using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using conversaciones.model;
 using conversaciones.services.dbcontext;
+using conversaciones.services.plantilla;
 using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
-using Plantilla = conversaciones.model.Plantilla;
 
-namespace conversaciones.services.plantilla;
-[ServicioEntidadAPI(entidad:typeof(Plantilla))]
-public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantilla, Plantilla, Plantilla, string>,
-    IServicioEntidadAPI, IServicioPlantilla
+namespace conversaciones.services.conversacion;
+[ServicioEntidadAPI(entidad: typeof(Conversacion))]
+public class ServicioConversacion : ServicioEntidadGenericaBase<Conversacion, Conversacion, Conversacion, Conversacion, string>,
+    IServicioEntidadAPI, IServicioConversacion
 {
     private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
     private readonly IDistributedCache cache;
 
-    public ServicioPlantilla(ILogger<ServicioPlantilla> logger,
+    public ServicioConversacion(ILogger<ServicioConversacion> logger,
         IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI Reflector, IDistributedCache Cache) : base (null, null, logger, Reflector, Cache)
+        IReflectorEntidadesAPI Reflector, IDistributedCache Cache) : base(null, null, logger, Reflector, Cache)
     {
         _logger = logger;
         reflector = Reflector;
         cache = Cache;
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA);
-        if(configuracionEntidad == null)
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION);
+        if (configuracionEntidad == null)
         {
-            string err = $"No existe configuración de mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA}";
+            string err = $"No existe configuración de mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION}";
             _logger.LogError(err);
             throw new Exception(err);
 
@@ -50,16 +51,16 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
                     : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
             _db = MongoDbContextConversaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextConversaciones)_db).Plantilla;
+            _dbSetFull = ((MongoDbContextConversaciones)_db).Conversacion;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION}'");
             throw;
         }
     }
 
-    private MongoDbContextConversaciones DB { get {  return (MongoDbContextConversaciones)_db; } }
+    private MongoDbContextConversaciones DB { get { return (MongoDbContextConversaciones)_db; } }
     public bool RequiereAutenticacion => true;
 
     public Entidad EntidadRepoAPI()
@@ -94,7 +95,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<Plantilla>(JsonAPIDefaults());
+        var add = data.Deserialize<Conversacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -102,7 +103,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<Plantilla>(JsonAPIDefaults());
+        var update = data.Deserialize<Conversacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -142,7 +143,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
     }
 
     #region Overrides para la personalización de la entidad Plantilla
-    public override async Task<ResultadoValidacion> ValidarInsertar(Plantilla plantilla)
+    public override async Task<ResultadoValidacion> ValidarInsertar(Conversacion plantilla)
     {
         ResultadoValidacion resultado = new()
         {
@@ -151,7 +152,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Plantilla actualizacion, Plantilla original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Conversacion actualizacion, Conversacion original)
     {
         ResultadoValidacion resultado = new()
         {
@@ -160,43 +161,84 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return resultado;
     }
 
-    public override Plantilla ADTOFull(Plantilla actualizacion, Plantilla actual)
+    public override Conversacion ADTOFull(Conversacion actualizacion, Conversacion actual)
     {
-        actual.Contenidos = actualizacion.Contenidos;
-        actual.AplicacionId = actualizacion.AplicacionId;
-        actual.DeUsuario = actualizacion.DeUsuario;
+        actual.Emisor = actualizacion.Emisor;
+        actual.Participantes = actualizacion.Participantes;
+        actual.Canal = actualizacion.Canal;
+        actual.Nombre = actualizacion.Nombre;
         actual.FechaCreacion = actualizacion.FechaCreacion;
+        actual.FechaActualizacion = actualizacion.FechaActualizacion;
+        actual.CantidadMensajes = actualizacion.CantidadMensajes;
+        actual.Mensajes = actualizacion.Mensajes;
+        actual.Unidireccional = actualizacion.Unidireccional;
         return actual;
     }
 
-    public override Plantilla ADTODespliegue(Plantilla data)
+    public override Conversacion ADTODespliegue(Conversacion data)
     {
-        Plantilla plantilla = new Plantilla()
+        Conversacion conversacion = new Conversacion()
         {
             Id = data.Id,
-            Contenidos = data.Contenidos,
-            AplicacionId = data.AplicacionId,
-            DeUsuario = data.DeUsuario,
-            UsuarioId = data.UsuarioId,
-            FechaCreacion = data.FechaCreacion
+            Emisor = data.Emisor,
+            Participantes = data.Participantes,
+            Canal = data.Canal,
+            Nombre = data.Nombre,
+            FechaCreacion = data.FechaCreacion,
+            FechaActualizacion = data.FechaActualizacion,
+            CantidadMensajes = data.CantidadMensajes,
+            Mensajes = data.Mensajes,
+            Unidireccional = data.Unidireccional
+
         };
-        return plantilla;
+        return conversacion;
     }
 
-    public override Plantilla ADTOFull(Plantilla data)
+    public override Conversacion ADTOFull(Conversacion data)
     {
-        Plantilla plantilla = new Plantilla()
+        Conversacion conversacion = new Conversacion()
         {
             Id = data.Id,
-            Contenidos = data.Contenidos,
-            AplicacionId = data.AplicacionId,
-            DeUsuario = data.DeUsuario,
-            UsuarioId = data.UsuarioId,
-            FechaCreacion = DateTime.UtcNow
+            Emisor = data.Emisor,
+            Participantes = data.Participantes,
+            Canal = data.Canal,
+            Nombre = data.Nombre,
+            FechaCreacion = DateTime.UtcNow,
+            FechaActualizacion = data.FechaActualizacion,
+            CantidadMensajes = data.CantidadMensajes,
+            Mensajes = data.Mensajes,
+            Unidireccional = data.Unidireccional
         };
-        return plantilla;
+        return conversacion;
     }
 
+    public override async Task<PaginaGenerica<Conversacion>> ObtienePaginaElementos(Consulta consulta)
+    {
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Conversacion));
+        var Elementos = Enumerable.Empty<Conversacion>().AsQueryable();
+
+        if (consulta.Filtros.Count > 0)
+        {
+            var predicateBody = interpreteConsulta.CrearConsultaExpresion<Conversacion>(consulta, entidad);
+
+            if (predicateBody != null)
+            {
+                var RConsulta = _dbSetFull.AsQueryable().Provider.CreateQuery<Conversacion>(predicateBody.getWhereExpression(_dbSetFull.AsQueryable().Expression));
+
+                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
+            }
+        }
+        else
+        {
+            var RConsulta = _dbSetFull.AsQueryable();
+            Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
+
+        }
+        return await Elementos.PaginadoAsync(consulta);
+    }
 
     #endregion
+
 }
+#pragma warning disable CS8603 // Possible null reference return.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.

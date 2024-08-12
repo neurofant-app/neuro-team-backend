@@ -1,9 +1,13 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace conversaciones.model;
 /// <summary>
 /// Es un contenedor de mensajes para uno o más destinatarios participantes.
 /// </summary>
+[ExcludeFromCodeCoverage]
+[EntidadDB]
 public class Conversacion
 {
     [BsonId]

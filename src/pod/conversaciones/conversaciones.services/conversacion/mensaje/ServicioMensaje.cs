@@ -14,17 +14,17 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
-using Plantilla = conversaciones.model.Plantilla;
-namespace conversaciones.services.plantilla.contenido;
-[ServicioEntidadAPI(entidad:typeof(Contenido))]
-public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Contenido,Contenido,Contenido,string>,
-    IServicioEntidadHijoAPI,IServicioContenido
+
+namespace conversaciones.services.conversacion.mensaje;
+[ServicioEntidadAPI(entidad:typeof(Mensaje))]
+public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje, Mensaje, Mensaje, string>,
+    IServicioEntidadHijoAPI, IServicioMensaje
 {
-    private readonly ILogger<ServicioContenido> _logger;
+    private readonly ILogger<ServicioMensaje> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
-    private Plantilla? plantilla;
-    private DbSet<Plantilla> _dbSetPlantilla;
-    public ServicioContenido(ILogger<ServicioContenido> logger,
+    private Conversacion? conversacion;
+    private DbSet<Conversacion> _dbSetConversacion;
+    public ServicioMensaje(ILogger<ServicioMensaje> logger,
         IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI reflector, IDistributedCache cache) : base(null, null, logger, reflector, cache)
     {
@@ -32,10 +32,10 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         _reflector = reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -51,7 +51,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContextConversaciones.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetPlantilla = ((MongoDbContextConversaciones)_db).Plantilla;
+            _dbSetConversacion = ((MongoDbContextConversaciones)_db).Conversacion;
 
         }
         catch (Exception ex)
@@ -67,11 +67,11 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
 
     string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
 
-    string IServicioEntidadHijoAPI.Padreid { get => this.plantilla.Id ?? null; set => EstableceDbSet(value); }
+    string IServicioEntidadHijoAPI.Padreid { get => this.conversacion.Id ?? null; set => EstableceDbSet(value); }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        var update = data.Deserialize<Contenido>(JsonAPIDefaults());
+        var update = data.Deserialize<Mensaje>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
@@ -107,12 +107,12 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
 
     public void EstableceDbSet(string padreId)
     {
-        plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid = plantilla != null ? plantilla.Id : null;
+        conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == padreId);
+        this.Padreid = conversacion != null ? conversacion.Id : null;
     }
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
-        var add = data.Deserialize<Contenido>(JsonAPIDefaults());
+        var add = data.Deserialize<Mensaje>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -147,64 +147,85 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     }
 
     #region Overrides para la personalizacion de le ENTIDAD => Contenido
-    public override async Task<ResultadoValidacion> ValidarInsertar(Contenido data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(Mensaje data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Contenido original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Mensaje original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Contenido actualizacion, Contenido original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Mensaje actualizacion, Mensaje original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override Contenido ADTOFull(Contenido actualizacion, Contenido actual)
+    public override Mensaje ADTOFull(Mensaje actualizacion, Mensaje actual)
     {
         actual.Id = actualizacion.Id;
-        actual.Canal = actualizacion.Canal;
         actual.Cuerpo = actualizacion.Cuerpo;
         actual.Encabezado = actualizacion.Encabezado;
-        actual.Idioma = actualizacion.Idioma;
+        actual.PlantillaId = actualizacion.PlantillaId;
+        actual.CargaUtil = actualizacion.CargaUtil;
+        actual.FechaCreacion = actualizacion.FechaCreacion;
+        actual.FechaEnvio = actualizacion.FechaEnvio;
+        actual.ErrorEnvio = actualizacion.ErrorEnvio;
+        actual.CodigoError = actualizacion.CodigoError;
+        actual.EmisorId = actualizacion.EmisorId;
+        actual.Bytes = actualizacion.Bytes;
+        actual.PrepagoId = actualizacion.PrepagoId;
         return actual;
     }
 
-    public override Contenido ADTOFull(Contenido data)
+    public override Mensaje ADTOFull(Mensaje data)
     {
-        Contenido contenido = new Contenido()
+        Mensaje mensaje = new Mensaje()
         {
             Id = data.Id,
-            Canal = data.Canal,
             Cuerpo = data.Cuerpo,
             Encabezado = data.Encabezado,
-            Idioma = data.Idioma,
+            PlantillaId = data.PlantillaId,
+            CargaUtil = data.CargaUtil,
+            FechaCreacion = DateTime.UtcNow,
+            FechaEnvio = data.FechaEnvio,
+            ErrorEnvio = data.ErrorEnvio,
+            CodigoError = data.CodigoError,
+            EmisorId = data.EmisorId,
+            Bytes = data.Bytes,
+            PrepagoId = data.PrepagoId
         };
-        return contenido;
+        return mensaje;
     }
 
-    public override Contenido ADTODespliegue(Contenido data)
+    public override Mensaje ADTODespliegue(Mensaje data)
     {
-        Contenido contenido = new Contenido()
+        Mensaje mensaje = new Mensaje()
         {
             Id = data.Id,
-            Canal = data.Canal,
             Cuerpo = data.Cuerpo,
             Encabezado = data.Encabezado,
-            Idioma = data.Idioma,
+            PlantillaId = data.PlantillaId,
+            CargaUtil = data.CargaUtil,
+            FechaCreacion = data.FechaCreacion,
+            FechaEnvio = data.FechaEnvio,
+            ErrorEnvio = data.ErrorEnvio,
+            CodigoError = data.CodigoError,
+            EmisorId = data.EmisorId,
+            Bytes = data.Bytes,
+            PrepagoId = data.PrepagoId
         };
-        return contenido;
+        return mensaje;
     }
 
-    public virtual async Task<RespuestaPayload<Contenido>> Insertar(Contenido data)
+    public virtual async Task<RespuestaPayload<Mensaje>> Insertar(Mensaje data)
     {
-        var respuesta = new RespuestaPayload<Contenido>();
+        var respuesta = new RespuestaPayload<Mensaje>();
 
         try
         {
@@ -212,8 +233,8 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                plantilla.Contenidos.Add(entidad);
-                _dbSetPlantilla.Update(plantilla);
+                conversacion.Mensajes.Add(entidad);
+                _dbSetConversacion.Update(conversacion);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -236,7 +257,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Contenido data)
+    public override async Task<Respuesta> Actualizar(string id, Mensaje data)
     {
         var respuesta = new Respuesta();
         try
@@ -247,7 +268,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
                 return respuesta;
             }
 
-            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == data.Id);
+            Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -259,11 +280,11 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                var index = plantilla.Contenidos.IndexOf(entidad);
+                var index = conversacion.Mensajes.IndexOf(entidad);
                 if (index == 0)
                 {
-                    plantilla.Contenidos[0] = entidad;
-                    _dbSetPlantilla.Update(plantilla);
+                    conversacion.Mensajes[0] = entidad;
+                    _dbSetConversacion.Update(conversacion);
                     await _db.SaveChangesAsync();
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
@@ -293,12 +314,12 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Contenido>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Mensaje>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Contenido>();
+        var respuesta = new RespuestaPayload<Mensaje>();
         try
         {
-            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
+            Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.Ok;
@@ -331,7 +352,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
                 return respuesta;
             }
 
-            Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
+            Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -341,8 +362,8 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-                plantilla.Contenidos.Remove(actual);
-                _dbSetPlantilla.Update(plantilla);
+                conversacion.Mensajes.Remove(actual);
+                _dbSetConversacion.Update(conversacion);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -364,26 +385,26 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Contenido>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Mensaje>> ObtienePaginaElementos(Consulta consulta)
     {
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Contenido));
-        var Elementos = Enumerable.Empty<Contenido>().AsQueryable();
-        if (plantilla != null)
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Mensaje));
+        var Elementos = Enumerable.Empty<Mensaje>().AsQueryable();
+        if (conversacion != null)
         {
             if (consulta.Filtros.Count > 0)
             {
-                var predicateBody = interpreteConsulta.CrearConsultaExpresion<Contenido>(consulta, entidad);
+                var predicateBody = interpreteConsulta.CrearConsultaExpresion<Mensaje>(consulta, entidad);
 
                 if (predicateBody != null)
                 {
-                    var RConsulta = plantilla.Contenidos.AsQueryable().Provider.CreateQuery<Contenido>(predicateBody.getWhereExpression(plantilla.Contenidos.AsQueryable().Expression));
+                    var RConsulta = conversacion.Mensajes.AsQueryable().Provider.CreateQuery<Mensaje>(predicateBody.getWhereExpression(conversacion.Mensajes.AsQueryable().Expression));
 
                     Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
                 }
             }
             else
             {
-                var RConsulta = plantilla.Contenidos.AsQueryable();
+                var RConsulta = conversacion.Mensajes.AsQueryable();
                 Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
 
             }

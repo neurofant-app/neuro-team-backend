@@ -1,10 +1,14 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 
 namespace conversaciones.model;
 /// <summary>
 /// Contiene la información a intercambiar y será enviado por un canal en base
 /// a la lista de canales disponibles
 /// </summary>
+[ExcludeFromCodeCoverage]
+[EntidadDB]
 public class Mensaje
 {
     [BsonId]

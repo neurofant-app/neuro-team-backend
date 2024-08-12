@@ -9,7 +9,11 @@ namespace conversaciones.services.dbcontext;
 public class MongoDbContextConversaciones(DbContextOptions<MongoDbContextConversaciones> options): DbContext(options)
 {
     public const string NOMBRE_COLECCION_PLANTILLA = "plantilla";
+    public const string NOMBRE_COLECCION_CONVERSACION = "conversacion";
+    
     public DbSet<Plantilla> Plantilla { get; set; }
+    public DbSet<Conversacion> Conversacion { get; set; }
+
     public static MongoDbContextConversaciones Create(IMongoDatabase database)
     {
         // Este fragemnto sirve para evitar conflicts de mongo con cambios en el modelo
@@ -27,5 +31,7 @@ public class MongoDbContextConversaciones(DbContextOptions<MongoDbContextConvers
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Plantilla>().ToCollection(NOMBRE_COLECCION_PLANTILLA);
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Plantilla>().ToCollection(NOMBRE_COLECCION_CONVERSACION);
     }
 }
