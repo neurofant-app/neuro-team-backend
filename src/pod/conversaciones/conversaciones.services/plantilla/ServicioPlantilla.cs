@@ -37,7 +37,6 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
             string err = $"No existe configuración de mongo para '{MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA}";
             _logger.LogError(err);
             throw new Exception(err);
-
         }
 
         try
@@ -192,11 +191,11 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
             AplicacionId = data.AplicacionId,
             DeUsuario = data.DeUsuario,
             UsuarioId = data.UsuarioId,
-            FechaCreacion = DateTime.UtcNow
+            FechaCreacion = data.FechaCreacion
         };
         return plantilla;
     }
-
-
     #endregion
 }
+#pragma warning disable CS8603 // Possible null reference return.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.

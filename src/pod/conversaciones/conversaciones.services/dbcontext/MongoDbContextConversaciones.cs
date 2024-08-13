@@ -32,6 +32,6 @@ public class MongoDbContextConversaciones(DbContextOptions<MongoDbContextConvers
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Plantilla>().ToCollection(NOMBRE_COLECCION_PLANTILLA);
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Plantilla>().ToCollection(NOMBRE_COLECCION_CONVERSACION);
+        modelBuilder.Entity<Conversacion>().ToCollection(NOMBRE_COLECCION_CONVERSACION);
     }
 }

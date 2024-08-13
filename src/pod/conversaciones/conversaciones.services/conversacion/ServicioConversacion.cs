@@ -203,7 +203,7 @@ public class ServicioConversacion : ServicioEntidadGenericaBase<Conversacion, Co
             Participantes = data.Participantes,
             Canal = data.Canal,
             Nombre = data.Nombre,
-            FechaCreacion = DateTime.UtcNow,
+            FechaCreacion = data.FechaCreacion,
             FechaActualizacion = data.FechaActualizacion,
             CantidadMensajes = data.CantidadMensajes,
             Mensajes = data.Mensajes,
@@ -211,34 +211,7 @@ public class ServicioConversacion : ServicioEntidadGenericaBase<Conversacion, Co
         };
         return conversacion;
     }
-
-    public override async Task<PaginaGenerica<Conversacion>> ObtienePaginaElementos(Consulta consulta)
-    {
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Conversacion));
-        var Elementos = Enumerable.Empty<Conversacion>().AsQueryable();
-
-        if (consulta.Filtros.Count > 0)
-        {
-            var predicateBody = interpreteConsulta.CrearConsultaExpresion<Conversacion>(consulta, entidad);
-
-            if (predicateBody != null)
-            {
-                var RConsulta = _dbSetFull.AsQueryable().Provider.CreateQuery<Conversacion>(predicateBody.getWhereExpression(_dbSetFull.AsQueryable().Expression));
-
-                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
-            }
-        }
-        else
-        {
-            var RConsulta = _dbSetFull.AsQueryable();
-            Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
-
-        }
-        return await Elementos.PaginadoAsync(consulta);
-    }
-
     #endregion
-
 }
 #pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
