@@ -4,12 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.temario;
 
-//  - - - DETALLES
-//  
-//  Esta entidad se almacena en mongo
-//
-//  - - - 
-
 
 /// <summary>
 /// Describe un termario que sirve como plan de estudios para las actividades de aprendizaje
