@@ -3,7 +3,6 @@ using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
-using comunicaciones.api.seguridad;
 using comunicaciones.modelo;
 using comunicaciones.servicios.email;
 using comunicaciones.servicios.whatsapp;
@@ -27,10 +26,6 @@ namespace comunicaciones.api
             builder.Services.AddTransient<IServicioEmail, ServicioEmailSendGrid>();
             builder.Services.AddTransient<IMessageBuilder, JSONMessageBuilder>();
             builder.Services.AddTransient<IServicioWhatsapp, ServicioWhatsapp>();
-
-            builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
-            builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
-            builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
             builder.Services.AddHttpClient();
             var app = builder.Build();
 
