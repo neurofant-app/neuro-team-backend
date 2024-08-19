@@ -51,4 +51,10 @@ public class Mensaje
     /// </summary>
     [BsonElement("ppd")]
     public string? PrepagoId { get; set; }
+
+    /// <summary>
+    /// Determina el tipo de mensaje, archivo, texto, img, etc...
+    /// </summary>
+    [BsonElement("tm")]
+    public TipoMsj tipoMensaje { get; set; }
 }

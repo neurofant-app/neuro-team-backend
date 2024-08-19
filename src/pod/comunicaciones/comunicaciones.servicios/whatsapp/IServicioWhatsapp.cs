@@ -13,6 +13,7 @@ namespace comunicaciones.servicios.whatsapp
         string SubirImagen(string UrlBase, string Token, string RutaImg);
         string Base64ToImage(string base64String);
         Task<Respuesta> EnviarImagen(string UrlBase, string IdImg, string Token, string TelefonoDestino);
+        Task<Respuesta> EnviarTxt(string UrlBase, string Token, string TelefonoDestino, string mensaje);
 
 
     }

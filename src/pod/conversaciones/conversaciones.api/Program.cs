@@ -5,6 +5,8 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using conversaciones.api.seguridad;
+using conversaciones.services.proxy.abstractions;
+using conversaciones.services.proxy.implementations;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 public class Program
@@ -23,6 +25,7 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IProxyConversacionComunicaciones, ProxyConversacionComunicaciones>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

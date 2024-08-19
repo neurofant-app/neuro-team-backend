@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 using System.Drawing;
+using System.Net.Http.Headers;
 
 namespace comunicaciones.servicios.whatsapp
 {
@@ -18,6 +19,10 @@ namespace comunicaciones.servicios.whatsapp
             this.logger = logger;
             this.configuration = configuration;
         }
+
+
+
+
 
         public string Base64ToImage(string base64String)
         {
@@ -76,15 +81,56 @@ namespace comunicaciones.servicios.whatsapp
 
             // Construir el cuerpo del mensaje en formato JSON
             string jsonBody = $@"
-        {{
-            ""messaging_product"": ""whatsapp"",
-            ""recipient_type"": ""individual"",
-            ""to"": ""{TelefonoDestino}"",
-            ""type"": ""image"",
-            ""image"": {{
-                ""id"": ""{idImg}""
-            }}
-        }}";
+            {{
+                ""messaging_product"": ""whatsapp"",
+                ""recipient_type"": ""individual"",
+                ""to"": ""{TelefonoDestino}"",
+                ""type"": ""image"",
+                ""image"": {{
+                    ""id"": ""{idImg}""
+                }}
+            }}";
+
+            request.AddParameter("application/json", jsonBody, ParameterType.RequestBody);
+
+            RestResponse response = client.Execute(request);
+
+            if (response.IsSuccessful)
+            {
+                logger.LogDebug("Mensaje enviado con éxito.");
+                r.Ok = true;
+            }
+            else
+            {
+                logger.LogDebug($"ServicioWhatsapp - No se envio Mensaje");
+                r.Ok = false;
+                r.HttpCode = HttpCode.BadRequest;
+
+            }
+
+            return r;
+        }
+
+        public async Task<Respuesta> EnviarTxt(string UrlBase, string Token, string TelefonoDestino, string mensaje)
+        {
+            Respuesta r = new Respuesta();
+            RestClient client = new RestClient();
+            var urlEnvioImagen = UrlBase + "messages";
+            RestRequest request = new RestRequest(urlEnvioImagen, Method.Post);
+            request.AddHeader("Authorization", "Bearer " + Token);
+            request.AddHeader("Content-Type", "application/json");
+
+            // Construir el cuerpo del mensaje en formato JSON
+            string jsonBody = $@"
+            {{
+                ""messaging_product"": ""whatsapp"",
+                ""recipient_type"": ""individual"",
+                ""to"": ""{TelefonoDestino}"",
+                ""type"": ""text"",
+                ""text"": {{
+                    ""body"": ""{mensaje}""
+                }}
+            }}";
 
             request.AddParameter("application/json", jsonBody, ParameterType.RequestBody);
 

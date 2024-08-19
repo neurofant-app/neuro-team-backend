@@ -6,14 +6,21 @@ using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
+using comunicaciones.modelo;
+using comunicaciones.modelo.email;
+using comunicaciones.modelo.whatsapp;
 using conversaciones.model;
 using conversaciones.services.dbcontext;
+using conversaciones.services.extensiones;
+using conversaciones.services.proxy.abstractions;
 using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
+using static comunicaciones.modelo.Constantes;
 
 namespace conversaciones.services.conversacion.mensaje;
 [ServicioEntidadAPI(entidad:typeof(Mensaje))]
@@ -22,15 +29,20 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
 {
     private readonly ILogger<ServicioMensaje> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
+    private readonly IConfiguration configuration;
+    private readonly IProxyConversacionComunicaciones _proxyConversacionComunicaciones;
     private Conversacion? conversacion;
     private DbSet<Conversacion> _dbSetConversacion;
     public ServicioMensaje(ILogger<ServicioMensaje> logger,
         IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI reflector, IDistributedCache cache) : base(null, null, logger, reflector, cache)
+        IReflectorEntidadesAPI reflector, IDistributedCache cache, IConfiguration configuration, IProxyConversacionComunicaciones proxyConversacionComunicaciones
+        ) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
         _reflector = reflector;
+        this.configuration = configuration;
         interpreteConsulta = new InterpreteConsultaExpresiones();
+        _proxyConversacionComunicaciones = proxyConversacionComunicaciones;
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_CONVERSACION);
         if (configuracionEntidad == null)
@@ -233,12 +245,23 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                conversacion.Mensajes.Add(entidad);
-                _dbSetConversacion.Update(conversacion);
-                await _db.SaveChangesAsync();
-                respuesta.Ok = true;
-                respuesta.HttpCode = HttpCode.Ok;
-                respuesta.Payload = ADTODespliegue(entidad);
+
+
+                var r = SeleccionCanal(conversacion, entidad);
+
+                if(r.Result.Ok == true)
+                {
+                    conversacion.Mensajes.Add(entidad);
+                    _dbSetConversacion.Update(conversacion);
+                    await _db.SaveChangesAsync();
+                    respuesta.Ok = true;
+                    respuesta.HttpCode = HttpCode.Ok;
+                    respuesta.Payload = ADTODespliegue(entidad);
+                }
+                else
+                {
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                }
             }
             else
             {
@@ -410,6 +433,102 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             }
         }
         return Elementos.Paginado(consulta);
+    }
+
+
+    public async Task<Respuesta> SeleccionCanal(Conversacion conversacion, Mensaje mensaje)
+    {
+        var r = new Respuesta();
+        switch (conversacion.Canal)
+        {
+            case TipoCanal.CorreoElectronico:
+                r = await ProcesoEmail(conversacion, mensaje);
+                break;
+            case TipoCanal.WhatsApp:
+                r = await ProcesoWhatsApp(conversacion, mensaje);
+                break;
+        }
+        return r;
+    }
+
+    public async Task<Respuesta> ProcesoWhatsApp(Conversacion conversacion, Mensaje mensaje)
+    {
+        var r = new Respuesta();
+        try
+        {
+            foreach (var item in conversacion.Participantes)
+            {
+                MensajeWhatsapp whatsapp = new()
+                {
+                    Mensaje = mensaje.CargaUtil,
+                    Telefono = item.UsuarioId,
+                    Tipo = TipoMensajeWhatsApp(mensaje.tipoMensaje),
+                };
+                var respuestaWhatsApp = await _proxyConversacionComunicaciones.EnvioWhatsApp(whatsapp);
+                r = respuestaWhatsApp;
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"WhatsApp {e.Message}");
+            _logger.LogError($"{e}");
+            r.Ok = false;
+            r.HttpCode = HttpCode.Conflict;
+        }
+
+        return r;
+    }
+
+    public async Task<Respuesta> ProcesoEmail(Conversacion conversacion, Mensaje mensaje)
+    {
+        var r = new Respuesta();
+        try
+        {
+            foreach (var item in conversacion.Participantes)
+            {
+                DatosPlantilla data = new()
+                {
+                    Nombre = mensaje.EmisorId,
+                    UrlBase = configuration.LeeUrlBase(),
+                    Mensaje = mensaje.CargaUtil,
+                };
+
+                MensajeEmail m = new MensajeEmail()
+                {
+                    DireccionPara = item.Id,
+                    NombrePara = item.Nombre,
+                    JSONData = JsonSerializer.Serialize(data),
+                    PlantillaCuerpo = configuration.LeePlantillaRegistro(),
+                    PlantillaTema = configuration.LeeTemaRegistro()
+                };
+
+                var respuestaCorreo = await _proxyConversacionComunicaciones.EnvioCorreo(m);
+                r = respuestaCorreo;
+            }  
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Email {e.Message}");
+            _logger.LogError($"{e}");
+            r.Ok = false;
+            r.HttpCode = HttpCode.Conflict;
+        }
+
+        return r;
+
+    }
+
+    private TipoMensaje TipoMensajeWhatsApp(TipoMsj tipo)
+    {
+        switch (tipo)
+        {
+            case TipoMsj.texto:
+                return TipoMensaje.texto;
+            case TipoMsj.img:
+                return TipoMensaje.img;
+            default:
+                return TipoMensaje.texto;
+        }
     }
 
     #endregion

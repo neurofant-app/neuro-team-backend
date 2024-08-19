@@ -1,7 +1,7 @@
 ﻿using apigenerica.primitivas.aplicacion;
 using comunes.primitivas.seguridad;
 
-namespace conversaciones.api.seguridad;
+namespace comunicaciones.api.seguridad;
 
 public class ConfiguracionSeguridad : IProveedorAplicaciones
 {
