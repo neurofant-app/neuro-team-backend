@@ -42,7 +42,6 @@ public class MongoDbContextAplicaciones(DbContextOptions<MongoDbContextAplicacio
         modelBuilder.Entity<EntidadConsentimiento>().ToCollection(NOMBRE_COLECCION_CONSENTIMIENTO);
         modelBuilder.Entity<EntidadLogoAplicacion>().ToCollection(NOMBRE_COLECCION_LOGOAPLICACION);
         modelBuilder.Entity<EntidadPlantillaInvitacion>().ToCollection(NOMBRE_COLECCION_PLANTILLaAPLICACION);
-
     }
 
 }

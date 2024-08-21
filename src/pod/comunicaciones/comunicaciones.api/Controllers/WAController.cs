@@ -9,8 +9,8 @@ using System.IO;
 
 namespace comunicaciones.api.Controllers;
 [ApiController]
-[Route("whatsapp")]
 [Authorize]
+[Route("whatsapp")]
 public class WAController
 {
     private readonly ILogger<EmailController> _logger;
@@ -22,6 +22,7 @@ public class WAController
         this.servicioWhatsapp = servicioWhatsapp;
         this.configuration = configuration;
     }
+
     /// <summary>
     /// Se requiere activar el permiso de messages para que funcione wehook
     /// </summary>
@@ -83,18 +84,20 @@ public class WAController
     /// </summary>
     /// <param name="mensaje"></param>
     /// <returns></returns>
-    [HttpPost(Name = "EnviarImg")]
+    [HttpPost]
     [AllowAnonymous]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [Route("EnviarImg")]
     public async Task<Respuesta> EnviarImagen([FromBody] MensajeWhatsapp mensaje)
     {
         Respuesta respuesta = new();
         string idTelefonoEmpresa = configuration.GetValue<string>("WhatsappConfig:remitente"); 
         string Token = configuration.GetValue<string>("WhatsappConfig:token");
         string telefonoDestino = mensaje.Telefono;
-        string urlBase = "https://graph.facebook.com/" + idTelefonoEmpresa + "/";
+        string urlFb = configuration.GetValue<string>("WhatsappConfig:urlFb");
+        string urlBase = urlFb + idTelefonoEmpresa + "/";
         var rutaImg = servicioWhatsapp.Base64ToImage(mensaje.Mensaje);
         string IdImg = servicioWhatsapp.SubirImagen(urlBase, Token, rutaImg);
 
@@ -113,4 +116,41 @@ public class WAController
         }
         return respuesta;
     }
+
+
+
+    /// <summary>
+    /// Envia TEXTO 
+    /// </summary>
+    /// <param name="mensaje"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [Route("EnviarTxt")]
+
+    public async Task<Respuesta> EnviarTxt([FromBody] MensajeWhatsapp mensaje)
+    {
+        Respuesta respuesta = new();
+        string idTelefonoEmpresa = configuration.GetValue<string>("WhatsappConfig:remitente");
+        string Token = configuration.GetValue<string>("WhatsappConfig:token");
+        string urlFb = configuration.GetValue<string>("WhatsappConfig:urlFb");
+        string telefonoDestino = mensaje.Telefono;
+        string urlBase = urlFb + idTelefonoEmpresa + "/";
+        respuesta = await servicioWhatsapp.EnviarTxt(urlBase, Token, telefonoDestino, mensaje.Mensaje);
+        if (respuesta.Ok)
+        {
+            _logger.LogDebug($"Se Envio Msj al telefono {telefonoDestino}");
+            respuesta.Ok = true;
+        }
+        else
+        {
+            _logger.LogError($"No se Envio el msj al telefono {telefonoDestino}");
+        }
+        return respuesta;
+    }
+
+
 }

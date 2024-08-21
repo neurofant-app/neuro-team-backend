@@ -17,7 +17,6 @@ public class EntidadAlumno: PersonaBase
     [BsonId]
     public virtual Guid Id { get; set; }
 
-
     /// <summary>
     /// Identificador único del campus al que pertenece el alumno
     /// </summary>
