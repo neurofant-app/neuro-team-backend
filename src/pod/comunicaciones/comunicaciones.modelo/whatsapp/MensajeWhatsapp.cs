@@ -13,10 +13,8 @@ public class MensajeWhatsapp
     /// Contenido del mensaje
     /// </summary>
     public string Mensaje { get; set; }
-
     /// <summary>
     /// Tipo de mensaje archivo, texto, img, etc..
     /// </summary>
-
     public TipoMensaje Tipo { get; set; }
 }

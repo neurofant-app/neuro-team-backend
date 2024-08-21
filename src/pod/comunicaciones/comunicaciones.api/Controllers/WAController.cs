@@ -96,7 +96,8 @@ public class WAController
         string idTelefonoEmpresa = configuration.GetValue<string>("WhatsappConfig:remitente"); 
         string Token = configuration.GetValue<string>("WhatsappConfig:token");
         string telefonoDestino = mensaje.Telefono;
-        string urlBase = "https://graph.facebook.com/" + idTelefonoEmpresa + "/";
+        string urlFb = configuration.GetValue<string>("WhatsappConfig:urlFb");
+        string urlBase = urlFb + idTelefonoEmpresa + "/";
         var rutaImg = servicioWhatsapp.Base64ToImage(mensaje.Mensaje);
         string IdImg = servicioWhatsapp.SubirImagen(urlBase, Token, rutaImg);
 
@@ -135,8 +136,9 @@ public class WAController
         Respuesta respuesta = new();
         string idTelefonoEmpresa = configuration.GetValue<string>("WhatsappConfig:remitente");
         string Token = configuration.GetValue<string>("WhatsappConfig:token");
+        string urlFb = configuration.GetValue<string>("WhatsappConfig:urlFb");
         string telefonoDestino = mensaje.Telefono;
-        string urlBase = "https://graph.facebook.com/" + idTelefonoEmpresa + "/";
+        string urlBase = urlFb + idTelefonoEmpresa + "/";
         respuesta = await servicioWhatsapp.EnviarTxt(urlBase, Token, telefonoDestino, mensaje.Mensaje);
         if (respuesta.Ok)
         {

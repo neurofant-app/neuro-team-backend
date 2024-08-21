@@ -111,12 +111,15 @@ namespace comunicaciones.servicios.whatsapp
             return r;
         }
 
-        public async Task<Respuesta> EnviarTxt(string UrlBase, string Token, string TelefonoDestino, string mensaje)
+        public async Task<Respuesta> EnviarTxt(string UrlBase, 
+                                               string Token, 
+                                               string TelefonoDestino, 
+                                               string mensaje)
         {
             Respuesta r = new Respuesta();
             RestClient client = new RestClient();
-            var urlEnvioImagen = UrlBase + "messages";
-            RestRequest request = new RestRequest(urlEnvioImagen, Method.Post);
+            var url = UrlBase + "messages";
+            RestRequest request = new RestRequest(url, Method.Post);
             request.AddHeader("Authorization", "Bearer " + Token);
             request.AddHeader("Content-Type", "application/json");
 

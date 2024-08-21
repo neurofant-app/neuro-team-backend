@@ -11,7 +11,7 @@ namespace aprendizaje.model;
 /// </summary>
 [ExcludeFromCodeCoverage]
 [EntidadDB]
-public class Cursoo
+public class Curso
 {
     /// <summary>
     /// Identificador único del curso
