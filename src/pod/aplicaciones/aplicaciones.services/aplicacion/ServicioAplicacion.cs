@@ -6,7 +6,6 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.aplicacion;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -14,9 +13,6 @@ using System.Text.Json;
 using comunes.primitivas.configuracion.mongo;
 using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
-using Polly.Caching;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Microsoft.OpenApi.Validations;
 
 namespace aplicaciones.services.aplicacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadAplicacion))]
@@ -98,9 +94,11 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioAplicacion-InsertarAPI-{data}", data);
         var add = data.Deserialize<CreaAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioAplicacion-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error );
         return respuesta;
     }
 
@@ -283,16 +281,16 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
+            _logger.LogError(ex, "ServicioAplicacion-Actualizar {msg}", ex.Message);
 
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -471,8 +469,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
+            _logger.LogError(ex, "ServicioAplicacion-Insertar {msg}", ex.Message);
 
             respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
