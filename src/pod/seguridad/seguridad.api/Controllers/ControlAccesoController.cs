@@ -29,12 +29,14 @@ public class ControlAccesoController : ControladorBaseGenerico
     [HttpGet("interno/roles/{aplicacionId}/{usuarioId}")]
     public async Task<ActionResult<List<Rol>>> ObtieneRolesUsuarioInterno([Required] string aplicacionId, [Required]string usuarioId, [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
+        logger.LogDebug("ControlAccesoController-ObtieneRolesUsuarioInterno- {aplicacionId} {usuarioId}", aplicacionId, usuarioId);
         return await servicioInstanciaAplicacion.GetRolesUsuarioInterno(aplicacionId, usuarioId, dominioId, uOrgID);
     }
 
     [HttpGet("interno/permisos/{aplicacionId}/{usuarioId}")]
     public async Task<ActionResult<List<Permiso>>> ObtienePermisosAplicacionInterno([Required] string aplicacionId, [Required] string usuarioId, [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
+        logger.LogDebug("ControlAccesoController-ObtienePermisosAplicacionInterno- {aplicacionId} {usuarioId}", aplicacionId, usuarioId);
         return await servicioInstanciaAplicacion.GetPermisosAplicacionInterno(aplicacionId, usuarioId, dominioId, uOrgID);
     }
 }

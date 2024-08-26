@@ -1,4 +1,5 @@
-﻿using comunicaciones.modelo;
+﻿using comunes.primitivas;
+using comunicaciones.modelo;
 using comunicaciones.servicios.email;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,14 +33,16 @@ public class EmailController : ControllerBase
     [SwaggerResponse(statusCode: 409, description: "Correo enviado anteriormente")]
     public async Task<IActionResult> EnviarCorreo([FromBody] MensajeEmail datos)
     {
+        _logger.LogDebug("EmailController - EnviarCorreo {datos}", datos);
         var resultado = await servicioEmail.Enviar(datos);
         if (resultado.Ok)
         {
+            _logger.LogDebug("EmailController -  resultado {ok} {code} {error}", resultado!.Ok, resultado!.HttpCode, resultado.Error);
             return Ok();
         }
         else
         {
-            _logger.LogDebug($"No se pudo Enviar correo {resultado.Error}");
+            _logger.LogDebug("EmailController -  resultado {ok} {code} {error}", resultado!.Ok, resultado!.HttpCode, resultado.Error);
             return Conflict(resultado.Error);
         }
     }

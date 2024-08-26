@@ -61,45 +61,58 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioTemario-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Temario>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioTemario-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioTemario-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioTemario-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioTemario-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioTemario-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioTemario-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioTemario-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioTemario-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioTemario-InsertarAPI-{data}", data);
         var add = data.Deserialize<Temario>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
-        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemario-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -110,34 +123,43 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioTemario-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioTemario-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemario-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioTemario-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemario-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioTemario-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemario-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioTemario-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemario-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -215,6 +237,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMARIO_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -224,6 +252,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMARIO_NO_ENCONTRADA,
+                    Mensaje = "No existe un Temario con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -241,16 +275,15 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemario-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -266,6 +299,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             Temario actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMARIO_NO_ENCONTRADA,
+                    Mensaje = "No existe un Temario con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -276,10 +315,8 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemario-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -293,6 +330,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMARIO_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -300,6 +343,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             Temario actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMARIO_NO_ENCONTRADA,
+                    Mensaje = "No existe una Temario con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -316,21 +365,19 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemario-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
     }
     #endregion
 }
-
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
-#pragma warning restore CS8603 // P
+#pragma warning restore CS8603 // Possible null reference return

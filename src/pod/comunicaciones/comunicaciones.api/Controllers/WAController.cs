@@ -39,14 +39,14 @@ public class WAController
         [FromQuery(Name = "hub.verify_token")] string verify_token
     )
     {
-        _logger.LogDebug($"Valiando token para puente de conexion");
+        _logger.LogDebug("WAController - Valiando token para puente de conexion");
         if (verify_token.Equals("WAbot"))
         {
             return challenge;
         }
         else
         {
-            _logger.LogDebug($"Token no valido para puente de conexion");
+            _logger.LogDebug("WAController - Token no valido para puente de conexion");
             return "";
         }
     }
@@ -67,15 +67,15 @@ public class WAController
         var httpClient = new HttpClient() { BaseAddress = new Uri(url) };
         string path = Path.Combine(url, $"/accesocaptcha/facturacion/respuesta");
 
-        _logger.LogDebug($" LLamada remota a la ruta {path}");
+        _logger.LogDebug(" WAController - LLamada remota a la ruta {path}", path);
         var result = await httpClient.PostAsync(path, new StringContent(JsonConvert.SerializeObject(new MensajeWhatsapp(){Telefono=telefono,Mensaje=mensaje_recibido.ToUpper()}), Encoding.UTF8, "application/json"));
         if (result.IsSuccessStatusCode)
         {
-            _logger.LogDebug($" LLamada remota a la ruta {path} finalizada satisfactoriamente");
+            _logger.LogDebug("WAController - LLamada remota a la ruta {path} finalizada satisfactoriamente", path);
         }
         else
         {
-            _logger.LogDebug($" LLamada remota a la ruta {path}, NO se finalizo satisfactoriamente ");
+            _logger.LogDebug("WAController - LLamada remota a la ruta {path}, NO se finalizo satisfactoriamente ", path);
         }
     }
 
@@ -106,12 +106,12 @@ public class WAController
             respuesta = await servicioWhatsapp.EnviarImagen(IdImg, urlBase, Token, telefonoDestino);
             if(respuesta.Ok)
             {
-                _logger.LogDebug($"Se Envio Imagen Captcha al telefono {telefonoDestino}");
+                _logger.LogDebug("WAController-EnviarImagen resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
                 respuesta.Ok = true;
             }
             else
             {
-                _logger.LogError($"No se Envio Imagen Captcha al telefono {telefonoDestino}");
+                _logger.LogError("WAController-EnviarImagen resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
             }
         }
         return respuesta;
@@ -142,12 +142,12 @@ public class WAController
         respuesta = await servicioWhatsapp.EnviarTxt(urlBase, Token, telefonoDestino, mensaje.Mensaje);
         if (respuesta.Ok)
         {
-            _logger.LogDebug($"Se Envio Msj al telefono {telefonoDestino}");
+            _logger.LogDebug("WAController-EnviarTxt resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
             respuesta.Ok = true;
         }
         else
         {
-            _logger.LogError($"No se Envio el msj al telefono {telefonoDestino}");
+            _logger.LogError("WAController-EnviarTxt resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         }
         return respuesta;
     }

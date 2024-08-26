@@ -36,9 +36,15 @@ public class ServicioEmailSendGrid : IServicioEmail
         }
         catch (Exception ex)
         {
-            logger.LogDebug($"No se pudo Enviar Correo {ex.Message}");
+            r.Error = new ErrorProceso()
+            {
+                Codigo = CodigosError.COMUNICACIONES_EMAIL_ERROR_ENVIO,
+                Mensaje = "No se pudo enviar el correo",
+                HttpCode = HttpCode.BadRequest
+            };
             r.Ok = false;
             r.HttpCode = HttpCode.BadRequest;
+            logger.LogDebug(ex, "ServicioEmailSendGrid {msg}", ex.Message);
             return r;
         };
     }

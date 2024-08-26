@@ -37,8 +37,10 @@ public class AccountController : Controller
     [HttpPost("password/token")]
     public async Task<IActionResult> EstablecePasswordToken([FromBody] ActualizarContrasena actualizarContrasena)
     {
+        logger.LogDebug("AccountController - EstablecePasswordToken - {actualizarContrasena}", actualizarContrasena);
         IdentityResult result = new();
         var dbtype = _configuration["dbtype"];
+        logger.LogDebug("AccountController - EstablecePasswordToken - DB {dbtype}", dbtype);
         switch (dbtype)
         {
             case "mysql":
@@ -46,8 +48,8 @@ public class AccountController : Controller
                 var user = await _userManager.FindByNameAsync(actualizarContrasena.Email);
                 if (user == null)
                 {
-                    logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
-                    return NotFound();
+                    logger.LogDebug("AccountController - EstablecePasswordToken - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
                 }
 
                 result = await _userManager.ResetPasswordAsync(user, actualizarContrasena.Token, actualizarContrasena.Password);
@@ -57,8 +59,8 @@ public class AccountController : Controller
                 var userMongo = await _userManagerMongo.FindByNameAsync(actualizarContrasena.Email);
                 if (userMongo == null)
                 {
-                    logger.LogDebug($"Cuenta inexistente {actualizarContrasena.Email}");
-                    return NotFound();
+                    logger.LogDebug("AccountController - EstablecePasswordToken - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
                 }
 
                 result = await _userManagerMongo.ResetPasswordAsync(userMongo, actualizarContrasena.Token, actualizarContrasena.Password);
@@ -80,8 +82,10 @@ public class AccountController : Controller
     [HttpGet("password/recuperar")]
     public async Task<ActionResult<DTORecuperacionPassword>> RecuperaPasswordEmail([FromQuery] string email)
     {
+        logger.LogDebug("AccountController - RecuperaPasswordEmail - {email}", email);
         DTORecuperacionPassword cuenta = new();
         var dbtype = _configuration["dbtype"];
+        logger.LogDebug("AccountController - RecuperaPasswordEmail - DB {dbtype}", dbtype);
         switch (dbtype)
         {
             case "mysql":
@@ -89,8 +93,8 @@ public class AccountController : Controller
                 var user = await _userManager.FindByNameAsync(email);
                 if (user == null)
                 {
-                    logger.LogDebug($"Cuenta inexistente {email}");
-                    return NotFound();
+                    logger.LogDebug("AccountController - RecuperaPasswordEmaiL - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
                 }
 
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user!);
@@ -108,8 +112,8 @@ public class AccountController : Controller
                 var userMongo = await _userManagerMongo.FindByNameAsync(email);
                 if (userMongo == null)
                 {
-                    logger.LogDebug($"Cuenta inexistente {email}");
-                    return NotFound();
+                    logger.LogDebug("AccountController - RecuperaPasswordEmaiL - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
                 }
 
                 var tokenMongo = await _userManagerMongo.GeneratePasswordResetTokenAsync(userMongo!);
@@ -136,7 +140,10 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
     {
+        logger.LogDebug("AccountController - Register -  {model}", model);
         var dbtype = _configuration["dbtype"];
+        logger.LogDebug("AccountController - Register - DB {dbtype}", dbtype);
+
         if (dbtype.Equals("mysql"))
         {
             var _applicationDbContext = _dependencyResolver.GetService<ApplicationDbContext>();
@@ -153,8 +160,8 @@ public class AccountController : Controller
                     var user = await _userManager.FindByNameAsync(model.Email);
                     if (user != null)
                     {
-                        logger.LogDebug($"Cuenta existente {model.Email}");
-                        return StatusCode(StatusCodes.Status409Conflict);
+                        logger.LogDebug("AccountController - Register - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                        return Conflict(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_EXISTENTE);
                     }
 
                     user = new ApplicationUser { UserName = model.Email, Email = model.Email };
@@ -165,8 +172,8 @@ public class AccountController : Controller
                     var userMongo = await _userManagerMongo.FindByNameAsync(model.Email);
                     if (userMongo != null)
                     {
-                        logger.LogDebug($"Cuenta existente {model.Email}");
-                        return StatusCode(StatusCodes.Status409Conflict);
+                        logger.LogDebug("AccountController - Register - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                        return Conflict(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_EXISTENTE);
                     }
 
                     userMongo = new ApplicationUserMongo { UserName = model.Email, Email = model.Email };
@@ -180,7 +187,7 @@ public class AccountController : Controller
             AddErrors(identityResult);
         }
 
-        logger.LogDebug($"No es valido el usuario");
+        logger.LogDebug("AccountController -  Register - resultado {code} {modelstate}", CodigosErrores.ACCOUNTCONTROLLER_ERROR_USUARIO_NOVALIDO, ModelState);
         return BadRequest(ModelState);
     }
 

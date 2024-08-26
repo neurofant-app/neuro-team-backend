@@ -64,31 +64,37 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioAplicacion-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioAplicacion-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioAplicacion-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioAplicacion-DespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioAplicacion-ContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioAplicacion-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
@@ -104,42 +110,54 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioAplicacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaAplicacion>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioAplicacion-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioAplicacion-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("SevicioAplicacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioAplicacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("SevicioAplicacion-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioAplicacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("SevicioAplicacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioAplicacion-PaginaAPI-{consulta}",consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
+        _logger.LogDebug("SevicioAplicacion-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioAplicacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("SevicioAplicacion-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     #region Overrides para la personalización de la entidad Aplicacion
@@ -242,15 +260,26 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
 
             EntidadAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una aplicación con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -289,11 +318,9 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioAplicacion-Actualizar {msg}", ex.Message);
-
             respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
-
         return respuesta;
     }
 
@@ -307,6 +334,12 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una aplicación con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -327,10 +360,8 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioAplicacion-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -341,9 +372,14 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         var respuesta = new Respuesta();
         try
         {
-
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -351,6 +387,12 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             EntidadAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una aplicación con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -368,15 +410,14 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioAplicacion-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -420,17 +461,15 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         }
         catch (Exception ex)
         {
-            _logger.LogError($"UnicaPorIdDespliegue {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioAplicacion-UnicaPorIdDespliegue {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<ConsultaAplicacion>> Insertar(CreaAplicacion data)
+    public override async Task<RespuestaPayload<ConsultaAplicacion>> Insertar(CreaAplicacion data)
     {
         var respuesta = new RespuestaPayload<ConsultaAplicacion>();
 
@@ -464,56 +503,82 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioAplicacion-Insertar {msg}", ex.Message);
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
-
         return respuesta;
     }
 
     #endregion
 
     #region Consulta Aplicacion
-    public async Task<ConsultaAplicacionAnonima> ConsultaAplicacion(string host, string? clave)
+    public async Task<RespuestaPayload<ConsultaAplicacionAnonima>> ConsultaAplicacion(string host, string? clave)
     {
-        ConsultaAplicacionAnonima consultaAplicacionAnonima = null;
-        EntidadAplicacion aplicacion = null;
-
-        aplicacion = !string.IsNullOrEmpty(clave)
-        ? await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Clave.ToLower() == clave.ToLower()) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default)
-        : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
-
-        aplicacion.Plantillas = await DB.PlantillaInvitaciones
-        .Where(x => x.AplicacionId == aplicacion.Id)
-        .ToListAsync();
-        aplicacion.Logotipos = await DB.LogoAplicaciones
-        .Where(x => x.AplicacionId == aplicacion.Id)
-        .ToListAsync();
-        aplicacion.Consentimientos = await DB.Consentimientos
-        .Where(x => x.AplicacionId == aplicacion.Id)
-        .ToListAsync();
-
-
-        if (aplicacion != null)
+        RespuestaPayload<ConsultaAplicacionAnonima> respuesta = new();
+        try
         {
-            consultaAplicacionAnonima = new()
-            {
-                Nombre = aplicacion.Nombre,
-                Clave = aplicacion.Clave,
-                Plantillas = aplicacion.Plantillas,
-                Logotipos = aplicacion.Logotipos,
-                Consentimientos = aplicacion.Consentimientos
-            };
-        }
-        return consultaAplicacionAnonima;
+            _logger.LogDebug("ServicioAplicacion-ConsultaAplicacion-{clave} ", clave);
 
+            EntidadAplicacion aplicacion = null;
+
+            aplicacion = !string.IsNullOrEmpty(clave)
+            ? await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Clave.ToLower() == clave.ToLower()) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default)
+            : await DB.Aplicaciones.FirstOrDefaultAsync(x => x.Hosts.Any(y => y.Equals(host))) ?? DB.Aplicaciones.FirstOrDefault(x => x.Default);
+
+
+            if (aplicacion != null)
+            {
+                aplicacion.Plantillas = await DB.PlantillaInvitaciones
+                .Where(x => x.AplicacionId == aplicacion.Id)
+                .ToListAsync();
+                aplicacion.Logotipos = await DB.LogoAplicaciones
+                .Where(x => x.AplicacionId == aplicacion.Id)
+                .ToListAsync();
+                aplicacion.Consentimientos = await DB.Consentimientos
+                .Where(x => x.AplicacionId == aplicacion.Id)
+                .ToListAsync();
+
+                ConsultaAplicacionAnonima consultaAplicacionAnonima = new()
+                {
+                    Nombre = aplicacion.Nombre,
+                    Clave = aplicacion.Clave,
+                    Plantillas = aplicacion.Plantillas,
+                    Logotipos = aplicacion.Logotipos,
+                    Consentimientos = aplicacion.Consentimientos
+                };
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Payload = consultaAplicacionAnonima;
+                _logger.LogDebug("SevicioAplicacion-ConsultaAplicacion resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+            }
+            else
+            {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una aplicación con la misma clave",
+                    HttpCode = HttpCode.NotFound
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "ServicioAplicacion-ConsultaAplicacion {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        
+        return respuesta;
     }
     #endregion
 }

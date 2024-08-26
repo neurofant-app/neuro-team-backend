@@ -71,78 +71,102 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioContenido-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Contenido>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioContenido-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioContenido-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioContenido-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioContenido-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioContenido-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioContenido-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioContenido-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioContenido-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public void EstableceDbSet(string padreId)
     {
+        _logger.LogDebug("ServicioContenido-EstableceDbSet - {padreId}", padreId);
         plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == padreId);
         this.Padreid = plantilla != null ? plantilla.Id : null;
+        _logger.LogDebug("ServicioContenido-EstableceDbSet - resultado {padreId}", this.Padreid);
     }
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioContenido-InsertarAPI-{data}", data);
         var add = data.Deserialize<Contenido>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
-        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioContenido-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioContenido-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioContenido-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioContenido-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioContenido-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioContenido-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioContenido-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioContenido-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioContenido-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioContenido-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -221,15 +245,15 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             }
             else
             {
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_DATOS_NO_VALIDOS;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioContenido-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -243,6 +267,12 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -250,6 +280,12 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_NO_ENCONTRADA,
+                    Mensaje = "No existe un Contenido con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -270,24 +306,29 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
                 }
                 else
                 {
-                    respuesta.Error = resultadoValidacion.Error;
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                    respuesta.Error = new ErrorProceso()
+                    {
+                        Codigo = CodigosError.CONVERSACIONES_CONTENIDO_ERROR_ACTUALIZAR,
+                        Mensaje = "No ha sido posible actualizar el Contenido",
+                        HttpCode = HttpCode.BadRequest
+                    };
+                    respuesta.HttpCode = HttpCode.BadRequest;
+                    return respuesta;
                 }
 
             }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Actualizar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioContenido-UnicoPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -301,7 +342,13 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
-                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_NO_ENCONTRADA,
+                    Mensaje = "No existe un CONVERSIONES con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
             respuesta.Ok = true;
@@ -310,10 +357,8 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         }
         catch (Exception ex)
         {
-            _logger.LogError($"UnicaPorId {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioContenido-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -324,9 +369,14 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         var respuesta = new Respuesta();
         try
         {
-
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -334,6 +384,12 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_NO_ENCONTRADA,
+                    Mensaje = "No existe un Contenido con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -349,16 +405,20 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             }
             else
             {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_CONTENIDO_ERROR_ELIMINAR,
+                    Mensaje = "No ha sido posible ELIMINAR el Contenido",
+                    HttpCode = HttpCode.BadRequest
+                };
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioContenido-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -366,6 +426,8 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
 
     public override async Task<PaginaGenerica<Contenido>> ObtienePaginaElementos(Consulta consulta)
     {
+        _logger.LogDebug("ServicioContenido - ObtienePaginaElementos - {consulta}", consulta);
+
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Contenido));
         var Elementos = Enumerable.Empty<Contenido>().AsQueryable();
         if (plantilla != null)

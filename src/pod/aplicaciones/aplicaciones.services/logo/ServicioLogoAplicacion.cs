@@ -65,77 +65,97 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioLogoAplicacion-EntidadRepoAPI");
         return this.EntidadRepo();
     }
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioLogoAplicacion-EntidadInsertAPI");
         return this.EntidadInsert();
     }
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioLogoAplicacion-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioLogoAplicacion-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioLogoAplicacion-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-InsertarAPI-{data}", data);
         var add = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioLogoAplicacion-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioLogoAplicacion-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioLogoAplicacion-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioLogoAplicacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
+        _logger.LogDebug("ServicioLogoAplicacion-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioLogoAplicacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioLogoAplicacion-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -215,6 +235,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.LOGOAPLICACION_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -224,6 +250,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.LOGOAPLICACION_NO_ENCONTRADO,
+                    Mensaje = "No existe una LOGOAPLICACION con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -241,16 +273,15 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioLogoAplicacion-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -266,6 +297,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             EntidadLogoAplicacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APPLICACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una LogoAplicacion con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -276,10 +313,8 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioLogoAplicacion-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -290,9 +325,14 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         var respuesta = new Respuesta();
         try
         {
-
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.LOGOAPLICACION_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -300,6 +340,12 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             EntidadLogoAplicacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.LOGOAPLICACION_NO_ENCONTRADO,
+                    Mensaje = "No existe una LOGOAPLICACION con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -316,15 +362,14 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioLogoAplicacion-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;

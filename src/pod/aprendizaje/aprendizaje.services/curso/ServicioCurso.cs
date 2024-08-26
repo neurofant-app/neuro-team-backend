@@ -4,6 +4,7 @@ using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using aprendizaje.model;
 using aprendizaje.model.espaciotrabajo;
+using aprendizaje.model.temario;
 using comunes.primitivas;
 using comunes.primitivas.atributos;
 using comunes.primitivas.configuracion.mongo;
@@ -66,78 +67,100 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioCurso-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioCurso-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioCurso-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioCurso-EntidadUpdateAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioCurso-EstableceContextoUsuarioAPI");
         this._contextoUsuario = contexto;
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioCurso-ObtieneContextoUsuarioAPI");
         return this.ObtieneContextoUsuario();
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioCurso-InsertarAPI-{data}", data);
         var add = data.Deserialize<Curso>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
-        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioCurso-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioCurso-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Curso>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioCurso-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioCurso-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioCurso-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioCurso-UnicaPorIdAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioCurso-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioCurso-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioCurso-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioCurso-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioCurso-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioCurso-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegueAPI(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioCurso-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -205,6 +228,12 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         {
             if (string.IsNullOrEmpty(id) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_CURSO_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -214,6 +243,12 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_CURSO_NO_ENCONTRADA,
+                    Mensaje = "No existe una CURSO con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -231,16 +266,15 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"ERROR Actualizar Curso {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "ERROR Id", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioCurso-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -255,6 +289,12 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             Curso actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_CURSO_NO_ENCONTRADA,
+                    Mensaje = "No existe una CURSO con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -265,10 +305,8 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         }
         catch (Exception ex)
         {
-            _logger.LogError($"UnicaPorId {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioCurso-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -282,6 +320,12 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_CURSO_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -289,6 +333,12 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             Curso actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_CURSO_NO_ENCONTRADA,
+                    Mensaje = "No existe una CURSO con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -306,15 +356,14 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Eliminar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioCurso-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
