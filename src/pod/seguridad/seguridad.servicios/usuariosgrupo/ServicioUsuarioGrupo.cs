@@ -71,81 +71,104 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EntidadRepoAPI");
         return this.EntidadRepo();
     }
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EntidadInsertAPI");
         return this.EntidadInsert();
     }
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EstableceContextoUsuarioAPi");
         this.EstableceContextoUsuario(contexto);
     }
 
     public void EstableceDbSet(string padreId)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-EstableceDbSet {padreId}", padreId);
         grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(padreId));
         this.Padreid = grupo!= null ? grupo.Id.ToString() : null;
+        _logger.LogDebug("ServicioUsuarioGrupo-EstableceDbSet {padreId}", this.Padreid);
     }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo - InsertarAPI - {data}", data);
         var add = data.Deserialize<CreaUsuarioGrupo>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioUsuarioGrupo - InsertarAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
-        throw new NotImplementedException();
+        _logger.LogDebug("ServicioUsuarioGrupo-ActualizarAPI {data}", data);
+        var update = data.Deserialize<UsuarioGrupo>(JsonAPIDefaults());
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioUsuarioGrupo-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioUsuarioGrupo-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioUsuarioGrupo-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioUsuarioGrupo-UnicarPorIdAPI resultado {ok} {code} {error", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioUsuarioGrupo-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo-PaginaAPI {consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
+        _logger.LogDebug("ServicioUsuarioGrupo-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioPlantilla-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioPlantilla-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -212,15 +235,15 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
             }
             else
             {
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.SEGURIDAD_DATOS_NO_VALIDOS;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioUsuarioGrupo-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.SEGURIDAD_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -234,7 +257,13 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         {
             string actual = grupo.UsuarioId.FirstOrDefault(_=>_==id);
             if (string.IsNullOrEmpty(actual))
-            {                
+            {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.SEGURIDAD_USUARIOGRUPO_NO_ENCONTRADA,
+                    Mensaje = "No existe un UsuarioGrupo con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -244,10 +273,8 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioUsuarioGrupo-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.SEGURIDAD_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -260,6 +287,12 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         {
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.SEGURIDAD_USUARIOGRUPO_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -282,22 +315,27 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
             }
             else
             {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.SEGURIDAD_USUARIOGRUPO_ERROR_ELIMINAR,
+                    Mensaje = "No ha sido posible ELIMINAR el UsuarioGrupo",
+                    HttpCode = HttpCode.BadRequest
+                };
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioUsuarioGrupo-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.SEGURIDAD_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
     }
     public override async Task<PaginaGenerica<UsuarioGrupo>> ObtienePaginaElementos(Consulta consulta)
     {
+        _logger.LogDebug("ServicioUsuarioGrupo - ObtienePaginaElementos - {consulta}", consulta);
         var Elementos =grupo!=null && grupo.UsuarioId.Any() ? grupo.UsuarioId.AsQueryable() : new List<string>().AsQueryable();
         var ElementosFinal = new List<UsuarioGrupo>();
         var pagina = Elementos.Paginado(consulta);

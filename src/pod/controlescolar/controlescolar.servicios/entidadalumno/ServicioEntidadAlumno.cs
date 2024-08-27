@@ -66,77 +66,97 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
     [Permiso(AppId: "control-escolar", PermisoId:  "control-escolar-p-crear") ]
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioEntidadAlumno-EntidadRepoAPI");
         return this.EntidadRepo();
     }
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioEntidadAlumno-EntidadInsertAPI");
         return this.EntidadInsert();
     }
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioEntidadAlumno-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioEntidadAlumno-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioEntidadAlumno-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-InsertarAPI-{data}", data);
         var add = data.Deserialize<CreaAlumno>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadAlumno-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaAlumno>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioEntidadAlumno-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioEntidadAlumno-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioEntidadAlumno-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadAlumno-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadAlumno-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
+        _logger.LogDebug("ServicioEntidadAlumno-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioEntidadAlumno-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadAlumno-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -213,6 +233,12 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONTROLESCOLAR_ENTIDADALUMNO_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -222,6 +248,12 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONTROLESCOLAR_ENTIDADALUMNO_NO_ENCONTRADA,
+                    Mensaje = "No existe una ENTIDADALUMNO con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -239,16 +271,15 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONTROLESCOLAR_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadAlumno-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONTROLESCOLAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -258,7 +289,7 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
 
 
 
-public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
     {
         var respuesta = new RespuestaPayload<EntidadAlumno>();
         try
@@ -266,6 +297,12 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
             EntidadAlumno actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONTROLESCOLAR_ENTIDADALUMNO_NO_ENCONTRADA,
+                    Mensaje = "No existe una EntidadAlumno con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -276,10 +313,8 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadAlumno-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONTROLESCOLAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -293,6 +328,12 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONTROLESCOLAR_ENTIDADALUMNO_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -300,6 +341,12 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
             EntidadAlumno actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONTROLESCOLAR_ENTIDADALUMNO_NO_ENCONTRADA,
+                    Mensaje = "No existe una EntidadAlumno con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -317,15 +364,14 @@ public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONTROLESCOLAR_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadAlumno-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONTROLESCOLAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;

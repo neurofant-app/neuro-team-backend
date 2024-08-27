@@ -97,14 +97,21 @@ namespace comunicaciones.servicios.whatsapp
 
             if (response.IsSuccessful)
             {
-                logger.LogDebug("Mensaje enviado con éxito.");
                 r.Ok = true;
+                logger.LogDebug("Mensaje enviado con éxito.");
+
             }
             else
             {
-                logger.LogDebug($"ServicioWhatsapp - No se envio Mensaje");
+                r.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.COMUNICACIONES_WHATSAPP_ERROR_ENVIO_MENSAJE_IMG,
+                    Mensaje = "No se pudo enviar la imagen a WhatsApp",
+                    HttpCode = HttpCode.BadRequest
+                };
                 r.Ok = false;
                 r.HttpCode = HttpCode.BadRequest;
+                logger.LogDebug("ServicioWhatsapp resultado {ok} {code} {error}", r!.Ok, r!.HttpCode, r.Error);
 
             }
 
@@ -146,10 +153,16 @@ namespace comunicaciones.servicios.whatsapp
             }
             else
             {
-                logger.LogDebug($"ServicioWhatsapp - No se envio Mensaje");
+
+                r.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.COMUNICACIONES_WHATSAPP_ERROR_ENVIO_MENSAJE,
+                    Mensaje = "No se pudo enviar el mensaje de WhatsApp",
+                    HttpCode = HttpCode.BadRequest
+                };
                 r.Ok = false;
                 r.HttpCode = HttpCode.BadRequest;
-
+                logger.LogDebug("ServicioWhatsapp resultado {ok} {code} {error}", r!.Ok, r!.HttpCode, r.Error);
             }
 
             return r;

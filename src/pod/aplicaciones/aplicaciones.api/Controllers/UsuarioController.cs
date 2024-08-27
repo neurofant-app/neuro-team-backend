@@ -1,6 +1,7 @@
 ﻿using aplicaciones.model;
 using aplicaciones.model.aplicaciones;
 using aplicaciones.model.invitaciones;
+using aplicaciones.services;
 using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
@@ -38,6 +39,7 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RecuperarContrasena([FromQuery] string email)
     {
+        _logger.LogDebug("UsuarioController-RecuperarContrasena-{email}", email);
         if (ValidaEmail(email))
         {
             var respuestaUsuario = await _proxyIdentityServices.RecuperaPasswordEmail(email);
@@ -56,15 +58,18 @@ public class UsuarioController : ControladorJwt
                 var inv = await _servicioInvitacion.Insertar(invInsertar);
                 if (inv.Ok)
                 {
+                    _logger.LogDebug("UsuarioController-ObtieneAplicacionPorIdentificado resultado {ok} {code} {error}", respuestaUsuario!.Ok, respuestaUsuario!.HttpCode, respuestaUsuario.Error);
                     return Ok(inv.Payload);
                 }
             }
             else
             {
-                return NotFound();
+                _logger.LogDebug("UsuarioController-ObtieneAplicacionPorIdentificado resultado {ok} {code} {error}", respuestaUsuario!.Ok, respuestaUsuario!.HttpCode, respuestaUsuario.Error);
+                return NotFound(respuestaUsuario.Error?.Codigo);
             }
         }
-        return BadRequest();
+        _logger.LogDebug("UsuarioController-ObtieneAplicacionPorIdentificado resultado {error}", CodigosError.USUARIOCONTROLLER_EMAIL_NO_VALIDO);
+        return BadRequest(CodigosError.USUARIOCONTROLLER_EMAIL_NO_VALIDO);
     }
 
     [HttpPost("password/restablecer/token")]
@@ -75,6 +80,7 @@ public class UsuarioController : ControladorJwt
     [SwaggerResponse(statusCode: 400, description: "Datos incorrectos")]
     public async Task<IActionResult> RestablecerContrasena([FromBody] DTOResetPassword dtoReset)
     {
+        _logger.LogDebug("UsuarioController-RestablecerContrasena-{DTOResetPassword}", dtoReset);
         RespuestaPayload<EntidadInvitacion> respuesta = await _servicioInvitacion.UnicaPorId(dtoReset.InvitacionId.ToString());
         if (respuesta != null)
         {
@@ -86,19 +92,22 @@ public class UsuarioController : ControladorJwt
                 var r = await _servicioInvitacion.Eliminar(invitacion.Id.ToString());
                 if (!r.Ok)
                 {
-                    _logger.LogWarning($"La invitacion {invitacion.Id} no pudo ser eliminada ");
+                    _logger.LogWarning("UsuarioController-RestablecerContrasena resultado {ok} {code} {error} ", r!.Ok, r!.HttpCode, r.Error);
                     return StatusCode(response.HttpCode.GetHashCode(), response.Error);
                 }
+                _logger.LogDebug("UsuarioController-RestablecerContrasena resultado {ok} {code} {error}", r!.Ok, r!.HttpCode, r.Error);
                 return Ok(r);
             }
             else
             {
+                _logger.LogDebug("UsuarioController-RestablecerContrasena resultado {ok} {code} {error}", response!.Ok, response!.HttpCode, response.Error);
                 return StatusCode(response.HttpCode.GetHashCode(), response.Error);
             }
         }
         else
         {
-            return NotFound();
+            _logger.LogDebug("UsuarioController-RestablecerContrasena resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+            return NotFound(respuesta.Error?.Codigo);
         }
     }
 

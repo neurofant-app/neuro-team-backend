@@ -98,6 +98,7 @@ public static class ExtensionesConfiguracionInterservicio
             .CreateLogger();
 
         builder.Logging.ClearProviders();
+        builder.Logging.AddConsole();
         builder.Logging.AddSerilog(logger);
     }
 

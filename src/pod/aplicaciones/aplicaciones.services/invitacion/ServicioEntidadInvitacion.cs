@@ -75,28 +75,34 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public bool RequiereAutenticacion => true;
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-EntidadRepoAPI");
         return this.EntidadRepo();
     }
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-EntidadInsertAPI");
         return this.EntidadInsert();
     }
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
@@ -116,54 +122,71 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     [Permiso("00000000-0000-0000-0000-000000000001", "app-manager-perm-admin")]
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI-{data}",data);
         if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
         {
-            return new RespuestaPayload<object> { HttpCode = HttpCode.FORBIDDEN };
+            RespuestaPayload<object> respuestaPayload = new RespuestaPayload<object>()
+            { HttpCode = HttpCode.FORBIDDEN, Error = new() { Codigo = CodigosError.ENTIDADINVITACION_ACCION_PROHIBIDA_NO_PERMISOS, Mensaje = "No se tiene el permiso acccion prohibida", HttpCode = HttpCode.FORBIDDEN } };
+            _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI resultado {ok} {code} {error}", respuestaPayload!.Ok, respuestaPayload!.HttpCode, respuestaPayload.Error);
+            return respuestaPayload;
         }
         var add = data.Deserialize<CreaInvitacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI resultado {ok} {code} {error}", respuesta.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaInvitacion>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioEntidadInvitacion-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioEntidadInvitacion-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioEntidadInvitacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
-
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
-
+        _logger.LogDebug("ServicioEntidadInvitacion-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioEntidadInvitacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioEntidadInvitacion-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -220,6 +243,12 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.ENTIDADINVITACION_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -229,6 +258,12 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
 
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.ENTIDADINVITACION_NO_ENCONTRADO,
+                    Mensaje = "No se encontro una EntidadInvitacion con el ID proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -246,16 +281,15 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadInvitacion-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -271,6 +305,12 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             EntidadInvitacion actual = await _dbSetFull.FindAsync(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.ENTIDADINVITACION_NO_ENCONTRADO,
+                    Mensaje = "No existe una ENTIDADINVITACION con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -281,10 +321,8 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadInvitacion-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -298,6 +336,12 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.ENTIDADINVITACION_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -305,6 +349,12 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             EntidadInvitacion actual = _dbSetFull.Find(Guid.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.ENTIDADINVITACION_NO_ENCONTRADO,
+                    Mensaje = "No existe una ENTIDADINVITACION con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -322,15 +372,14 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadInvitacion-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -407,6 +456,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 else
                 {
                     respuesta.Error = resultadoValidacion.Error;
+                    respuesta.Error!.Codigo = CodigosError.ENTIDADINVITACION_ENVIO_EMAIL_FALLIDO;
                     respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
                 }
 
@@ -414,15 +464,14 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APPLICACION_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioEntidadInvitacion-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APPLICACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 

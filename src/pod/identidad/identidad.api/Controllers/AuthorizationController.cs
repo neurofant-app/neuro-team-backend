@@ -66,7 +66,7 @@ public class AuthorizationController : Controller
             var application = await _applicationManager.FindByClientIdAsync(request.ClientId);
             if (application == null)
             {
-                 logger.LogDebug($"El cliente {request.ClientId} NO localizado");
+                 logger.LogDebug("AuthorizationController -Exchange - resultado {code} ", CodigosErrores.AUTHORIZATIONCONTROLLER_CLIENTE_NO_LOCALIZADO);
                 throw new InvalidOperationException("The application details cannot be found in the database.");
             }
 
@@ -100,6 +100,7 @@ public class AuthorizationController : Controller
         {
             ClaimsIdentity identity = null;
             var dbtype = _configuration["dbtype"];
+            logger.LogDebug("AuthorizationController - Register - DB {dbtype}", dbtype);
             switch (dbtype)
             {
                 case "mysql":
@@ -113,7 +114,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                                 "The username/password couple is invalid."
                         });
-                        logger.LogDebug($"El username/password no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USERNAME_PASSWORD_NOVALIDOS);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -128,7 +129,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                                 "The username/password couple is invalid."
                         });
-                        logger.LogDebug($"El par username/password no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USERNAME_PASSWORD_NOVALIDOS);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -155,7 +156,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                                 "The username/password couple is invalid."
                         });
-                        logger.LogDebug($"El username/password no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USERNAME_PASSWORD_NOVALIDOS);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -170,7 +171,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] =
                                 "The username/password couple is invalid."
                         });
-                        logger.LogDebug($"El par username/password no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USERNAME_PASSWORD_NOVALIDOS);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -202,6 +203,7 @@ public class AuthorizationController : Controller
         {
             ClaimsIdentity identity = null;
             var dbtype = _configuration["dbtype"];
+            logger.LogDebug("AuthorizationController - Register - DB {dbtype}", dbtype);
             switch (dbtype)
             {
                 case "mysql":
@@ -217,7 +219,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
                         });
-                        logger.LogDebug($"El token de refresco ya no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_TOKEN_REFRESCO_NOVALIDO);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
                     var _signInManager = _dependencyResolver.GetService<SignInManager<ApplicationUser>>();
@@ -230,7 +232,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
                         });
-                        logger.LogDebug($"El usuario ya no puede iniciar sesión.");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USUARIO_NOPUEDE_INICIAR_SESION);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -258,7 +260,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The refresh token is no longer valid."
                         });
-                        logger.LogDebug($"El token de refresco ya no es valido");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_TOKEN_REFRESCO_NOVALIDO);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
                     var _signInManagerMongo = _dependencyResolver.GetService<SignInManager<ApplicationUserMongo>>();
@@ -271,7 +273,7 @@ public class AuthorizationController : Controller
                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = Errors.InvalidGrant,
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The user is no longer allowed to sign in."
                         });
-                        logger.LogDebug($"El usuario ya no puede iniciar sesión.");
+                        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_USUARIO_NOPUEDE_INICIAR_SESION);
                         return Forbid(properties, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                     }
 
@@ -293,7 +295,7 @@ public class AuthorizationController : Controller
             return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
         }
 
-        logger.LogDebug($"el grand type especificado no esta implementado");
+        logger.LogDebug("AuthorizationController - Exchange - resultad {code}", CodigosErrores.AUTHORIZATIONCONTROLLER_GRAND_TYPE_ESPECIFICADO_NOESTA_IMPLEMENTADO);
         throw new NotImplementedException("The specified grant type is not implemented.");
     }
 

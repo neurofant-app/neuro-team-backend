@@ -83,78 +83,103 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioMensaje-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Mensaje>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioMensaje-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioMensaje-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioMensaje-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioMensaje-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioMensaje-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioMensaje-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioMensaje-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioMensaje-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public void EstableceDbSet(string padreId)
     {
+        _logger.LogDebug("ServicioMensaje-EstableceDbSet - {padreId}", padreId);
         conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == padreId);
         this.Padreid = conversacion != null ? conversacion.Id : null;
+        _logger.LogDebug("ServicioMensaje-EstableceDbSet - resultado {padreId}", this.Padreid);
+
     }
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioMensaje-InsertarAPI-{data}", data);
         var add = data.Deserialize<Mensaje>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
-        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioMensaje-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioMensaje-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioMensaje-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioMensaje-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioMensaje-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioMensaje-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioMensaje-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioMensaje-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioMensaje-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioMensaje-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -260,20 +285,22 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 }
                 else
                 {
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                    respuesta.Error = resultadoValidacion.Error;
+                    respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_MENSAJE_ERROR_ENVIO_A_CONVERSACION;
+                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
                 }
             }
             else
             {
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_DATOS_NO_VALIDOS;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioMensaje-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -287,6 +314,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -294,6 +327,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_NO_ENCONTRADA,
+                    Mensaje = "No existe un Mensaje con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -314,24 +353,28 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 }
                 else
                 {
-                    respuesta.Error = resultadoValidacion.Error;
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                    respuesta.Error = new ErrorProceso()
+                    {
+                        Codigo = CodigosError.CONVERSACIONES_MENSAJE_ERROR_ACTUALIZAR,
+                        Mensaje = "No ha sido posible actualizar el Mensaje",
+                        HttpCode = HttpCode.BadRequest
+                    };
+                    respuesta.HttpCode = HttpCode.BadRequest;
+                    return respuesta;
                 }
-
             }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Actualizar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioMensaje-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -345,7 +388,13 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
-                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_NO_ENCONTRADA,
+                    Mensaje = "No existe un Mensaje con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
             respuesta.Ok = true;
@@ -354,10 +403,8 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         }
         catch (Exception ex)
         {
-            _logger.LogError($"UnicaPorId {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioMensaje-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -371,6 +418,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -378,6 +431,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_NO_ENCONTRADA,
+                    Mensaje = "No existe un Mensaje con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -393,16 +452,20 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             }
             else
             {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.CONVERSACIONES_MENSAJE_ERROR_ELIMINAR,
+                    Mensaje = "No ha sido posible ELIMINAR el Mensaje",
+                    HttpCode = HttpCode.BadRequest
+                };
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioMensaje-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -410,6 +473,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
 
     public override async Task<PaginaGenerica<Mensaje>> ObtienePaginaElementos(Consulta consulta)
     {
+        _logger.LogDebug("ServicioMensaje - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Mensaje));
         var Elementos = Enumerable.Empty<Mensaje>().AsQueryable();
         if (conversacion != null)
@@ -468,12 +532,11 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 r = respuestaWhatsApp;
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError($"WhatsApp {e.Message}");
-            _logger.LogError($"{e}");
-            r.Ok = false;
-            r.HttpCode = HttpCode.Conflict;
+            _logger.LogError(ex, "ServicioMensaje-ProcesoWhatsApp resultado {msg}", ex.Message);
+            r.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            r.HttpCode = HttpCode.ServerError;
         }
 
         return r;
@@ -506,12 +569,11 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 r = respuestaCorreo;
             }  
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError($"Email {e.Message}");
-            _logger.LogError($"{e}");
-            r.Ok = false;
-            r.HttpCode = HttpCode.Conflict;
+            _logger.LogError(ex, "ServicioMensaje-ProcesoEmail resultado {msg}", ex.Message);
+            r.Error = new ErrorProceso() { Codigo = CodigosError.CONVERSACIONES_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            r.HttpCode = HttpCode.ServerError;
         }
 
         return r;

@@ -72,84 +72,108 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
     
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
+        _logger.LogDebug("ServicioTemaGaleria-ActualizarAPI-{data}", data);
         var update = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update);
+        _logger.LogDebug("ServicioTemaGaleria-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public async Task<Respuesta> EliminarAPI(object id)
     {
-        return await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioTemaGaleria-EliminarAPI");
+        Respuesta respuesta = await this.Eliminar((string)id);
+        _logger.LogDebug("ServicioTemaGaleria-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
     }
 
     public Entidad EntidadDespliegueAPI()
     {
+        _logger.LogDebug("ServicioTemaGaleria-EntidadDespliegueAPI");
         return this.EntidadDespliegue();
     }
 
     public Entidad EntidadInsertAPI()
     {
+        _logger.LogDebug("ServicioTemaGaleria-EntidadInsertAPI");
         return this.EntidadInsert();
     }
 
     public Entidad EntidadRepoAPI()
     {
+        _logger.LogDebug("ServicioTemaGaleria-EntidadRepoAPI");
         return this.EntidadRepo();
     }
 
     public Entidad EntidadUpdateAPI()
     {
+        _logger.LogDebug("ServicioTemaGaleria-EntidadUpdateAPI");
         return this.EntidadUpdate();
     }
 
     public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
+        _logger.LogDebug("ServicioTemaGaleria-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
     }
 
     public void EstableceDbSet(string padreId)
     {
+        _logger.LogDebug("ServicioTemaGaleria-EstableceDbSet - {padreId}", padreId);
         galeria = _dbSetGaleria.FirstOrDefault(_ => _.Id == new Guid(padreId));
         this.Padreid = galeria != null ? galeria.Id.ToString() : null;
+        _logger.LogDebug("ServicioTemaGaleria-EstableceDbSet - resultado {padreId}", this.Padreid);
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
+        _logger.LogDebug("ServicioTemaGaleria-InsertarAPI-{data}", data);
         var add = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
-        RespuestaPayload<Object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemaGaleria-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
+        _logger.LogDebug("ServicioTemaGaleria-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioTemaGaleria-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemaGaleria-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
     {
+        _logger.LogDebug("ServicioTemaGaleria-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemaGaleria-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
     {
+        _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
+        _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
+        _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
@@ -218,15 +242,15 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             }
             else
             {
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.BadRequest;
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemaGaleria-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
@@ -240,6 +264,12 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         {
             if (string.IsNullOrEmpty(id.ToString()) || data == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ID_PAYLOAD_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id ó Payload",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -247,6 +277,12 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_NO_ENCONTRADA,
+                    Mensaje = "No existe un TEMAGALERIA con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -267,24 +303,27 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
                 }
                 else
                 {
-                    respuesta.Error = resultadoValidacion.Error;
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                    respuesta.Error = new ErrorProceso()
+                    {
+                        Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ERROR_ACTUALIZAR,
+                        Mensaje = "No ha sido posible actualizar el TemaGaleria",
+                        HttpCode = HttpCode.BadRequest
+                    };
+                    respuesta.HttpCode = HttpCode.BadRequest;
+                    return respuesta;
                 }
-                
             }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
-
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Actualizar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemaGaleria-Actualizar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -298,7 +337,13 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == int.Parse(id));
             if (actual == null)
             {
-                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_NO_ENCONTRADA,
+                    Mensaje = "No existe un TEMAGALERIA con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
             respuesta.Ok = true;
@@ -307,10 +352,8 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         }
         catch (Exception ex)
         {
-            _logger.LogError($"UnicaPorId {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemaGaleria-UnicaPorId {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -324,6 +367,12 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
 
             if (string.IsNullOrEmpty(id))
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ID_NO_INGRESADO,
+                    Mensaje = "No ha sido proporcionado el Id",
+                    HttpCode = HttpCode.BadRequest
+                };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
@@ -331,6 +380,12 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_=>_.Id == int.Parse(id));
             if (actual == null)
             {
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_NO_ENCONTRADA,
+                    Mensaje = "No existe un TemaGaleria con el Id proporcionado",
+                    HttpCode = HttpCode.NotFound
+                };
                 respuesta.HttpCode = HttpCode.NotFound;
                 return respuesta;
             }
@@ -346,16 +401,20 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             }
             else
             {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+                respuesta.Error = new ErrorProceso()
+                {
+                    Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ERROR_ELIMINAR,
+                    Mensaje = "No ha sido posible ELIMINAR el TemaGaleria",
+                    HttpCode = HttpCode.BadRequest
+                };
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
-            _logger.LogError($"{ex}");
-
-            respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            _logger.LogError(ex, "ServicioTemaGaleria-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -363,6 +422,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
 
     public override async Task<PaginaGenerica<TemaGaleria>> ObtienePaginaElementos(Consulta consulta)
     {
+        _logger.LogDebug("ServicioTemaGaleria - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(TemaGaleria));
         var Elementos = Enumerable.Empty<TemaGaleria>().AsQueryable();
         if (galeria != null)

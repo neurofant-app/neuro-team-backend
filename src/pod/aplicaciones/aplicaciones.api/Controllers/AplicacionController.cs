@@ -13,11 +13,12 @@ public class AplicacionController : ControllerBase
 {
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IServicioAplicacion servicioAplicacion;
-
-    public AplicacionController(IHttpContextAccessor httpContextAccessor, IServicioAplicacion  servicioAplicacion )
+    private readonly ILogger _logger;
+    public AplicacionController(ILogger<AplicacionController> logger,IHttpContextAccessor httpContextAccessor, IServicioAplicacion  servicioAplicacion )
     {
         this.httpContextAccessor = httpContextAccessor;
         this.servicioAplicacion = servicioAplicacion;
+        this._logger = logger;
     }
     [HttpGet("/api/aplicacion/identificar", Name = "ObtieneAplicacionPorIdentificador")]
     [SwaggerOperation("Obtiene la configuración de la apliciación", OperationId = "ObtieneAplicacionPorIdentificador")]
@@ -25,12 +26,15 @@ public class AplicacionController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<ConsultaAplicacionAnonima>> ObtieneAplicacionPorIdentificador([FromQuery(Name = "key") ] string? key )
     {
+        _logger.LogDebug("AplicacionController-ObtieneAplicacionPorIdentificador-{key}", key);
         ConsultaAplicacionAnonima consultaAplicacionAnonima;
         var consultaAnonima = await servicioAplicacion.ConsultaAplicacion(httpContextAccessor.HttpContext.Request.Host.ToString(), key);
-        if(consultaAnonima == null)
+        if (consultaAnonima == null)
         {
-            return NotFound("No se encontró la aplicación");
+            _logger.LogDebug("AplicacionController-ObtieneAplicacionPorIdentificado resultado {ok} {code} {error}", consultaAnonima!.Ok, consultaAnonima!.HttpCode, consultaAnonima.Error);
+            return NotFound(consultaAnonima.Error?.Codigo);
         }
+        _logger.LogDebug("AplicacionController-ObtieneAplicacionPorIdentificado resultado {ok} {code} {error}", consultaAnonima!.Ok, consultaAnonima!.HttpCode, consultaAnonima.Error);
         return Ok(consultaAnonima);
     }
 

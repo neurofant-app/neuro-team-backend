@@ -1,5 +1,6 @@
 ﻿using aplicaciones.model;
 using aplicaciones.model.invitaciones;
+using aplicaciones.services;
 using aplicaciones.services.invitacion;
 using aplicaciones.services.proxy;
 using aplicaciones.services.proxy.implementations;
@@ -42,6 +43,7 @@ public class InvitacionController : ControladorJwt
     [SwaggerResponse(statusCode: 404, description: "Invitación no localizada o inexistente")]
     public async Task<ActionResult<TokenJWT>> Confirmar([FromRoute] Guid id, [FromBody]Confirmacion confirmacion)
     {
+        _logger.LogDebug("InvitacionController-Confirmar-{id}", id);
         var respuestaInivtacion = await _servicioInvitacion.UnicaPorId(id.ToString());
 
         if (respuestaInivtacion.Ok)
@@ -55,28 +57,31 @@ public class InvitacionController : ControladorJwt
                 {
                     var r = await _servicioInvitacion.Eliminar(invitacion.Id.ToString());
                     if (!r.Ok) {
-                        _logger.LogWarning($"La invitacion {id} no pudo ser eliminada ");
+                        _logger.LogWarning("InvitacionController-Confirmar- resultado {ok} {code} {error}", r!.Ok, r!.HttpCode, r.Error);
+                        return BadRequest(r.Error.Codigo);
                     }
+                    _logger.LogDebug("InvitacionController-Confirmar- resultado {ok}  {code} {error}", r!.Ok,r!.HttpCode, r.Error);
                     return Ok();
 
                 }
                 else
                 {
-                    _logger.LogWarning($"El usuario no pudo crearse {JsonConvert.SerializeObject(respuestaUsuario.Error)}");
+                    _logger.LogWarning("InvitacionController-Confirmar- resultado {ok} {code} {error}", respuestaUsuario!.Ok, respuestaUsuario!.HttpCode, respuestaUsuario.Error);
                     return StatusCode((int)respuestaUsuario.HttpCode, respuestaUsuario.Error);
                 }
             }
             else
             {
-                _logger.LogDebug($"Contraseña no válida");
-                return BadRequest("Contraseña no válida");
+                _logger.LogDebug("InvitacionController-Confirmar- resultado {error}", CodigosError.INVITACIONCONTROLLER_CONTRASENA_NO_VALIDA);
+                return BadRequest(CodigosError.INVITACIONCONTROLLER_CONTRASENA_NO_VALIDA);
             }
 
         }
         else
         {
-            _logger.LogDebug($"Ocurrió un error al obetener la invitacion {JsonConvert.SerializeObject(respuestaInivtacion.Error)}");
+            _logger.LogDebug("InvitacionController-Confirmar- resultado {ok}  {code} {error}", respuestaInivtacion!.Ok, respuestaInivtacion!.HttpCode, respuestaInivtacion.Error);
         }
+        _logger.LogDebug("InvitacionController-Confirmar- resultado {HttpCode}  {error}", (int)respuestaInivtacion.HttpCode, respuestaInivtacion.Error);
         return StatusCode((int)respuestaInivtacion.HttpCode, respuestaInivtacion.Error);
     }
 
