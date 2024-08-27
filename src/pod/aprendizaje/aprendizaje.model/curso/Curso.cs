@@ -1,5 +1,7 @@
-﻿using aprendizaje.model.temario;
+﻿using aprendizaje.model.plan;
+using aprendizaje.model.temario;
 using comunes.primitivas.atributos;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,6 +19,7 @@ public class Curso
     /// Identificador único del curso
     /// </summary>
     [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -32,11 +35,18 @@ public class Curso
     [BsonElement("i")]
     public List<string> Idiomas { get; set; } = [];
 
+
     /// <summary>
     /// Nombre del curso
     /// </summary>
     [BsonElement("n")]
     public List<ValorI18N<string>> Nombre { get; set; } = [];
+
+    /// <summary>
+    /// Descripción del curso, HTML, MarkDown o similar
+    /// </summary>
+    [BsonElement("d")]
+    public List<ValorI18N<string>> Descripcion { get; set; } = [];
 
     /// <summary>
     /// Versión del curso
@@ -47,6 +57,21 @@ public class Curso
     /// <summary>
     /// Lista de planes de estudiso para cumplir con el curso
     /// </summary>
-    [BsonElement("pes")]
+    [BsonElement("pe")]
     public List<Plan> PlanesEstudio { get; set; } = [];
+
+    /// <summary>
+    /// Lista de temariso disponibles para la planeación curricular a partir de esta lista se vinculan los temarios de los planes
+    /// </summary>
+    [BsonElement("ts")]
+    public List<Temario> Temarios { get; set; } = [];
+
+
+    /// <summary>
+    /// Especialidades del plan de estudios
+    /// </summary>
+    [BsonElement("es")]
+    public List<Especialidad> Especialidades { get; set; } = [];
+
+
 }

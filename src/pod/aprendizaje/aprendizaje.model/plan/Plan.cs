@@ -1,4 +1,6 @@
-﻿using comunes.primitivas.atributos;
+﻿using aprendizaje.model.plan;
+using comunes.primitivas.atributos;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
@@ -16,6 +18,7 @@ public class Plan
     /// Identificador único del plan de estudios
     /// </summary>
     [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -25,16 +28,18 @@ public class Plan
     public required string EspacioTrabajoId { get; set; }
 
     /// <summary>
-    /// Idioma en los que se ofrece el contenido del plan de estudios
-    /// </summary>
-    [BsonElement("i")]
-    public required string Idioma { get; set; }
-
-    /// <summary>
-    /// Nombre del plan de estudios
+    /// Nombre del curso
     /// </summary>
     [BsonElement("n")]
-    public required string Nombre { get; set; }
+    public List<ValorI18N<string>> Nombre { get; set; } = [];
+
+
+    /// <summary>
+    /// Descripción del plan de estudios, HTML, MarkDown o similar
+    /// </summary>
+    [BsonElement("d")]
+    public List<ValorI18N<string>> Descripcion { get; set; } = [];
+
 
     /// <summary>
     /// Versión del plan de estudios
@@ -43,9 +48,15 @@ public class Plan
     public string Version { get; set; } = "";
 
     /// <summary>
-    /// Lista de temarios asociados al plan de estudios
+    /// DEtermina si el plan de estudios se basa en periodos
     /// </summary>
-    [BsonElement("ts")]
-    public List<TemarioPlan> Temarios { get; set; } = [];
+    [BsonElement("pe")]
+    public TipoPeriodoPlan Periodicidad { get; set; }
+
+    /// <summary>
+    /// Periodos de los que consta un plan
+    /// </summary>
+    [BsonElement("ps")]
+    public List<Periodo> Periodos { get; set; } = [];
 
 }

@@ -1,4 +1,5 @@
 ﻿using comunes.primitivas.atributos;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
@@ -16,6 +17,7 @@ public class Temario
     /// Identificador único del temario
     /// </summary>
     [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -37,6 +39,12 @@ public class Temario
     /// </summary>
     [BsonElement("n")]
     public List<ValorI18N<string>> Nombre { get; set; } = [];
+
+    /// <summary>
+    /// Descripción del contenido del temario, HTML, MarkDown o similar
+    /// </summary>
+    [BsonElement("d")]
+    public List<ValorI18N<string>> Descripcion { get; set; } = [];
 
     /// <summary>
     /// Determina si el temario es de acceso públic, cualquiera puede tener acceeo al mismo
