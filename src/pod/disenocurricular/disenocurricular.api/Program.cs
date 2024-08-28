@@ -1,15 +1,14 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
-using aprendizaje.api;
-using aprendizaje.api.seguridad;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
+using disenocurricular.api.seguridad;
 using Microsoft.Extensions.Options;
 using System.Reflection;
 
-namespace controlescolar.api;
+namespace disenocurricular.api;
 
 public class Program
 {
@@ -17,7 +16,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
         builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
         builder.CreaConfiguiracionEntidadGenerica();
@@ -26,12 +24,13 @@ public class Program
         builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
 
+        // Añadir la extensión para los servicios de API genérica
+        app.UseEntidadAPI();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -47,5 +46,4 @@ public class Program
         app.MapControllers();
         app.Run();
     }
-
 }
