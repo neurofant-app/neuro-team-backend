@@ -1,4 +1,4 @@
-﻿using aprendizaje.model.comunes;
+﻿using aprendizaje.model.almacenamiento;
 using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.flashcard;

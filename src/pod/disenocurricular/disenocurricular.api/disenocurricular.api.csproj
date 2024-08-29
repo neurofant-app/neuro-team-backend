@@ -31,8 +31,8 @@
 		<ProjectReference Include="..\..\..\lib\apigenerica.primitivas\apigenerica.primitivas.csproj" />
 		<ProjectReference Include="..\..\..\lib\comunes.interservcio.primitivas\comunes.interservicio.primitivas.csproj" />
 		<ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
-		<ProjectReference Include="..\aprendizaje.model\aprendizaje.model.csproj" />
-		<ProjectReference Include="..\aprendizaje.services\aprendizaje.services.csproj" />
+		<ProjectReference Include="..\disenocurricular.model\disenocurricular.model.csproj" />
+		<ProjectReference Include="..\disenocurricular.services\disenocurricular.services.csproj" />
 	</ItemGroup>
 
 </Project>
