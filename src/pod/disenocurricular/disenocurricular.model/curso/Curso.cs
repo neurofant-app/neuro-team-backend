@@ -52,22 +52,21 @@ public class Curso
     public string Version { get; set; } = "";
 
     /// <summary>
-    /// Lista de planes de estudiso para cumplir con el curso
+    /// Lista de identificadores de planes de estudiso para cumplir con el curso
     /// </summary>
     [BsonElement("pe")]
-    public List<Plan> PlanesEstudio { get; set; } = [];
+    public List<Guid> PlanesEstudio { get; set; } = [];
 
     /// <summary>
-    /// Lista de temariso disponibles para la planeación curricular a partir de esta lista se vinculan los temarios de los planes
+    /// Lista de identificadores de temarios disponibles para la planeación curricular a partir de esta lista se vinculan los temarios de los planes
     /// </summary>
     [BsonElement("ts")]
-    public List<Temario> Temarios { get; set; } = [];
-
+    public List<Guid> Temarios { get; set; } = [];
 
     /// <summary>
-    /// Especialidades del plan de estudios
+    /// Lista de identificadores de especialidades del plan de estudios
     /// </summary>
     [BsonElement("es")]
-    public List<Especialidad> Especialidades { get; set; } = [];
+    public List<Guid> Especialidades { get; set; } = [];
 }
 

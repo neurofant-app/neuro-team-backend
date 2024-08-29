@@ -1,5 +1,4 @@
-﻿using aprendizaje.model.comunes;
-using MongoDB.Bson.Serialization.Attributes;
+﻿using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.galeria;

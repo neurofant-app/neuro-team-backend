@@ -1,10 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disenocurricular.model;
 
@@ -19,6 +14,14 @@ public class Especialidad
     [BsonId]
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// Identificador del curso al que corresponde el temario
+    /// </summary>
+    [BsonElement("cid")]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid CursoId { get; set; }
+
 
     /// <summary>
     /// Nombre del curso

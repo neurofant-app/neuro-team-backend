@@ -20,6 +20,13 @@ public class Temario
     public Guid Id { get; set; }
 
     /// <summary>
+    /// Identificador del curso al que corresponde el temario
+    /// </summary>
+    [BsonElement("cid")]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid CursoId { get; set; }
+
+    /// <summary>
     /// Didentificador único del espacio de trabajo al que pertenece la Neurona,
     /// Los espacios de trabajo son creados por usuarios suscritos a NeuroPad
     /// </summary>
