@@ -1,25 +1,27 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
+using comunes.primitivas.atributos;
+using System.Diagnostics.CodeAnalysis;
 
 namespace disenocurricular.model;
 
 /// <summary>
 /// Define una especialziación para un plan de estudios
 /// </summary>
+[ExcludeFromCodeCoverage]
+[EntidadDB]
 public class Especialidad
 {
     /// <summary>
     /// Identificador único del plan de estudios
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Identificador del curso al que corresponde el temario
     /// </summary>
     [BsonElement("cid")]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid CursoId { get; set; }
 
 

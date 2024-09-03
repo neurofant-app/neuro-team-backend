@@ -16,14 +16,12 @@ public class Temario
     /// Identificador único del temario
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
     /// Identificador del curso al que corresponde el temario
     /// </summary>
     [BsonElement("cid")]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid CursoId { get; set; }
 
     /// <summary>

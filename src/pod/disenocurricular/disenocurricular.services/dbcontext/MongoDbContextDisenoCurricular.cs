@@ -1,32 +1,32 @@
 ﻿using disenocurricular.model;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace disenocurricular.services.dbcontext;
-
 public class MongoDbContextDisenoCurricular(DbContextOptions<MongoDbContextDisenoCurricular> options) : DbContext(options)
 {
-    public const string NOMBRE_COLECCION_CURSO = "curso";
-    public const string NOMBRE_COLECCION_PLAN = "plan";
-    public const string NOMBRE_COLECCION_TEMARIO = "temario";
+    public const string NOMBRE_COLECCION_CURSOS = "cursos";
+    public const string NOMBRE_COLECCION_ESPECIALIDADES = "especialidades";
+    public const string NOMBRE_COLECCION_PLANES = "planes";
+    public const string NOMBRE_COLECCION_TEMARIOS = "temarios";
 
-    public DbSet<Curso> Curso { get; set; }
-    public DbSet<Plan> Plan { get; set; }
-    public DbSet<Temario> Temario { get; set; }
+    public DbSet<Curso> Cursos { get; set; }
+    public DbSet<Plan> Planes { get; set; }
+    public DbSet<Temario> Temarios { get; set; }
+    public DbSet<Especialidad> Especialidades { get; set; }
 
     public static MongoDbContextDisenoCurricular Create(IMongoDatabase database)
     {
         var pack = new ConventionPack
         {
-            new IgnoreExtraElementsConvention(true)
+            new IgnoreExtraElementsConvention(true),
         };
+
         ConventionRegistry.Register("Conventions", pack, t => true);
 
         return new(new DbContextOptionsBuilder<MongoDbContextDisenoCurricular>()
@@ -37,12 +37,15 @@ public class MongoDbContextDisenoCurricular(DbContextOptions<MongoDbContextDisen
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Curso>().ToCollection(NOMBRE_COLECCION_CURSO);
+        modelBuilder.Entity<Curso>().ToCollection(NOMBRE_COLECCION_CURSOS);
 
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Plan>().ToCollection(NOMBRE_COLECCION_PLAN);
+        modelBuilder.Entity<Especialidad>().ToCollection(NOMBRE_COLECCION_ESPECIALIDADES);
 
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Temario>().ToCollection(NOMBRE_COLECCION_TEMARIO);
+        modelBuilder.Entity<Plan>().ToCollection(NOMBRE_COLECCION_PLANES);
+
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Temario>().ToCollection(NOMBRE_COLECCION_TEMARIOS);
     }
 }

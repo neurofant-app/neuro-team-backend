@@ -1,4 +1,6 @@
-﻿using apigenerica.model.interpretes;
+﻿#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8603 // Possible null reference return
+using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
@@ -7,9 +9,11 @@ using comunes.primitivas.configuracion.mongo;
 using disenocurricular.model;
 using disenocurricular.services.dbcontext;
 using extensibilidad.metadatos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Polly;
 using System.Text.Json;
 
 namespace disenocurricular.services.curso;
@@ -29,10 +33,10 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSO);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSOS);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSO}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSOS}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -46,13 +50,13 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
                     ? configuracionMongo.ConexionDefault()
                     : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
-
-            _db = MongoDbContextDisenoCurricular.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextDisenoCurricular)_db).Curso;
+            
+            _db = MongoDbContextDisenoCurricular.Create(client.GetDatabase(configuracionEntidad.Esquema ));
+            _dbSetFull = ((MongoDbContextDisenoCurricular)_db).Cursos;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSO}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSOS}'");
             throw;
         }
 
@@ -187,9 +191,7 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             Nombre = data.Nombre,
             Descripcion = data.Descripcion,
             Version = data.Version,
-            PlanesEstudio = data.PlanesEstudio,
-            Temarios = data.Temarios,
-            Especialidades = data.Especialidades
+
         };
         return curso;
     }
@@ -201,9 +203,6 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         actual.Nombre = actualizacion.Nombre;
         actual.Descripcion = actualizacion.Descripcion;
         actual.Version = actualizacion.Version;
-        actual.PlanesEstudio = actualizacion.PlanesEstudio;
-        actual.Temarios = actualizacion.Temarios;
-        actual.Especialidades = actualizacion.Especialidades;
         return actual;
     }
 
@@ -218,9 +217,6 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
             Nombre = data.Nombre,
             Descripcion = data.Descripcion,
             Version = data.Version,
-            PlanesEstudio = data.PlanesEstudio,
-            Temarios = data.Temarios,
-            Especialidades = data.Especialidades
         };
 
         return curso;
@@ -317,7 +313,7 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         return respuesta;
     }
 
-    public virtual async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id)
     {
         var respuesta = new Respuesta();
         try
@@ -374,6 +370,37 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         return respuesta;
     }
 
+    public async Task<Respuesta> ActualizaDbSetCurso(Curso curso)
+    {
+        _logger.LogDebug("ServicioCurso - ActualizaContext {curso} ", curso);
+        var respuesta = new Respuesta();
+
+        Curso actual = _dbSetFull.Find(curso.Id);
+
+
+        if (actual == null)
+        {
+            respuesta.Error = new ErrorProceso()
+            {
+                Mensaje = "Ocurrió un problema al actualizar la entidad Curso",
+                Codigo = CodigosError.DISENOCURRICULAR_CURSO_ERROR_ACTUALIZAR,
+                HttpCode = HttpCode.ServerError
+            };
+            respuesta.HttpCode = HttpCode.ServerError;
+            return respuesta;
+        }
+
+        var entidad = ADTOFull(curso, actual);
+        
+        this._dbSetFull.Update(entidad);
+        await _db.SaveChangesAsync();
+
+        respuesta.Ok = true;
+        _logger.LogDebug("ServicioCurso - ActualizaContext resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
+    }
+
     #endregion
 }
-
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8603 // Possible null reference return

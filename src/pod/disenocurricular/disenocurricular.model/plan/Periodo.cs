@@ -13,8 +13,7 @@ public class Periodo
     /// Identificador único del periodo
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
-    public Guid Id { get; set; }
+    public Guid? Id { get; set; }
 
     /// <summary>
     /// Nombre del curso
@@ -107,7 +106,7 @@ public class Periodo
     public int MinimoTemarios { get; set; } = 0;
 
 
-    [BsonElement("cmax")]
+    [BsonElement("cmxt")]
     /// <summary>
     /// Número máximo de temarios para cubrir en el periodo, 0 sin límite
     /// </summary>

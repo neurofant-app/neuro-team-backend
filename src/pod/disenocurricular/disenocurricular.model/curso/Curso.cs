@@ -16,7 +16,6 @@ public class Curso
     /// Identificador único del curso
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>
