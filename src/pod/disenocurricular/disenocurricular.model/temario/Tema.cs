@@ -14,7 +14,6 @@ public class Tema
     /// Identificador único del tema
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
 
     /// <summary>

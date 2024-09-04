@@ -12,8 +12,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using Polly.Timeout;
-using System.Numerics;
 using System.Text.Json;
 
 namespace aprendizaje.services.galeria.temagaleria;
@@ -223,7 +221,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         return temaGaleria;
     }
 
-    public virtual async Task<RespuestaPayload<TemaGaleria>> Insertar(TemaGaleria data)
+    public override async Task<RespuestaPayload<TemaGaleria>> Insertar(TemaGaleria data)
     {
         var respuesta = new RespuestaPayload<TemaGaleria>();
 

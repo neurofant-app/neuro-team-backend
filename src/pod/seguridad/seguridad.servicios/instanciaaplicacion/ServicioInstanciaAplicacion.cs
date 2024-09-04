@@ -143,6 +143,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
     {
         _logger.LogDebug("ServicioInstanciaAplicacion-UnicaPorIdDespliegueAPI");
+        var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioInstanciaAplicacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;

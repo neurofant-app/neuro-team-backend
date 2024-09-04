@@ -16,14 +16,12 @@ public class Plan
     /// Identificador único del plan de estudios
     /// </summary>
     [BsonId]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
     
     /// <summary>
-    /// Identificador del curso al que corresponde el temario
+    /// Identificador del curso al que corresponde el Plan
     /// </summary>
     [BsonElement("cid")]
-    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid CursoId { get; set; }
 
     /// <summary>

@@ -5,7 +5,9 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using disenocurricular.api.seguridad;
+using disenocurricular.services.curso;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using System.Reflection;
 
 namespace disenocurricular.api;
@@ -15,7 +17,6 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
         builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
         builder.CreaConfiguiracionEntidadGenerica();
@@ -25,6 +26,7 @@ public class Program
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IServicioCurso, ServicioCurso>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

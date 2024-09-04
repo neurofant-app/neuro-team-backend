@@ -27,10 +27,10 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         _reflector = reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIO);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIO}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -46,12 +46,12 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
             var client = new MongoClient(cadenaConexion);
 
             _db = MongoDbContextDisenoCurricular.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetFull = ((MongoDbContextDisenoCurricular)_db).Temario;
+            _dbSetFull = ((MongoDbContextDisenoCurricular)_db).Temarios;
 
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIO}'");
+            _logger.LogError(ex, $"Error al inicializar mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS}'");
             throw;
         }
     }
