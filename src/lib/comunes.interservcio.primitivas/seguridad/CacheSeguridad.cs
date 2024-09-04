@@ -4,11 +4,7 @@ using Microsoft.Extensions.Configuration;
 using comunes.interservicio.primitivas.extensiones;
 using apigenerica.primitivas.seguridad;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
-using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.Extensions.Logging;
 
 namespace comunes.interservicio.primitivas.seguridad;
 
