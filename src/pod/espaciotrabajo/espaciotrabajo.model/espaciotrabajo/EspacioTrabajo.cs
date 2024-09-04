@@ -31,6 +31,12 @@ public class EspacioTrabajo
     public Guid TenantId { get; set; }
 
     /// <summary>
+    /// Identificador único de la aplicacion asociada al espaco de trabajo, por ejemplo NeuroTeam  o NeuroPad
+    /// </summary>
+    [BsonElement("aid")]
+    public required string AppId { get; set; }
+
+    /// <summary>
     /// Miembros del espacios
     /// </summary>
     [BsonElement("m")]
