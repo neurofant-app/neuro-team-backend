@@ -43,4 +43,6 @@ public class EntidadCampus : CampusBase, IEntidadCuenta
     /// </summary>
     [BsonElement("fmel")]
     public DateTime? FechaMarcadoEliminar { get; set; }
+
+
 }

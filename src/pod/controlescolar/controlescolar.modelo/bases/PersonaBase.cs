@@ -42,5 +42,10 @@ public abstract class PersonaBase
     /// </summary>
     [BsonElement("g")]
     public GeneroPersona Genero { get; set; } = GeneroPersona.NoDefinido;
-   
+
+    /// <summary>
+    /// red social de la persona
+    /// </summary>
+    [BsonElement("s")]
+    public string? RedSocialId { get; set; }
 }
