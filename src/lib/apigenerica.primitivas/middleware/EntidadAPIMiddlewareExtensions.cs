@@ -84,7 +84,7 @@ public static class EntidadAPIMiddlewareExtensions
         List<Claim>? claims = null;
 
 #if DEBUG
-        return ("roken", Guid.Empty.ToString(), new List<Claim>());
+        return ("token", Guid.Empty.ToString(), new List<Claim>());
 #endif 
 
         string? authHeader = context.Request.Headers?[JWTAHEADER];

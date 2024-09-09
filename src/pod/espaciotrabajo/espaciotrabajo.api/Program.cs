@@ -5,7 +5,9 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using espaciotrabajo.api.seguridad;
+using espaciotrabajo.services.espaciotrabajo;
 using Microsoft.Extensions.Options;
+using Quartz;
 using System.Reflection;
 
 namespace espaciotrabajo.api;
@@ -14,6 +16,15 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddQuartz(options =>
+        {
+            options.UseMicrosoftDependencyInjectionJobFactory();
+            options.UseSimpleTypeLoader();
+            options.UseInMemoryStore();
+        });
+
+        // Register the Quartz.NET service and configure it to block shutdown until jobs are complete.
+        builder.Services.AddQuartzHostedService(options => options.AwaitApplicationStarted = true);
 
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
         builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
@@ -24,8 +35,10 @@ public class Program
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IServicioEspacioTrabajo, ServicioEspacioTrabajo>();
         builder.Services.AddHttpClient();
 
+        builder.Services.AddHostedService<Worker>();
         var app = builder.Build();
         // Añadir la extensión para los servicios de API genérica
         app.UseEntidadAPI();

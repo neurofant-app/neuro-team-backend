@@ -2,14 +2,17 @@
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
+using comunes.interservicio.primitivas;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using espaciotrabajo.model.espaciotrabajo;
 using extensibilidad.metadatos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace espaciotrabajo.services.espaciotrabajo;
 [ServicioEntidadAPI(typeof(EspacioTrabajo))]
@@ -90,7 +93,7 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         _logger.LogDebug("ServicioEspacioTrabajo-ObtieneContextoUsuarioAPI");
-        return this.ObtieneContextoUsuario();
+        return ObtieneContextoUsuario();
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
@@ -179,6 +182,9 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
+            TenantId = data.TenantId,
+            AppId = data.AppId,
+            Miembros = data.Miembros,
         };
         return espacioTrabajo;
     }
@@ -186,6 +192,9 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
     public override EspacioTrabajo ADTOFull(EspacioTrabajo actualizacion, EspacioTrabajo actual)
     {
         actual.Nombre = actualizacion.Nombre;
+        actual.TenantId = actualizacion.TenantId;
+        actual.AppId = actualizacion.AppId;
+        actual.Miembros = actualizacion.Miembros;
         return actual;
     }
 
@@ -196,6 +205,9 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
         {
             Id = data.Id,
             Nombre = data.Nombre,
+            TenantId = data.TenantId,
+            AppId = data.AppId,
+            Miembros = data.Miembros,
         };
 
         return espacioTrabajo;
@@ -349,5 +361,57 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
         return respuesta;
     }
 
+    public async Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspaciosUsuario(string usuarioId)
+    {
+        _logger.LogDebug("ServicioEspacioTrabajo - ObtieneEspaciosUsuario {usuarioId}", usuarioId);
+        RespuestaPayload<List<EspacioTrabajoUsuario>> respuestaPayload = new();
+        var espaciosTrabajo = DB.EspaciosTrabajo.ToList();
+        if(espaciosTrabajo.Count > 0)
+        {
+            EspacioTrabajoUsuario espacioTrabajoUsuario = new EspacioTrabajoUsuario();
+            List<EspacioTrabajoUsuario> listaEspacioTrabajoUsuario = new List<EspacioTrabajoUsuario>();
+            foreach(var x in espaciosTrabajo)
+            {
+                var userSearch = x.Miembros.Find(y => y.UsuarioId.Equals(usuarioId));
+
+                if (userSearch != null)
+                {
+                    EspacioTrabajoBase espacioTrabajoBase = new EspacioTrabajoBase() { Id = (Guid)x.Id, Nombre = x.Nombre, Permisos = this._contextoUsuario.PermisosAplicacion, Roles = this._contextoUsuario.RolesAplicacion };
+                    espacioTrabajoUsuario.Espacios.Add(espacioTrabajoBase);
+                    listaEspacioTrabajoUsuario.Add(espacioTrabajoUsuario);
+                }
+            }
+
+
+
+            if(listaEspacioTrabajoUsuario.Count > 0)
+            {
+                respuestaPayload.Ok = true;
+                respuestaPayload.Payload = listaEspacioTrabajoUsuario;
+            }
+            else
+            {
+                respuestaPayload.Error = new ErrorProceso()
+                {
+                    Mensaje = "Miembro no pertenece a ningún espacio de trabajo",
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_PERTENECE_A_NINGUN_ESPACIOTRABAJO,
+                    HttpCode = HttpCode.NotFound
+                };
+                respuestaPayload.HttpCode = HttpCode.NotFound;
+            }
+        }
+        else
+        {
+            respuestaPayload.Error = new ErrorProceso()
+            {
+                Mensaje = "No existen EspaciosTrabajo",
+                Codigo = CodigosError.ESPACIOTRABAJO_NO_EXISTEN_ESPACIOSTRABAJO,
+                HttpCode = HttpCode.NotFound
+            };
+            respuestaPayload.HttpCode = HttpCode.NotFound;
+        }
+        _logger.LogDebug("ServicioEspacioTrabajo - ObtieneEspaciosUsuario - resultado {Ok} {code} {error}", respuestaPayload!.Ok, respuestaPayload!.HttpCode, respuestaPayload.Error);
+        return respuestaPayload; 
+    }
     #endregion
 }

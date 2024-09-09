@@ -4,6 +4,7 @@ using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
+using comunes.interservicio.primitivas;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using disenocurricular.model;
@@ -24,13 +25,14 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 {
     private readonly ILogger<ServicioCurso> _logger;
     private readonly IReflectorEntidadesAPI reflector;
+    private readonly IProxyEspacioTrabajo proxyEspacioTrabajo;
 
     public ServicioCurso(ILogger<ServicioCurso> logger, IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI reflector, IDistributedCache distributedCache) : base(null, null, logger, reflector, distributedCache)
+        IReflectorEntidadesAPI reflector, IDistributedCache distributedCache, IProxyEspacioTrabajo proxyEspacioTrabajo) : base(null, null, logger, reflector, distributedCache)
     {
         this._logger = logger;
         this.reflector = reflector;
-
+        this.proxyEspacioTrabajo = proxyEspacioTrabajo;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSOS);
@@ -98,7 +100,7 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         _logger.LogDebug("ServicioCurso-ObtieneContextoUsuarioAPI");
-        return this.ObtieneContextoUsuario();
+        return this._contextoUsuario;
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
@@ -397,6 +399,30 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 
         respuesta.Ok = true;
         _logger.LogDebug("ServicioCurso - ActualizaContext resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
+    }
+
+    public async Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspacios(string UsuarioId)
+    {
+        RespuestaPayload<List<EspacioTrabajoUsuario>> respuesta = new RespuestaPayload<List<EspacioTrabajoUsuario>>();
+
+        var obtiene = await proxyEspacioTrabajo.EspacioTrabajoUsuario(UsuarioId);
+
+        if (obtiene == null)
+        {
+            respuesta.Error = new ErrorProceso()
+            {
+                Mensaje = "No se pudo obtener los espacios trabajo",
+                Codigo = "EspaciosTrabajo no obteniods",
+                HttpCode = HttpCode.ServerError
+            };
+        }
+        else
+        {
+            respuesta.Ok = true;
+            respuesta.Payload = obtiene;
+        }
+
         return respuesta;
     }
 

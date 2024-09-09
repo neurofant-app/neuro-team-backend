@@ -1,4 +1,6 @@
-﻿namespace comunes.interservicio.primitivas;
+﻿using comunes.primitivas;
+
+namespace comunes.interservicio.primitivas;
 
 /// <summary>
 /// Proxy para solicitar datos de los espacios de trabajo
@@ -11,7 +13,7 @@ public interface IProxyEspacioTrabajo
     /// </summary>
     /// <param name="UsuarioId"></param>
     /// <returns></returns>
-    Task<List<EspacioTrabajoUsuario>> EspacioTrabajoUsuario(string UsuarioId);
+    Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> EspacioTrabajoUsuario(string UsuarioId);
 
     /// <summary>
     /// Determina si un usuario tiene acceso a un espacio de trabajo

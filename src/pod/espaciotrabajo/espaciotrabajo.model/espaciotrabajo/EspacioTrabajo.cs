@@ -40,5 +40,5 @@ public class EspacioTrabajo
     /// Miembros del espacios
     /// </summary>
     [BsonElement("m")]
-    List<Miembro> Miembros { get; set; } = [];
+    public List<Miembro> Miembros { get; set; } = [];
 }
