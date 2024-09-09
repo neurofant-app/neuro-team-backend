@@ -201,7 +201,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
         actual.ConteoActividdades = actualizacion.ConteoActividdades;
         actual.ConteoDescargas = actualizacion.ConteoDescargas;
         actual.SecuenciaObjetos = actualizacion.SecuenciaObjetos;
-        actual.FlashCardIds = actualizacion.FlashCardIds;
+        actual.Flashcards = actualizacion.Flashcards;
         actual.ActividadesIds = actualizacion.ActividadesIds;
         return actual;
     }
@@ -228,7 +228,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             ConteoActividdades = data.ConteoActividdades,
             ConteoDescargas = data.ConteoDescargas,
             SecuenciaObjetos = data.SecuenciaObjetos,
-            FlashCardIds = data.FlashCardIds,
+            Flashcards = data.Flashcards,
             ActividadesIds = data.ActividadesIds,
         };
         return neurona;
@@ -256,7 +256,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             ConteoActividdades = data.ConteoActividdades,
             ConteoDescargas = data.ConteoDescargas,
             SecuenciaObjetos = data.SecuenciaObjetos,
-            FlashCardIds = data.FlashCardIds,
+            Flashcards = data.Flashcards,
             ActividadesIds = data.ActividadesIds,
 
         };

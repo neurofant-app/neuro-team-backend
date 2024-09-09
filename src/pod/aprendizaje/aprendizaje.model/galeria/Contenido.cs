@@ -22,10 +22,10 @@ public class Contenido
     public required string Nombre { get; set; }
 
     /// <summary>
-    /// Tipo del contenido de aprendizaje
+    /// Tipo MIME del contenido de aprendizaje 
     /// </summary>
     [BsonElement("ti")]
-    public TipoContenido Tipo { get; set; }
+    public string? TipoMime { get; set; }
 
     /// <summary>
     /// Imágen en minuarura para mostrar en la galería, so botiene automáticamente 

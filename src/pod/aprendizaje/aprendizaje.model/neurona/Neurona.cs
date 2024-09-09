@@ -62,7 +62,7 @@ public class Neurona
     /// Estado de publicación de la neurona
     /// </summary>
     [BsonElement("ep")]
-    public EstadoNeurona EstadoPublicacion { get; set; }
+    public EstadoContenido EstadoPublicacion { get; set; }
 
 
     /// <summary>
@@ -135,10 +135,10 @@ public class Neurona
     public long SecuenciaObjetos { get; set; }
 
     /// <summary>
-    /// Identificadores de los flashcards asociados a la neuroa
+    /// Flashcards asociados a la neuroa
     /// </summary>
-    [BsonElement("fid")]
-    public List<long> FlashCardIds { get; set; } = [];
+    [BsonElement("fs")]
+    public List<FlashcardNeurona> Flashcards { get; set; } = [];
 
     /// <summary>
     /// Identificadores de las actividades de aprendizaje asociados a la neuroa

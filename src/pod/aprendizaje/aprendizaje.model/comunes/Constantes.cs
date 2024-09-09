@@ -21,14 +21,14 @@ public enum EstadoTemario
 
 
 /// <summary>
-/// Estado de publicación de la neurona
+/// Estado de la neurona y su contenido asociado
 /// </summary>
-public enum EstadoNeurona
+public enum EstadoContenido
 {
     /// <summary>
     /// La neurona si ecuentra en edición
     /// </summary>
-    EnEdicion = 0,
+    Borraador = 0,
     /// <summary>
     /// La neurona ha sido publicado y no puede ser modificado
     /// </summary>
@@ -122,31 +122,6 @@ public enum TipoSecreto
     /// </summary>
     SecretoGCP = 1
 }
-
-
-/// <summary>
-/// Tipos de medios para los elementos de aprendizaje
-/// </summary>
-public enum TipoContenido
-{
-    /// <summary>
-    /// Imagen compatible con web, ya se jpg, gif o png
-    /// </summary>
-    Imagen = 0,
-    /// <summary>
-    /// Video compatible con web, ya se mpg, mp4 o oog
-    /// </summary>
-    Video = 1,
-    /// <summary>
-    /// Audio compatible con web, ya se mp3 o oog
-    /// </summary>
-    Audio = 2,
-    /// <summary>
-    /// Documento PDF
-    /// </summary>
-    PDF = 3
-}
-
 
 /// <summary>
 /// Eventos de las neuronas

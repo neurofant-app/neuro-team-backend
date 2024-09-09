@@ -21,7 +21,7 @@ public class EspacioTrabajo
     /// Nombre del espacio de trabajo
     /// </summary>
     [BsonElement("n")]
-    public required string Nombre { get; set; }
+    public string Nombre { get; set; }
 
     /// <summary>
     /// Identificador del dueño al que pertenece el espacio de trabajo
@@ -34,7 +34,7 @@ public class EspacioTrabajo
     /// Identificador único de la aplicacion asociada al espaco de trabajo, por ejemplo NeuroTeam  o NeuroPad
     /// </summary>
     [BsonElement("aid")]
-    public required string AppId { get; set; }
+    public string AppId { get; set; }
 
     /// <summary>
     /// Miembros del espacios

@@ -14,7 +14,7 @@ public class Anexo
     /// Id único del contenido almacenado
     /// </summary>
     [BsonId]
-    public required string IdAlmacenamiento { get; set; }
+    public required string AlmacenamientoId { get; set; }
 
     /// <summary>
     /// Tamaño del contenido en bytes
