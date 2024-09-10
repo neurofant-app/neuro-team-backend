@@ -3,7 +3,6 @@ using apigenerica.model.reflectores;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.modelos;
 using apigenerica.primitivas.seguridad;
-using comunes.primitivas.atributos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +33,7 @@ public class EntidadAPIMiddleware
     private readonly string? driver;
 
     public EntidadAPIMiddleware(RequestDelegate next, IConfiguracionAPIEntidades configuracionAPI, ILogger<EntidadAPIMiddleware> logger,
-        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad, ICacheAtributos cacheAtributos, IConfiguration configuration )
+        IProveedorAplicaciones proveedorAplicaciones, ICacheSeguridad cacheSeguridad, ICacheAtributos cacheAtributos, IConfiguration configuration)
     {
         _next = next;
         _configuracionAPI = configuracionAPI;
@@ -63,12 +62,30 @@ public class EntidadAPIMiddleware
                     await ProcesaEntidadHijoGenerica(context);
                     break;
 
+                default:
+                    ProcesaControladorAutenticado(context);
+                    break;
+
             }
         }
         // Call the next delegate/middleware in the pipeline.
         await _next(context);
     }
 
+
+    private void ProcesaControladorAutenticado(HttpContext context)
+    {
+        try
+        {
+            var contextoUsuario = context.ObtieneContextoUsuario();
+            context.Features.Set(contextoUsuario);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al obtener contexto sesion");
+            throw;
+        }
+    }
 
     /// <summary>
     /// Realiza el procesamiento de un endpoint atendido por un servicio de catálogo genérico
@@ -77,54 +94,55 @@ public class EntidadAPIMiddleware
     /// <returns></returns>
     private async Task ProcesaCatalogoGenerico(HttpContext context)
     {
-        if(context.GetRouteData().Values["entidad"] == null )
+        if (context.GetRouteData().Values["entidad"] == null)
         {
             return;
         }
 
-        string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
-        var servicios = _configuracionAPI.ObtienesServiciosICatalogoEntidadAPI();
-        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
-
-        if (servicio == null)
-        {
-            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
-            {
-                Entidad = entidad,
-                Error = ErrorMiddlewareGenerico.ERROR_SERVICIO_NO_LOCALIZADO,
-                HttpCode = 400
-            });
-        }
-
-        var assembly = Assembly.LoadFrom(servicio.Ruta);
-        var tt = assembly.GetType(servicio.NombreEnsamblado);
-
-        if (tt == null)
-        {
-            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
-            {
-                Entidad = entidad,
-                Error = ErrorMiddlewareGenerico.ERROR_ENSAMBLADO_NO_LOCALIZADO,
-                HttpCode = 400
-            });
-        }
-
-        var ctors = tt.GetConstructors();
-        var ps = ctors[0].GetParameters();
-        object[] paramArray = new object[ps.Length];
-        int i = 0;
-        foreach (var p in ps)
-        {
-            var s = context.RequestServices.GetService(p.ParameterType);
-            if (s != null)
-            {
-                paramArray[i] = s;
-            }
-            i++;
-        }
 
         try
         {
+            string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
+            var servicios = _configuracionAPI.ObtienesServiciosICatalogoEntidadAPI();
+            var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+
+            if (servicio == null)
+            {
+                await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+                {
+                    Entidad = entidad,
+                    Error = ErrorMiddlewareGenerico.ERROR_SERVICIO_NO_LOCALIZADO,
+                    HttpCode = 400
+                });
+            }
+
+            var assembly = Assembly.LoadFrom(servicio.Ruta);
+            var tt = assembly.GetType(servicio.NombreEnsamblado);
+
+            if (tt == null)
+            {
+                await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+                {
+                    Entidad = entidad,
+                    Error = ErrorMiddlewareGenerico.ERROR_ENSAMBLADO_NO_LOCALIZADO,
+                    HttpCode = 400
+                });
+            }
+
+            var ctors = tt.GetConstructors();
+            var ps = ctors[0].GetParameters();
+            object[] paramArray = new object[ps.Length];
+            int i = 0;
+            foreach (var p in ps)
+            {
+                var s = context.RequestServices.GetService(p.ParameterType);
+                if (s != null)
+                {
+                    paramArray[i] = s;
+                }
+                i++;
+            }
+
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
             var service = (IServicioCatalogoAPI)Activator.CreateInstance(tt, paramArray);
 #pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
@@ -174,9 +192,9 @@ public class EntidadAPIMiddleware
         string entidad = context.GetRouteData().Values["entidad"].ToString() ?? "";
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
         ServicioEntidadAPI? servicio = null;
-        if(string.IsNullOrEmpty(driver))
+        if (string.IsNullOrEmpty(driver))
         {
-             servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
         }
         else
         {
@@ -221,7 +239,7 @@ public class EntidadAPIMiddleware
             }
             i++;
         }
-        
+
         try
         {
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
@@ -231,7 +249,7 @@ public class EntidadAPIMiddleware
             {
                 var contexto = context.ObtieneContextoUsuario();
                 contexto = await AdicionaSeguridad(contexto);
-                contexto = await AdicionaAtributosMetodo(contexto,tt);
+                contexto = await AdicionaAtributosMetodo(contexto, tt);
 #if !DEBUG
                 if (service.RequiereAutenticacion)
                 {
@@ -369,14 +387,15 @@ public class EntidadAPIMiddleware
     /// </summary>
     /// <param name="contexto"></param>
     /// <returns></returns>
-    private async Task<ContextoUsuario> AdicionaSeguridad(ContextoUsuario contexto) {
+    private async Task<ContextoUsuario> AdicionaSeguridad(ContextoUsuario contexto)
+    {
 
-        
+
         var aplicacion = await _proveedorAplicaciones.ObtieneApliaciones();
-            var roles = await _cacheSeguridad.RolesUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
-            var permisos = await _cacheSeguridad.PermisosUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
-            contexto.RolesAplicacion = roles.Select(_ => _.RolId).ToList();
-            contexto.PermisosAplicacion = permisos.Select(_ => _.PermisoId).ToList();
+        var roles = await _cacheSeguridad.RolesUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
+        var permisos = await _cacheSeguridad.PermisosUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
+        contexto.RolesAplicacion = roles.Select(_ => _.RolId).ToList();
+        contexto.PermisosAplicacion = permisos.Select(_ => _.PermisoId).ToList();
         return contexto;
     }
 
@@ -387,8 +406,8 @@ public class EntidadAPIMiddleware
     /// <returns></returns>
     private async Task<ContextoUsuario> AdicionaAtributosMetodo(ContextoUsuario contexto, Type tipoServicio)
     {
-      contexto.AtributosMetodos= await _cacheAtributos.AtributosServicio(tipoServicio);
-       
+        contexto.AtributosMetodos = await _cacheAtributos.AtributosServicio(tipoServicio);
+
         return contexto;
     }
 

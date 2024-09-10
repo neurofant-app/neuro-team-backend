@@ -1,5 +1,4 @@
-﻿using apigenerica.primitivas.aplicacion;
-using comunes.primitivas.seguridad;
+﻿using apigenerica.model.modelos;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -62,7 +61,8 @@ public abstract class ControladorBaseGenerico : ControllerBase
     /// <returns></returns>
     protected virtual string? UsuarioId()
     {
-        return "u-id";
+        ContextoUsuario? ContextoUsuario = _httpContextAccessor.HttpContext.Features.Get<ContextoUsuario>();
+        return ContextoUsuario?.UsuarioId;
     }
 
     /// <summary>
