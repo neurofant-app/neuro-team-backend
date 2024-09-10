@@ -29,4 +29,7 @@ public class EntidadAlumno: PersonaBase
     /// </summary>
     [BsonElement("idi")]
     public string? IdInterno { get; set; }
+
+    [BsonElement("eid")]
+    public Guid EscuelaId { get; set; }
 }
