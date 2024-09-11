@@ -65,7 +65,7 @@ public class ProxySeguridad:IProxySeguridad
                         logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine($"{host.UrlBase}/api/Aplicacion/Entidad/{app.ApplicacionId}")}");
                         var payload = new StringContent(JsonConvert.SerializeObject(app,new JsonSerializerSettings() { ContractResolver = new CamelCasePropertyNamesContractResolver() }), Encoding.UTF8, "application/json");
                         seguridadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
-                        var response = await seguridadHttpClient.PutAsync($"{host.UrlBase}/api/Aplicacion/Entidad/{app.ApplicacionId}", payload);
+                        var response = await seguridadHttpClient.PutAsync($"{host.UrlBase}/api/Aplicacion/entidad/{app.ApplicacionId}", payload);
                         logger.LogDebug($"ProxySeguridad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
 
                         string? contenidoRespuesta = await response.Content.ReadAsStringAsync();

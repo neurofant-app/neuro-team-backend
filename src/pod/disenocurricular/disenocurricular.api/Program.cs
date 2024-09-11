@@ -2,6 +2,7 @@ using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
 using comunes.interservicio.primitivas;
+using comunes.interservicio.primitivas.espaciotrabajo;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using disenocurricular.api.seguridad;
@@ -27,6 +28,7 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddTransient<IServicioCurso, ServicioCurso>();
+        builder.Services.AddTransient<IProxyEspacioTrabajo, ProxyEspecioTrabajo>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

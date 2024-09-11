@@ -9,7 +9,7 @@ public class Aplicacion
 {
 
     /// <summary>
-    /// Identificador único de la aplicación, este Id será propoerionado por un sistema externo
+    /// Identificador único de la aplicación, este Id será proporcionado por un sistema externo
     /// </summary>
     public virtual required Guid ApplicacionId { get; set; }
 

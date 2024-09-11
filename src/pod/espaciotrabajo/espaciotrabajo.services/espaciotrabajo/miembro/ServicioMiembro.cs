@@ -6,40 +6,36 @@ using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
-using disenocurricular.model;
-using disenocurricular.services.dbcontext;
+using espaciotrabajo.model.espaciotrabajo;
 using extensibilidad.metadatos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using System.Runtime.Serialization;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace disenocurricular.services.temario.tema;
+namespace espaciotrabajo.services.espaciotrabajo.miembro;
 
-[ServicioEntidadAPI(typeof(Tema))]
-public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Tema, string>,
-    IServicioEntidadHijoAPI, IServicioTema
+[ServicioEntidadAPI(typeof(Miembro))]
+public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro, Miembro, Miembro,string>,
+    IServicioEntidadHijoAPI, IServicioMiembro
 {
-    private readonly ILogger<ServicioTema> _logger;
-    private readonly IReflectorEntidadesAPI reflector;
-    private Temario? temario;
-    private DbSet<Temario> _dbSetTemarios;
+    private readonly ILogger<Miembro> _logger;
+    private readonly IReflectorEntidadesAPI _reflector;
+    private DbSet<EspacioTrabajo> _dbSetEspacioTrabajo;
+    private EspacioTrabajo? espacioTrabajo;
 
-    public ServicioTema(ILogger<ServicioTema> logger,
-        IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI reflector,
-        IDistributedCache cache) : base(null, null, logger, reflector, cache)
+
+    public ServicioMiembro(ILogger<Miembro> logger,IReflectorEntidadesAPI reflector, IServicionConfiguracionMongo configuracionMongo, IDistributedCache cache) 
+        : base (null, null, logger, reflector, cache)
     {
         this._logger = logger;
-        this.reflector = reflector;
+        this._reflector = reflector;
         interpreteConsulta = new InterpreteConsultaExpresiones();
-        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS);
+        var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextEspacioTrabajo.NOMBRE_COLECCION_ESPACIOTRABAJO);
         if (configuracionEntidad == null)
         {
-            string err = $"No existe configuracion de mongo para '{MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS}'";
+            string err = $"No existe configuracion de mongo para '{MongoDbContextEspacioTrabajo.NOMBRE_COLECCION_ESPACIOTRABAJO}'";
             _logger.LogError(err);
             throw new Exception(err);
         }
@@ -53,28 +49,28 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
                     : configuracionEntidad.Conexion;
             var client = new MongoClient(cadenaConexion);
 
-            _db = MongoDbContextDisenoCurricular.Create(client.GetDatabase(configuracionEntidad.Esquema));
-            _dbSetTemarios = ((MongoDbContextDisenoCurricular)_db).Temarios;
+            _db = MongoDbContextEspacioTrabajo.Create(client.GetDatabase(configuracionEntidad.Esquema));
+            _dbSetEspacioTrabajo = ((MongoDbContextEspacioTrabajo)_db).EspaciosTrabajo;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error al inicializar mongo para {coleccion}'", MongoDbContextDisenoCurricular.NOMBRE_COLECCION_TEMARIOS);
+            _logger.LogError(ex, "Error al inicializar mongo para {coleccion}'", MongoDbContextEspacioTrabajo.NOMBRE_COLECCION_ESPACIOTRABAJO);
             throw;
         }
     }
 
-    private MongoDbContextDisenoCurricular DB { get { return (MongoDbContextDisenoCurricular)_db; } }
+    private MongoDbContextEspacioTrabajo DB { get { return (MongoDbContextEspacioTrabajo)_db; } }
 
     public bool RequiereAutenticacion => true;
 
     string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
 
-    string IServicioEntidadHijoAPI.Padreid { get => this.temario.Id.ToString() ?? null; set => EstableceDbSet(value); }
+    string IServicioEntidadHijoAPI.Padreid { get => this.espacioTrabajo.Id.ToString() ?? null; set => EstableceDbSet(value); }
 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
         _logger.LogDebug("ServicioMiembro-ActualizarAPI-{data}", data);
-        var update = data.Deserialize<Tema>(JsonAPIDefaults());
+        var update = data.Deserialize<Miembro>(JsonAPIDefaults());
         Respuesta respuesta = await this.Actualizar((string)id, update);
         _logger.LogDebug("ServicioMiembro-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -121,15 +117,15 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
     public void EstableceDbSet(string padreId)
     {
         _logger.LogDebug("ServicioMiembro-EstableceDbSet - {padreId}", padreId);
-        temario = _dbSetTemarios.FirstOrDefault(_ => _.Id == new Guid(padreId));
-        this.Padreid = temario != null ? temario.Id.ToString() : null;
+        espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == new Guid(padreId));
+        this.Padreid = espacioTrabajo != null ? espacioTrabajo.Id.ToString() : null;
         _logger.LogDebug("ServicioMiembro-EstableceDbSet - resultado {padreId}", this.Padreid);
     }
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
         _logger.LogDebug("ServicioMiembro-InsertarAPI-{data}", data);
-        var add = data.Deserialize<Tema>(JsonAPIDefaults());
+        var add = data.Deserialize<Miembro>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
@@ -179,121 +175,58 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
     }
 
     #region Overrides para la personalización de la ENTIDAD => Tema
-    public override async Task<ResultadoValidacion> ValidarInsertar(Tema data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(Miembro data)
     {
         ResultadoValidacion resultado = new();
 
 
-        if(!data.TemaId.Equals(Guid.Empty))
-        {
-            var existeTemaId = temario.Temas.FirstOrDefault(x => x.TemaId.Equals(data.TemaId));
-
-            if(existeTemaId == null)
-            {
-                resultado.Valido = true;
-
-            }
-            else
-            {
-                resultado.Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_TEMAID_NO_EXISTE,
-                    Mensaje = "No existe el TemaId",
-                    HttpCode = HttpCode.BadRequest
-                };
-                resultado.Valido = false;
-            }
-        }
+        resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Tema original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Miembro original)
     {
         ResultadoValidacion resultado = new();
 
 
-        if (original.TemaId.Equals(Guid.Empty))
-        {
-            var existeTemaId = temario.Temas.FirstOrDefault(x => x.TemaId.Equals(original.TemaId));
-            if (existeTemaId != null)
-            {
-                resultado.Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_EXISTE_TEMAS_DEPENDIENTES,
-                    Mensaje = "Existen temas dependientes",
-                    HttpCode = HttpCode.Conflict
-                };
-                resultado.Valido = false;
-            }
-            else
-            {
-                resultado.Valido = true;
-            }
-        }
+        resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Tema actualizacion, Tema original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, Miembro actualizacion, Miembro original)
     {
         ResultadoValidacion resultado = new();
-        if (!actualizacion.TemaId.Equals(Guid.Empty))
-        {
-            var existeTemaId = temario.Temas.FirstOrDefault(x => x.TemaId.Equals(actualizacion.TemaId));
-            if (existeTemaId != null)
-            {
-                resultado.Valido = true;
 
-            }
-            else
-            {
-                resultado.Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_TEMAID_NO_EXISTE,
-                    Mensaje = "No existe el TemaId",
-                    HttpCode = HttpCode.BadRequest
-                };
-                resultado.Valido = false;
-            }
-        }
+
+        resultado.Valido = true;
         return resultado;
     }
 
-    public override Tema ADTOFull(Tema actualizacion, Tema actual)
+    public override Miembro ADTOFull(Miembro actualizacion, Miembro actual)
     {
-        actual.Indice = actualizacion.Indice;
-        actual.Clave = actualizacion.Clave;
-        actual.Nombre = actualizacion.Nombre;
-        actual.TemaId = actualizacion.TemaId;
+        actual.UsuarioId = actualizacion.UsuarioId;
         return actual;
     }
 
-    public override Tema ADTOFull(Tema data)
+    public override Miembro ADTOFull(Miembro data)
     {
-        Tema Tema = new Tema()
+        Miembro miembro = new Miembro()
         {
-            Id = Guid.NewGuid(),
-            Indice = data.Indice,
-            Clave = data.Clave,
-            Nombre = data.Nombre,
-            TemaId = data.TemaId
+            UsuarioId = data.UsuarioId,
         };
-        return Tema;
+        return miembro;
     }
 
-    public override Tema ADTODespliegue(Tema data)
+    public override Miembro ADTODespliegue(Miembro data)
     {
-        Tema Tema = new Tema()
+        Miembro miembro = new Miembro()
         {
-            Id = data.Id,
-            Indice = data.Indice,
-            Clave = data.Clave,
-            Nombre = data.Nombre,
-            TemaId = data.TemaId
+            UsuarioId = data.UsuarioId
         };
-        return Tema;
+        return miembro;
     }
 
-    public override async Task<RespuestaPayload<Tema>> Insertar(Tema data)
+    public override async Task<RespuestaPayload<Miembro>> Insertar(Miembro data)
     {
-        var respuesta = new RespuestaPayload<Tema>();
+        var respuesta = new RespuestaPayload<Miembro>();
 
         try
         {
@@ -301,8 +234,8 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                temario.Temas.Add(entidad);
-                _dbSetTemarios.Update(temario);
+                espacioTrabajo.Miembros.Add(entidad);
+                _dbSetEspacioTrabajo.Update(espacioTrabajo);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -311,21 +244,21 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
-                respuesta.Error!.Codigo = CodigosError.DISENOCURRICULAR_DATOS_NO_VALIDOS;
+                respuesta.Error!.Codigo = CodigosError.ESPACIOTRABAJO_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioMiembro-Insertar {msg}", ex.Message);
-            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.DISENOCURRICULAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.ESPACIOTRABAJO_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
 
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Tema data)
+    public override async Task<Respuesta> Actualizar(string id, Miembro data)
     {
         var respuesta = new Respuesta();
         try
@@ -334,7 +267,7 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_ID_PAYLOAD_NO_INGRESADO,
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_ID_PAYLOAD_NO_INGRESADO,
                     Mensaje = "No ha sido proporcionado el Id ó Payload",
                     HttpCode = HttpCode.BadRequest
                 };
@@ -342,13 +275,13 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
                 return respuesta;
             }
 
-            Tema actual = temario.Temas.FirstOrDefault(_ => _.Id == Guid.Parse(id));
+            Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_NO_ENCONTRADA,
-                    Mensaje = "No existe un Tema con el Id proporcionado",
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_ENCONTRADO,
+                    Mensaje = "No existe un MIEMBRO con el Id proporcionado",
                     HttpCode = HttpCode.NotFound
                 };
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -360,11 +293,11 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                var index = temario.Temas.IndexOf(entidad);
+                var index = espacioTrabajo.Miembros.IndexOf(entidad);
                 if (index == 0)
                 {
-                    temario.Temas[0] = entidad;
-                    _dbSetTemarios.Update(temario);
+                    espacioTrabajo.Miembros[0] = entidad;
+                    _dbSetEspacioTrabajo.Update(espacioTrabajo);
                     await _db.SaveChangesAsync();
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
@@ -373,8 +306,8 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
                 {
                     respuesta.Error = new ErrorProceso()
                     {
-                        Codigo = CodigosError.DISENOCURRICULAR_TEMA_ERROR_ACTUALIZAR,
-                        Mensaje = "No ha sido posible actualizar el Tema",
+                        Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_ERROR_ACTUALIZAR,
+                        Mensaje = "No ha sido posible actualizar el Miembro",
                         HttpCode = HttpCode.BadRequest
                     };
                     respuesta.HttpCode = HttpCode.BadRequest;
@@ -384,31 +317,31 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
-                respuesta.Error!.Codigo = CodigosError.DISENOCURRICULAR_DATOS_NO_VALIDOS;
+                respuesta.Error!.Codigo = CodigosError.ESPACIOTRABAJO_DATOS_NO_VALIDOS;
                 respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioMiembro-Actualizar {msg}", ex.Message);
-            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.DISENOCURRICULAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.ESPACIOTRABAJO_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Tema>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Miembro>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<Tema>();
+        var respuesta = new RespuestaPayload<Miembro>();
         try
         {
-            Tema actual = temario.Temas.FirstOrDefault(_ => _.Id == Guid.Parse(id));
+            Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_NO_ENCONTRADA,
-                    Mensaje = "No existe un Tema con el Id proporcionado",
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_ENCONTRADO,
+                    Mensaje = "No existe un MIEMBRO con el Id proporcionado",
                     HttpCode = HttpCode.NotFound
                 };
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -421,7 +354,7 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioMiembro-UnicaPorId {msg}", ex.Message);
-            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.DISENOCURRICULAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.ESPACIOTRABAJO_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
@@ -437,7 +370,7 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_ID_NO_INGRESADO,
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_ID_NO_INGRESADO,
                     Mensaje = "No ha sido proporcionado el Id",
                     HttpCode = HttpCode.BadRequest
                 };
@@ -445,13 +378,13 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
                 return respuesta;
             }
 
-            Tema actual = temario.Temas.FirstOrDefault(_ => _.Id == Guid.Parse(id));
+            Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_NO_ENCONTRADA,
-                    Mensaje = "No existe un Tema con el Id proporcionado",
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_ENCONTRADO,
+                    Mensaje = "No existe un Miembro con el Id proporcionado",
                     HttpCode = HttpCode.NotFound
                 };
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -461,8 +394,8 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-                temario.Temas.Remove(actual);
-                _dbSetTemarios.Update(temario);
+                espacioTrabajo.Miembros.Remove(actual);
+                _dbSetEspacioTrabajo.Update(espacioTrabajo);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
@@ -471,7 +404,7 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.DISENOCURRICULAR_TEMA_ERROR_ELIMINAR,
+                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_ERROR_ELIMINAR,
                     Mensaje = "No ha sido posible ELIMINAR el Tema",
                     HttpCode = HttpCode.BadRequest
                 };
@@ -482,35 +415,32 @@ public class ServicioTema : ServicioEntidadHijoGenericaBase<Tema, Tema, Tema, Te
         catch (Exception ex)
         {
             _logger.LogError(ex, "ServicioMiembro-Eliminar {msg}", ex.Message);
-            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.DISENOCURRICULAR_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.ESPACIOTRABAJO_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Tema>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Miembro>> ObtienePaginaElementos(Consulta consulta)
     {
         _logger.LogDebug("ServicioMiembro - ObtienePaginaElementos - {consulta}", consulta);
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Tema));
-        var Elementos = Enumerable.Empty<Tema>().AsQueryable();
-        if (temario != null)
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Miembro));
+        var Elementos = Enumerable.Empty<Miembro>().AsQueryable();
+        if (espacioTrabajo != null)
         {
             if (consulta.Filtros.Count > 0)
             {
-                var predicateBody = interpreteConsulta.CrearConsultaExpresion<Tema>(consulta, entidad);
-
+                var predicateBody = interpreteConsulta.CrearConsultaExpresion<Miembro>(consulta, entidad);
                 if (predicateBody != null)
                 {
-                    var RConsulta = temario.Temas.AsQueryable().Provider.CreateQuery<Tema>(predicateBody.getWhereExpression(temario.Temas.AsQueryable().Expression));
-
-                    Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
+                    var RConsulta = espacioTrabajo.Miembros.AsQueryable().Provider.CreateQuery<Miembro>(predicateBody.getWhereExpression(espacioTrabajo.Miembros.AsQueryable().Expression));
+                    Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "UsuarioId", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
                 }
             }
             else
             {
-                var RConsulta = temario.Temas.AsQueryable();
-                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
-
+                var RConsulta = espacioTrabajo.Miembros.AsQueryable();
+                Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "UsuarioId", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
             }
         }
         return Elementos.Paginado(consulta);
