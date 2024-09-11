@@ -2,11 +2,14 @@
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
+using apigenerica.primitivas.aplicacion;
 using comunes.interservicio.primitivas;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
+using comunes.primitivas.seguridad;
 using espaciotrabajo.model.espaciotrabajo;
 using extensibilidad.metadatos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -19,15 +22,21 @@ namespace espaciotrabajo.services.espaciotrabajo;
 public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo, EspacioTrabajo, EspacioTrabajo, EspacioTrabajo, string>,
     IServicioEntidadAPI, IServicioEspacioTrabajo
 {
+    //Variable temporal hasta implementar el HEADER para la identificación de la aplicación.
+    const string NOMBRE_APP = "NeuroTeam";
     private ILogger<ServicioEspacioTrabajo> _logger;
     private readonly IReflectorEntidadesAPI reflector;
+    private readonly IProveedorAplicaciones _proveedorAplicaciones;
+    private readonly IProxySeguridad _proxySeguridad;
+    private readonly IHttpContextAccessor httpContextAccessor;
 
     public ServicioEspacioTrabajo(ILogger<ServicioEspacioTrabajo> logger, IServicionConfiguracionMongo configuracionMongo,
-        IReflectorEntidadesAPI reflector, IDistributedCache distributedCache) : base(null, null, logger, reflector, distributedCache)
+        IReflectorEntidadesAPI reflector, IDistributedCache distributedCache, IProxySeguridad proxySeguridad, IHttpContextAccessor httpContextAccessor) : base(null, null, logger, reflector, distributedCache)
     {
         this._logger = logger;
         this.reflector = reflector;
-
+        this._proxySeguridad = proxySeguridad;
+        this.httpContextAccessor = httpContextAccessor;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextEspacioTrabajo.NOMBRE_COLECCION_ESPACIOTRABAJO);
@@ -361,46 +370,13 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspaciosUsuario(string usuarioId)
+    public async Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspaciosUsuario(string usuarioId, string dominioId, string unidadOrgId)
     {
         _logger.LogDebug("ServicioEspacioTrabajo - ObtieneEspaciosUsuario {usuarioId}", usuarioId);
         RespuestaPayload<List<EspacioTrabajoUsuario>> respuestaPayload = new();
         var espaciosTrabajo = DB.EspaciosTrabajo.ToList();
-        if(espaciosTrabajo.Count > 0)
-        {
-            EspacioTrabajoUsuario espacioTrabajoUsuario = new EspacioTrabajoUsuario();
-            List<EspacioTrabajoUsuario> listaEspacioTrabajoUsuario = new List<EspacioTrabajoUsuario>();
-            foreach(var x in espaciosTrabajo)
-            {
-                var userSearch = x.Miembros.Find(y => y.UsuarioId.Equals(usuarioId));
 
-                if (userSearch != null)
-                {
-                    EspacioTrabajoBase espacioTrabajoBase = new EspacioTrabajoBase() { Id = (Guid)x.Id, Nombre = x.Nombre, Permisos = this._contextoUsuario.PermisosAplicacion, Roles = this._contextoUsuario.RolesAplicacion };
-                    espacioTrabajoUsuario.Espacios.Add(espacioTrabajoBase);
-                    listaEspacioTrabajoUsuario.Add(espacioTrabajoUsuario);
-                }
-            }
-
-
-
-            if(listaEspacioTrabajoUsuario.Count > 0)
-            {
-                respuestaPayload.Ok = true;
-                respuestaPayload.Payload = listaEspacioTrabajoUsuario;
-            }
-            else
-            {
-                respuestaPayload.Error = new ErrorProceso()
-                {
-                    Mensaje = "Miembro no pertenece a ningún espacio de trabajo",
-                    Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_PERTENECE_A_NINGUN_ESPACIOTRABAJO,
-                    HttpCode = HttpCode.NotFound
-                };
-                respuestaPayload.HttpCode = HttpCode.NotFound;
-            }
-        }
-        else
+        if(!espaciosTrabajo.Any())
         {
             respuestaPayload.Error = new ErrorProceso()
             {
@@ -409,7 +385,41 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
                 HttpCode = HttpCode.NotFound
             };
             respuestaPayload.HttpCode = HttpCode.NotFound;
+            return respuestaPayload;
         }
+
+        EspacioTrabajoUsuario espacioTrabajoUsuario = new EspacioTrabajoUsuario();
+        List<EspacioTrabajoUsuario> listaEspacioTrabajoUsuario = new List<EspacioTrabajoUsuario>();
+        foreach (var x in espaciosTrabajo)
+        {
+            var userSearch = x.Miembros.Find(y => y.UsuarioId.Equals(usuarioId));
+
+            if (userSearch != null)
+            {
+                var permisos = this._proxySeguridad.PermisosUsuario(x.AppId, usuarioId, dominioId, unidadOrgId).Result.Select(p => p.Nombre).ToList();
+                var roles = this._proxySeguridad.RolesUsuario(x.AppId, usuarioId, dominioId, unidadOrgId).Result.Select(r => r.Nombre).ToList();
+
+                EspacioTrabajoBase espacioTrabajoBase = new EspacioTrabajoBase() { Id = (Guid)x.Id, Nombre = x.Nombre, Permisos = permisos, Roles = roles };
+                espacioTrabajoUsuario.Espacios.Add(espacioTrabajoBase);
+            }
+
+        }
+
+        if (!espacioTrabajoUsuario.Espacios.Any())
+        {
+            respuestaPayload.Error = new ErrorProceso()
+            {
+                Mensaje = "Miembro no pertenece a ningún espacio de trabajo",
+                Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_NO_PERTENECE_A_NINGUN_ESPACIOTRABAJO,
+                HttpCode = HttpCode.NotFound
+            };
+            respuestaPayload.HttpCode = HttpCode.NotFound;
+            return respuestaPayload;
+        }
+        listaEspacioTrabajoUsuario.Add(espacioTrabajoUsuario);
+        respuestaPayload.Ok = true;
+        respuestaPayload.Payload = listaEspacioTrabajoUsuario;
+
         _logger.LogDebug("ServicioEspacioTrabajo - ObtieneEspaciosUsuario - resultado {Ok} {code} {error}", respuestaPayload!.Ok, respuestaPayload!.HttpCode, respuestaPayload.Error);
         return respuestaPayload; 
     }

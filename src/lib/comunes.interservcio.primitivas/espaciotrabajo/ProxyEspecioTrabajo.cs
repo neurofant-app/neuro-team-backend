@@ -49,8 +49,8 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
     {
         RespuestaPayload<List<EspacioTrabajoUsuario>> respuestaPayload = new RespuestaPayload<List<EspacioTrabajoUsuario>>();
         List<EspacioTrabajoUsuario> espacioTrabajoUsuarios = new();
-        logger.LogDebug("ProxyEspecioTrabajo- Obteniendo EspaciosUsuario");
 
+        logger.LogDebug("ProxyEspecioTrabajo- Obteniendo EspaciosUsuario");
         if (host == null)
         {
             logger.LogError($"ProxyEspecioTrabajo - Host espacioTrabajo no configurado");
@@ -58,7 +58,6 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
         ActualizaHeaders("mi-dominio", "x-uo-id");
         try
         {
-
             var espaciosCache = _cache.GetString(ESPACIOS_TRABAJOS_KEY);
 
             if (espaciosCache != null)
@@ -67,7 +66,6 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
                 respuestaPayload.Ok = true;
                 respuestaPayload.Payload = espacioTrabajoUsuarios;
             }
-
 
             TokenJWT? jWT = null;
             if (string.IsNullOrEmpty(host.ClaveAutenticacion))

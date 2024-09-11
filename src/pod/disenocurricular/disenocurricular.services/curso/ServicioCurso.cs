@@ -24,15 +24,15 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
     IServicioEntidadAPI, IServicioCurso
 {
     private readonly ILogger<ServicioCurso> _logger;
-    private readonly IReflectorEntidadesAPI reflector;
-    private readonly IProxyEspacioTrabajo proxyEspacioTrabajo;
+    private readonly IReflectorEntidadesAPI _reflector;
+    private readonly IProxyEspacioTrabajo _proxyEspacioTrabajo;
 
     public ServicioCurso(ILogger<ServicioCurso> logger, IServicionConfiguracionMongo configuracionMongo,
         IReflectorEntidadesAPI reflector, IDistributedCache distributedCache, IProxyEspacioTrabajo proxyEspacioTrabajo) : base(null, null, logger, reflector, distributedCache)
     {
         this._logger = logger;
-        this.reflector = reflector;
-        this.proxyEspacioTrabajo = proxyEspacioTrabajo;
+        this._reflector = reflector;
+        this._proxyEspacioTrabajo = proxyEspacioTrabajo;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextDisenoCurricular.NOMBRE_COLECCION_CURSOS);
@@ -401,12 +401,16 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         _logger.LogDebug("ServicioCurso - ActualizaContext resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
-
+    /// <summary>
+    /// Método temporal creado para realizar pruebas con el proxy de interservicio EspacioTrabajo
+    /// </summary>
+    /// <param name="UsuarioId"></param>
+    /// <returns></returns>
     public async Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspacios(string UsuarioId)
     {
         RespuestaPayload<List<EspacioTrabajoUsuario>> respuesta = new RespuestaPayload<List<EspacioTrabajoUsuario>>();
 
-        var obtiene = await proxyEspacioTrabajo.EspacioTrabajoUsuario(UsuarioId);
+        var obtiene = await _proxyEspacioTrabajo.EspacioTrabajoUsuario(UsuarioId);
 
         if (obtiene == null)
         {

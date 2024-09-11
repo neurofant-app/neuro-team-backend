@@ -3,6 +3,9 @@ using disenocurricular.services.curso;
 using Microsoft.AspNetCore.Mvc;
 
 namespace disenocurricular.api.Controllers;
+/// <summary>
+/// Controlador Prueba para ser usado con el ProxyEspacioTrabajo
+/// </summary>
 [Route("pruebaEspacioTrabajo")]
 [ApiController]
 public class PruebaController : ControllerBase
@@ -19,16 +22,13 @@ public class PruebaController : ControllerBase
 
     [HttpGet("obtieneEspacios/{usuarioId}", Name = "ObtieneEspaciosUsuario")]
     public async Task<ActionResult<List<EspacioTrabajoUsuario>>> ObtieneEspaciosUsuario([FromRoute] string usuarioId)
-    
     {
         _logger.LogDebug("PruebaController - ObtieneEspaciosUsuario - {usuarioId}", usuarioId);
         List<EspacioTrabajoUsuario> l = [];
-
-        // llamar al servicio para obtener la lista de espacios de trabajo del susuario
         var espaciosTrabajo = await this.servicioCurso.ObtieneEspacios(usuarioId);
-
         if (espaciosTrabajo.Ok == true)
         {
+            _logger.LogDebug("PruebaController - ObtieneEspacioUsuario - resultado {ok} {code} {error}", espaciosTrabajo!.Ok, espaciosTrabajo!.HttpCode, espaciosTrabajo.Error);
             return Ok(espaciosTrabajo.Payload);
         }
         _logger.LogDebug("PruebaController - ObtieneEspacioUsuario - resultado {ok} {code} {error}", espaciosTrabajo!.Ok, espaciosTrabajo!.HttpCode, espaciosTrabajo.Error);

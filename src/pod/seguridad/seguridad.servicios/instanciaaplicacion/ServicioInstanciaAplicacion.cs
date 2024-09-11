@@ -388,7 +388,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId.Equals(Guid.Parse(aplicacionId)) && dominioId.Equals(dominioId));
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
@@ -429,7 +429,7 @@ public class ServicioInstanciaAplicacion : ServicioEntidadGenericaBase<Instancia
 
         if (string.IsNullOrEmpty(rolesCache))
         {
-            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId == Guid.Parse(aplicacionId) && dominioId == dominioId);
+            InstanciaAplicacion instanciaAplicacion = await _dbSetFull.FirstOrDefaultAsync(_ => _.ApplicacionId.Equals(Guid.Parse(aplicacionId)) && dominioId.Equals(dominioId));
             var aplicacionResult = await servicioAplicacion.UnicaPorId(aplicacionId);
 
             if (aplicacionResult.Ok && instanciaAplicacion != null)
