@@ -423,5 +423,18 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
         _logger.LogDebug("ServicioEspacioTrabajo - ObtieneEspaciosUsuario - resultado {Ok} {code} {error}", respuestaPayload!.Ok, respuestaPayload!.HttpCode, respuestaPayload.Error);
         return respuestaPayload; 
     }
+
+    public async Task<Respuesta> ActualizaDbSetEspacioTrabajo(EspacioTrabajo espacioTrabajo)
+    {
+        _logger.LogDebug("ServicioEspacioTrabajo - ActualizaDbSetEspacioTrabajo {curso} ", espacioTrabajo);
+        var respuesta = new Respuesta();
+
+        this._dbSetFull.Update(espacioTrabajo);
+        await _db.SaveChangesAsync();
+
+        respuesta.Ok = true;
+        _logger.LogDebug("ServicioEspacioTrabajo - ActualizaDbSetEspacioTrabajo resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
+        return respuesta;
+    }
     #endregion
 }

@@ -191,6 +191,42 @@ public class AccountController : Controller
         return BadRequest(ModelState);
     }
 
+
+    [SwaggerOperation("Buscando existencia del Usuario por Id")]
+    [SwaggerResponse(statusCode: 200, description: "El Usuario Existe")]
+    [SwaggerResponse(statusCode: 404, description: "No existe el Usuario")]
+    [HttpPost("usuario/{id}")]
+    public async Task<ActionResult> ExisteUsuarioId([FromRoute] string id)
+    {
+        bool existeUsuario = false;
+        logger.LogDebug("AccountController - ExisteUsuarioId - {id}", id);
+        IdentityResult result = new();
+        var dbtype = _configuration["dbtype"];
+        logger.LogDebug("AccountController - ExisteUsuarioId - DB {dbtype}", dbtype);
+        switch (dbtype)
+        {
+            case "mysql":
+                var _userManager = _dependencyResolver.GetService<UserManager<ApplicationUser>>();
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                {
+                    logger.LogDebug("AccountController - ExisteUsuarioId - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                }
+                break;
+            case "mongo":
+                var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
+                var userMongo = await _userManagerMongo.FindByIdAsync(id);
+                if (userMongo == null)
+                {
+                    logger.LogDebug("AccountController - ExisteUsuarioId - resultado {code}", CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                    return NotFound(CodigosErrores.ACCOUNTCONTROLLER_CUENTA_INEXISTENTE);
+                }
+                break;
+        }
+        return Ok();
+    }
+
     #region Helpers
 
     // The following code creates the database and schema if they don't exist.

@@ -2,6 +2,7 @@ using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
 using comunes.interservicio.primitivas;
+using comunes.interservicio.primitivas.identidad;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using espaciotrabajo.api.seguridad;
@@ -36,6 +37,7 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddTransient<IServicioEspacioTrabajo, ServicioEspacioTrabajo>();
+        builder.Services.AddTransient<IProxyIdentidad,  ProxyIdentidad>();
         builder.Services.AddHttpClient();
 
         builder.Services.AddHostedService<Worker>();
