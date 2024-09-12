@@ -49,7 +49,7 @@ public class ProxyIdentidad : IProxyIdentidad
                 }
                 else
                 { 
-                    _logger.LogDebug($"ProxyIdentidad - Llamado remoto a {Path.Combine($"{host.UrlBase}/account/usuario/{UsuarioId}")}");
+                    _logger.LogDebug($"ProxyIdentidad - Llamado remoto a {Path.Combine($"{host.UrlBase}/controlacceso/usuario/{UsuarioId}")}");
                     identidadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
                     var response = await identidadHttpClient.PostAsync($"{host.UrlBase}/account/usuario/{UsuarioId}", null);
                     _logger.LogDebug($"ProxyIdentidad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
