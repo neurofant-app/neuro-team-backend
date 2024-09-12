@@ -8,4 +8,5 @@ namespace espaciotrabajo.services.espaciotrabajo;
 public interface IServicioEspacioTrabajo : IServicioEntidadGenerica<EspacioTrabajo, EspacioTrabajo, EspacioTrabajo, EspacioTrabajo, string>
 {
     Task<RespuestaPayload<List<EspacioTrabajoUsuario>>> ObtieneEspaciosUsuario(string usuarioId, string dominioId, string unidadOrgId);
+    Task<Respuesta> ActualizaDbSetEspacioTrabajo(EspacioTrabajo espacioTrabajo);
 }

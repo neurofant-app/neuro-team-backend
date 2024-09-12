@@ -71,6 +71,7 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
             if (string.IsNullOrEmpty(host.ClaveAutenticacion))
             {
                 logger.LogError($"ProxyEspecioTrabajo - No hay una clave de autenticacion definida para EspacioTrabajo");
+                return respuestaPayload;
             }
             else
             {
@@ -78,6 +79,7 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
                 if (jWT == null)
                 {
                     logger.LogDebug("ProxyEspecioTrabajo - Error al obtener el token interservicio de JWT para EspacioTrabajo");
+                    return respuestaPayload;
                 }
                 else
                 {
@@ -92,6 +94,7 @@ public class ProxyEspecioTrabajo : IProxyEspacioTrabajo
                     if (!response.IsSuccessStatusCode)
                     {
                         logger.LogError($"ProxyEspecioTrabajo - error llamada remota {response.ReasonPhrase} {contenidoRespuesta}");
+                        return respuestaPayload;
                     }
 
                     espacioTrabajoUsuarios = JsonConvert.DeserializeObject<List<EspacioTrabajoUsuario>>(contenidoRespuesta);
