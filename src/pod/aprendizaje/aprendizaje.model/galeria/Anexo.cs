@@ -13,8 +13,8 @@ public class Anexo
     /// <summary>
     /// Id único del contenido almacenado
     /// </summary>
-    [BsonId]
-    public required string IdAlmacenamiento { get; set; }
+    [BsonElement("alid")]
+    public required string AlmacenamientoId { get; set; }
 
     /// <summary>
     /// Tamaño del contenido en bytes
@@ -23,10 +23,22 @@ public class Anexo
     public long Tamano { get; set; } = 0;
 
     /// <summary>
-    /// Versión del contenido, se actualiza automáticamente en cada PUT 
-    /// siemrpe y cuando el hash del contenido sea distinto al de la versión más reciente
+    /// Tipo MIME del contenido
+    /// </summary>
+    [BsonElement("tm")]
+    public required string TipoMime { get; set; }
+
+    /// <summary>
+    /// Versión del anexo, esto puede suceder por que el contenido se actualiza con un nuevo
+    /// archivo y permite a los dependientes mantener la relación con un contenido anterior
+    /// Se incrementa en cada PUT
     /// </summary>
     [BsonElement("v")]
     public int Version { get; set; } = 1;
 
+    /// <summary>
+    /// Indica si el contenido es el activo, en aca actualizacion el mas reciente se torna activo
+    /// </summary>
+    [BsonElement("a")]
+    public bool Activo { get; set; }
 }

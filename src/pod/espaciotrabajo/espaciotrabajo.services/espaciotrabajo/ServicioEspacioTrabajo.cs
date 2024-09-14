@@ -187,7 +187,7 @@ public class ServicioEspacioTrabajo : ServicioEntidadGenericaBase<EspacioTrabajo
 
     public override EspacioTrabajo ADTOFull(EspacioTrabajo data)
     {
-        EspacioTrabajo espacioTrabajo = new()
+        EspacioTrabajo espacioTrabajo = new ()
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,

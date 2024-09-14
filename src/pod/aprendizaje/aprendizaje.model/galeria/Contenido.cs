@@ -22,12 +22,6 @@ public class Contenido
     public required string Nombre { get; set; }
 
     /// <summary>
-    /// Tipo del contenido de aprendizaje
-    /// </summary>
-    [BsonElement("ti")]
-    public TipoContenido Tipo { get; set; }
-
-    /// <summary>
     /// Imágen en minuarura para mostrar en la galería, so botiene automáticamente 
     /// con al actualizar crear o actualizar el contenido de imágenes y videos,
     /// para los archivos de audio se utiliza un icono estándar y la propiedad es nula
@@ -50,8 +44,8 @@ public class Contenido
     /// <summary>
     /// Temas en los que se incluye el contenido
     /// </summary>
-    [BsonElement("te")]
-    public List<int> Temas { get; set; } = [];
+    [BsonElement("tg")]
+    public List<int> Tags { get; set; } = [];
 
     /// <summary>
     /// Determina si el contenido ha sido marcado como eliminado, el contenido 

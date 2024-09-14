@@ -1,4 +1,6 @@
 ﻿using aprendizaje.model.almacenamiento;
+using aprendizaje.model.galeria;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.flashcard;
@@ -8,8 +10,6 @@ namespace aprendizaje.model.flashcard;
 //  Esta entidad se almacena directamente en un sistema de archivos 
 //
 //  - - - 
-
-
 
 /// <summary>
 /// Representa una tarjeta de memorización o flashcard
@@ -35,20 +35,49 @@ public abstract class FlashCard
     public Guid TemaId { get; set; }
 
     /// <summary>
-    /// Concepto del flashcard 
+    /// Determina el tipo base para el concepto de la tarjeta
+    /// Sólo son adminitidos los tipos simples
+    /// </summary>
+    public TipoBaseFlashcard TipoConcepto { get; set; } = TipoBaseFlashcard.Texto;
+
+    /// <summary>
+    /// Determina el tipo base del contenido de la tarjeta
+    /// </summary>
+    public TipoBaseFlashcard TipoContendo { get; set; }
+
+
+    /// <summary>
+    /// Contenido personalizado asociado, 
+    /// el tipo base debe establecerse como Personalizado para su uso
+    /// </summary>
+    public Guid? ContenidoPersonalizadoId { get; set; }
+
+    /// <summary>
+    /// Concepto del flashcard, el usuario regularmente lo ve com el título de la tarjeta 
     /// </summary>
     public List<ValorI18N<string>> Concepto { get; set; } = [];
 
-
     /// <summary>
-    /// Contenido del flashcard 
+    /// Contenido del flashcard para las de tipo multimedia y texto, puede almacenar referencia a medios existentes en la galería
     /// </summary>
     public List<ValorI18N<string>> Comtenido { get; set; } = [];
 
+    /// <summary>
+    /// Texto Texto To Spech para el estudio auditivo
+    /// </summary>
+    public List<ValorI18N<string>> TextoTTS { get; set; } = [];
+
 
     /// <summary>
-    /// Contenidos de aprendizaje vinculados a la flashcard
+    /// Para las tajetas de tipo básico, a excepción de las de texto, almacena la referencia al 
+    /// elemento de la galería que apunta al contenido
     /// </summary>
-    public List<ContenidoAnexo> MediosAnexos { get; set; } = [];
+    public List<ValorI18N<VinculoContenidoGaleria>> ContenidoGaleria { get; set; } = [];
+
+    /// <summary>
+    /// Contenido personalizado asociado
+    /// </summary>
+    [NotMapped]
+    public ContenidoPersonalizado? ContenidoPersonalizado { get; set; }
 
 }
