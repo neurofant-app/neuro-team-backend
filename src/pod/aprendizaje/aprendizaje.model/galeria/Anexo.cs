@@ -11,7 +11,8 @@ namespace aprendizaje.model.galeria;
 public class Anexo
 {
     /// <summary>
-    /// Id único del contenido almacenado
+    /// Id único del contenido almacenado, se utiliza como identificador de versiones para el contenido 
+    /// Cuando un Contenido camvbia se crea un nuevo archivo que tendrá un nuevo ID de almacenamiento
     /// </summary>
     [BsonElement("alid")]
     public required string AlmacenamientoId { get; set; }
@@ -27,14 +28,6 @@ public class Anexo
     /// </summary>
     [BsonElement("tm")]
     public required string TipoMime { get; set; }
-
-    /// <summary>
-    /// Versión del anexo, esto puede suceder por que el contenido se actualiza con un nuevo
-    /// archivo y permite a los dependientes mantener la relación con un contenido anterior
-    /// Se incrementa en cada PUT
-    /// </summary>
-    [BsonElement("v")]
-    public int Version { get; set; } = 1;
 
     /// <summary>
     /// Indica si el contenido es el activo, en aca actualizacion el mas reciente se torna activo

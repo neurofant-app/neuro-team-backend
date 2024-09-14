@@ -56,5 +56,11 @@ public class FlashcardNeurona
     /// </summary>
     [BsonElement("z")]
     public TipoBaseFlashcard TipoContendo { get; set; }
+
+    /// <summary>
+    /// Si es true, sincroniza automáticamente los cambios del contenido en la galería
+    /// </summary>
+    [BsonElement("sg")]
+    public bool SincronizarGaleria { get; set; } = false;
 }
 

@@ -191,8 +191,8 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         actual.Nombre = actualizacion.Nombre;
         actual.Contenido = actualizacion.Contenido;
         actual.Publica = actualizacion.Publica;
-        actual.EspaciosVinculadosLextura = actualizacion.EspaciosVinculadosLextura;
-        actual.ListaTemasGaleria = actualizacion.ListaTemasGaleria;
+        actual.EspaciosVinculadosLectura = actualizacion.EspaciosVinculadosLectura;
+        actual.TagsContenido = actualizacion.TagsContenido;
         return actual;
     }
 
@@ -205,8 +205,8 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
             Nombre = data.Nombre,
             Contenido = data.Contenido,
             Publica = data.Publica,
-            EspaciosVinculadosLextura = data.EspaciosVinculadosLextura,
-            ListaTemasGaleria = data.ListaTemasGaleria
+            EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
+            TagsContenido = data.TagsContenido
         };
         return galeria;
     }
@@ -221,8 +221,8 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
             Fecha = data.Fecha,
             Contenido = data.Contenido,
             Publica = data.Publica,
-            EspaciosVinculadosLextura = data.EspaciosVinculadosLextura,
-            ListaTemasGaleria = data.ListaTemasGaleria
+            EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
+            TagsContenido = data.TagsContenido
         };
         return galeria;
     }

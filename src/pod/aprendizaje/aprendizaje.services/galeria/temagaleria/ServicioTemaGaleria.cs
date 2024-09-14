@@ -15,8 +15,8 @@ using MongoDB.Driver;
 using System.Text.Json;
 
 namespace aprendizaje.services.galeria.temagaleria;
-[ServicioEntidadAPI(entidad: typeof(TemaGaleria))]
-public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, TemaGaleria, TemaGaleria, TemaGaleria, string>,
+[ServicioEntidadAPI(entidad: typeof(TagContenido))]
+public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido, TagContenido, TagContenido, TagContenido, string>,
     IServicioEntidadHijoAPI,IServicioTemaGaleria
 {
     private readonly ILogger<ServicioTemaGaleria> _logger;
@@ -71,7 +71,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
     {
         _logger.LogDebug("ServicioTemaGaleria-ActualizarAPI-{data}", data);
-        var update = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
+        var update = data.Deserialize<TagContenido>(JsonAPIDefaults());
         Respuesta respuesta = await this.Actualizar((string)id, update);
         _logger.LogDebug("ServicioTemaGaleria-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -126,7 +126,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
     {
         _logger.LogDebug("ServicioTemaGaleria-InsertarAPI-{data}", data);
-        var add = data.Deserialize<TemaGaleria>(JsonAPIDefaults());
+        var add = data.Deserialize<TagContenido>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemaGaleria-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
@@ -176,54 +176,54 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
     }
 
     #region Overrides para la personalización de la ENTIDAD => TEMAGALERIA
-    public override async Task<ResultadoValidacion> ValidarInsertar(TemaGaleria data)
+    public override async Task<ResultadoValidacion> ValidarInsertar(TagContenido data)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, TemaGaleria original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, TagContenido original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarActualizar(string id, TemaGaleria actualizacion, TemaGaleria original)
+    public override async Task<ResultadoValidacion> ValidarActualizar(string id, TagContenido actualizacion, TagContenido original)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
         return resultado;
     }
 
-    public override TemaGaleria ADTOFull(TemaGaleria actualizacion, TemaGaleria actual)
+    public override TagContenido ADTOFull(TagContenido actualizacion, TagContenido actual)
     {
-        actual.Nombre = actualizacion.Nombre;
+        actual.Tag = actualizacion.Tag;
         return actual;
     }
 
-    public override TemaGaleria ADTOFull(TemaGaleria data)
+    public override TagContenido ADTOFull(TagContenido data)
     {
-        TemaGaleria temaGaleria = new TemaGaleria()
+        TagContenido temaGaleria = new TagContenido()
         {
             Id = data.Id,
-            Nombre = data.Nombre
+            Tag = data.Tag
         };
         return temaGaleria;
     }
 
-    public override TemaGaleria ADTODespliegue(TemaGaleria data)
+    public override TagContenido ADTODespliegue(TagContenido data)
     {
-        TemaGaleria temaGaleria = new TemaGaleria()
+        TagContenido temaGaleria = new TagContenido()
         {
             Id = data.Id,
-            Nombre = data.Nombre
+            Tag = data.Tag
         };
         return temaGaleria;
     }
 
-    public override async Task<RespuestaPayload<TemaGaleria>> Insertar(TemaGaleria data)
+    public override async Task<RespuestaPayload<TagContenido>> Insertar(TagContenido data)
     {
-        var respuesta = new RespuestaPayload<TemaGaleria>();
+        var respuesta = new RespuestaPayload<TagContenido>();
 
         try
         {
@@ -231,7 +231,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                galeria.ListaTemasGaleria.Add(entidad);
+                galeria.TagsContenido.Add(entidad);
                 _dbSetGaleria.Update(galeria);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
@@ -255,7 +255,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, TemaGaleria data)
+    public override async Task<Respuesta> Actualizar(string id, TagContenido data)
     {
         var respuesta = new Respuesta();
         try
@@ -272,7 +272,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
                 return respuesta;
             }
 
-            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == data.Id);
+            TagContenido actual = galeria.TagsContenido.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
@@ -290,10 +290,10 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data, actual);
-                var index = galeria.ListaTemasGaleria.IndexOf(entidad);
+                var index = galeria.TagsContenido.IndexOf(entidad);
                 if(index == 0)
                 {
-                    galeria.ListaTemasGaleria[0] = entidad;
+                    galeria.TagsContenido[0] = entidad;
                     _dbSetGaleria.Update(galeria);
                     await _db.SaveChangesAsync();
                     respuesta.Ok = true;
@@ -304,7 +304,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
                     respuesta.Error = new ErrorProceso()
                     {
                         Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ERROR_ACTUALIZAR,
-                        Mensaje = "No ha sido posible actualizar el TemaGaleria",
+                        Mensaje = "No ha sido posible actualizar el TagContenido",
                         HttpCode = HttpCode.BadRequest
                     };
                     respuesta.HttpCode = HttpCode.BadRequest;
@@ -327,12 +327,12 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<TemaGaleria>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<TagContenido>> UnicaPorId(string id)
     {
-        var respuesta = new RespuestaPayload<TemaGaleria>();
+        var respuesta = new RespuestaPayload<TagContenido>();
         try
         {
-            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_ => _.Id == int.Parse(id));
+            TagContenido actual = galeria.TagsContenido.FirstOrDefault(_ => _.Id == int.Parse(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
@@ -375,13 +375,13 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
                 return respuesta;
             }
 
-            TemaGaleria actual = galeria.ListaTemasGaleria.FirstOrDefault(_=>_.Id == int.Parse(id));
+            TagContenido actual = galeria.TagsContenido.FirstOrDefault(_=>_.Id == int.Parse(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
                 {
                     Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_NO_ENCONTRADA,
-                    Mensaje = "No existe un TemaGaleria con el Id proporcionado",
+                    Mensaje = "No existe un TagContenido con el Id proporcionado",
                     HttpCode = HttpCode.NotFound
                 };
                 respuesta.HttpCode = HttpCode.NotFound;
@@ -391,7 +391,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
             var resultadoValidacion = await ValidarEliminacion(id, actual);
             if (resultadoValidacion.Valido)
             {
-                galeria.ListaTemasGaleria.Remove(actual);
+                galeria.TagsContenido.Remove(actual);
                 _dbSetGaleria.Update(galeria);
                 await _db.SaveChangesAsync();
                 respuesta.Ok = true;
@@ -402,7 +402,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
                 respuesta.Error = new ErrorProceso()
                 {
                     Codigo = CodigosError.APRENDIZAJE_TEMAGALERIA_ERROR_ELIMINAR,
-                    Mensaje = "No ha sido posible ELIMINAR el TemaGaleria",
+                    Mensaje = "No ha sido posible ELIMINAR el TagContenido",
                     HttpCode = HttpCode.BadRequest
                 };
                 respuesta.HttpCode = HttpCode.BadRequest;
@@ -418,27 +418,27 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TemaGaleria, 
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<TemaGaleria>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<TagContenido>> ObtienePaginaElementos(Consulta consulta)
     {
         _logger.LogDebug("ServicioTemaGaleria - ObtienePaginaElementos - {consulta}", consulta);
-        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(TemaGaleria));
-        var Elementos = Enumerable.Empty<TemaGaleria>().AsQueryable();
+        Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(TagContenido));
+        var Elementos = Enumerable.Empty<TagContenido>().AsQueryable();
         if (galeria != null)
         {
             if (consulta.Filtros.Count > 0)
             {
-                var predicateBody = interpreteConsulta.CrearConsultaExpresion<TemaGaleria>(consulta, entidad);
+                var predicateBody = interpreteConsulta.CrearConsultaExpresion<TagContenido>(consulta, entidad);
 
                 if (predicateBody != null)
                 {
-                    var RConsulta = galeria.ListaTemasGaleria.AsQueryable().Provider.CreateQuery<TemaGaleria>(predicateBody.getWhereExpression(galeria.ListaTemasGaleria.AsQueryable().Expression));
+                    var RConsulta = galeria.TagsContenido.AsQueryable().Provider.CreateQuery<TagContenido>(predicateBody.getWhereExpression(galeria.TagsContenido.AsQueryable().Expression));
 
                     Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
                 }
             }
             else
             {
-                var RConsulta = galeria.ListaTemasGaleria.AsQueryable();
+                var RConsulta = galeria.TagsContenido.AsQueryable();
                 Elementos = RConsulta.OrdenarPor(consulta.Paginado.ColumnaOrdenamiento ?? "Id", consulta.Paginado.Ordenamiento ?? Ordenamiento.asc);
 
             }
