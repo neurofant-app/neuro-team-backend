@@ -5,11 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 namespace aprendizaje.model.galeria;
 
 /// <summary>
-/// Define temas o tags para los elementos de la galería
+/// Define tags para los elementos de la galería
 /// </summary>
 [ExcludeFromCodeCoverage]
 [EntidadDB]
-public class TemaGaleria
+public class TagContenido
 {
     /// <summary>
     /// Identificador único del tema
@@ -21,5 +21,5 @@ public class TemaGaleria
     /// Nombre del tema
     /// </summary>
     [BsonElement("n")]
-    public required string Nombre { get; set; }
+    public List<ValorI18N<string>> Tag { get; set; } = [];
 }

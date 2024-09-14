@@ -37,6 +37,31 @@ public class Galeria
     public DateTime Fecha { get; set; } = DateTime.UtcNow;
 
     /// <summary>
+    /// Fscha de la última actualización a la galeria
+    /// </summary>
+    [BsonElement("fa")]
+    public DateTime FechaActualizacion { get; set; }
+
+    /// <summary>
+    /// Identificador único del almacenamiento de los datos de la galeria
+    /// </summary>
+    [BsonElement("ad")]
+    public Guid AlmacenamientoId { get; set; }
+
+    /// <summary>
+    /// Identifica si la galeria extiende a otra de solo lectura
+    /// </summary>
+    [BsonElement("extgid")]
+    public Guid? ExtensiongaleriaId { get; set; } = null;
+
+
+    /// <summary>
+    /// Idiomas en los que se ofrece el contenido  de la Neurona
+    /// </summary>
+    [BsonElement("i")]
+    public List<string> Idiomas { get; set; } = [];
+
+    /// <summary>
     /// Contenido de la galería
     /// </summary>
     [BsonElement("c")]
@@ -50,14 +75,15 @@ public class Galeria
 
     /// <summary>
     /// Lista de los espacios vinculdaos que tienen acceso a la galería en modo lectura
+    /// Por ejemplo cuando un espacio de trabajo añade una galería compartida
     /// </summary>
     [BsonElement("ev")]
-    public List<Guid> EspaciosVinculadosLextura { get; set; } = [];
+    public List<Guid> EspaciosVinculadosLectura { get; set; } = [];
 
     /// <summary>
-    /// Lista de los temas galeria que tienen acceso a la galería
+    /// Lista de los tags galeria para la clasificación de contenido 
     /// </summary>
-    [BsonElement("ltg")]
-    public List<TemaGaleria> ListaTemasGaleria { get; set; } = [];
+    [BsonElement("tgc")]
+    public List<TagContenido> TagsContenido { get; set; } = [];
 
 }

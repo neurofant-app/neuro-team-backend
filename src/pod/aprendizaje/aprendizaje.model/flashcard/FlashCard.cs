@@ -45,6 +45,7 @@ public abstract class FlashCard
     /// </summary>
     public TipoBaseFlashcard TipoContendo { get; set; }
 
+
     /// <summary>
     /// Contenido personalizado asociado, 
     /// el tipo base debe establecerse como Personalizado para su uso
@@ -62,16 +63,16 @@ public abstract class FlashCard
     public List<ValorI18N<string>> Comtenido { get; set; } = [];
 
     /// <summary>
-    /// Para las tajetas de tipo básico, a excepción de las de texto, almacena la referencia al elemento de la galería que apunta al contenido
+    /// Texto Texto To Spech para el estudio auditivo
     /// </summary>
-    public List<ValorI18N<VinculoContenidoGaleria>> ContenidoGaleria { get; set; } = [];
+    public List<ValorI18N<string>> TextoTTS { get; set; } = [];
 
 
     /// <summary>
-    /// Contenidos de aprendizaje vinculados a la flashcard
+    /// Para las tajetas de tipo básico, a excepción de las de texto, almacena la referencia al 
+    /// elemento de la galería que apunta al contenido
     /// </summary>
-    public List<Anexo> MediosAnexos { get; set; } = [];
-
+    public List<ValorI18N<VinculoContenidoGaleria>> ContenidoGaleria { get; set; } = [];
 
     /// <summary>
     /// Contenido personalizado asociado
