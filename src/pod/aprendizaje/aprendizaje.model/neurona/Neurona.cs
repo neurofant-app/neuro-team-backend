@@ -5,12 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.neurona;
 
-//  - - - DETALLES
-//  
-//  Esta entidad se almacena en mongo
-//
-//  - - - 
-
 /// <summary>
 /// Una neuorna representa un conjunto de medios y actividades de aprendizaje vinculados a un temario
 /// </summary>
@@ -103,6 +97,13 @@ public class Neurona
     public Guid AlmacenamientoId { get; set; }
 
     /// <summary>
+    /// Identificador único de la galería a locala la neurona si existe una 
+    /// A veces la neurona solo conume recursos de su galería local.
+    /// </summary>
+    [BsonElement("gid")]
+    public Guid? GaleriaId { get; set; }
+
+    /// <summary>
     /// Tipo de licenciamiento para la neurona
     /// </summary>
     [BsonElement("t")]
@@ -147,12 +148,21 @@ public class Neurona
     public List<long> ActividadesIds { get; set; } = [];
 
     /// <summary>
+    /// Identificador del último cambio existente en la neurona, el valor inicial el cero
+    /// cada actualziación trae la fecha UTC convertida a ticks de net core
+    /// </summary>
+    [BsonElement("s")]
+    public long TimeStampt { get; set; } = 0;
+
+    /// <summary>
     /// Lista de eentos asociados a la neurona
     /// </summary>
+    [BsonIgnore]
     public List<EventoNeurona> Eventos { get; set; } = [];
 
     /// <summary>
     /// Lista de precios asociada a la neurona
     /// </summary>
+    [BsonIgnore]
     public List<Precio> Precios { get; set; } = [];
 }

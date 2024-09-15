@@ -68,10 +68,25 @@ public class Galeria
     public List<Contenido> Contenido { get; set; } = [];
 
     /// <summary>
+    /// Referencia a todos los elementos de una neurona que no tiene una galería asocidad, todos los elemento son locales
+    /// A veces las galerias se crean al interio de la neurona conteniendo todos los medios 
+    /// asociadoa a los elemento hijos de la mismam 
+    /// </summary>
+    [BsonElement("nid")]
+    public Guid? NeuronaId { get; set; }
+
+    /// <summary>
     /// Determina si la galería permite ser añadida por cualquier espacio de trabajo
     /// </summary>
     [BsonElement("p")]
     public bool Publica { get; set; }
+
+    /// <summary>
+    /// Determina si la galería sólo es local a la neurona asociada vía NeuronaId
+    /// </summary>
+    [BsonElement("ln")]
+    public bool LocalNuerona { get; set; } = false;
+
 
     /// <summary>
     /// Lista de los espacios vinculdaos que tienen acceso a la galería en modo lectura

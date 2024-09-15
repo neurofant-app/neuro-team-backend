@@ -62,5 +62,11 @@ public class FlashcardNeurona
     /// </summary>
     [BsonElement("sg")]
     public bool SincronizarGaleria { get; set; } = false;
+
+    /// <summary>
+    /// Identificador del último cambio existente en la neurona
+    /// </summary>
+    [BsonElement("s")]
+    public long TimeStampt { get; set; }
 }
 
