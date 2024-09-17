@@ -22,7 +22,7 @@ public class ProxySeguridad:IProxySeguridad
         IHttpClientFactory httpClientFactory)
     {
         configuracionAPI = options.Value;
-        this.host = configuracionAPI.ObtieneHost("identity");
+        this.host = configuracionAPI.ObtieneHost("seguridad");
         this.logger =logger;
         this.autenticacionJWT = autenticacionJWT;
         seguridadHttpClient = httpClientFactory.CreateClient();
