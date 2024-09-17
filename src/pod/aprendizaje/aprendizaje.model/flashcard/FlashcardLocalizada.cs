@@ -18,7 +18,7 @@ public class FlashcardLocalizada: FlashcardBase
     /// Contenido del flashcard para las de tipo multimedia y texto, 
     /// puede almacenar referencia a medios existentes en la galería
     /// </summary>
-    public required string Comtenido { get; set; }
+    public required string Contenido { get; set; }
 
     /// <summary>
     /// Texto Texto To Spech para el estudio auditivo

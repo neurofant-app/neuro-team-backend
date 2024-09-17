@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace aprendizaje.model.flashcard;
 
@@ -17,7 +16,7 @@ public class FlashCard: FlashcardBase
     /// <summary>
     /// Contenido del flashcard para las de tipo multimedia y texto, puede almacenar referencia a medios existentes en la galería
     /// </summary>
-    public List<ValorI18N<string>> Comtenido { get; set; } = [];
+    public List<ValorI18N<string>> Contenido { get; set; } = [];
 
     /// <summary>
     /// Texto Texto To Spech para el estudio auditivo
