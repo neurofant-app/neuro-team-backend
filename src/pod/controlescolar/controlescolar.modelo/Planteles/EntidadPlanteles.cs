@@ -1,32 +1,37 @@
 ﻿using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace controlescolar.modelo.Planteles
+
+namespace controlescolar.modelo.Planteles;
+
+[EntidadDB]
+public class EntidadPlanteles
 {
-    [EntidadDB]
-    public class EntidadPlanteles
-    {
-        [BsonId]
-        public virtual Guid Id { get; set; }
+    /// <summary>
+    /// Identificador único del Plantel en el repositorio, se genera al crear un registro
+    /// </summary>
+    [BsonId]
+    public virtual Guid Id { get; set; }
+    /// <summary>
+    /// IDentificadpr único del escuela dentro del plantel por ejemplo clave de la escuela 
+    /// </summary>
 
-        [BsonElement("eid")]
-        public Guid EscuelaId { get; set; }
+    [BsonElement("eid")]
+    public Guid EscuelaId { get; set; }
+    /// <summary>
+    /// IDentificadpr único de la dirección dentro del plantel 
+    /// </summary>
 
-        [BsonElement("d")]
-        public string Direccion { get; set; }
-        [BsonElement("dat")]
-        public string DivisionAreasTrabajo { get; set; }
+    [BsonElement("d")]
+    public Guid? DireccionId { get; set; }
+    /// <summary>
+    /// Nombre del plantel
+    /// </summary>
+    public required string Nombre { get; set; }
+    /// <summary>
+    /// clave del plantel
+    /// </summary>
+    public string? Clave { get; set; }
 
-        public int NumeroHabitates { get; set; }
-        public string PlanEstudios { get; set; }
-        public string Programas { get; set; }
-        public string MetodosEnsenanza { get; set; }
-        
-    }
+
 }

@@ -11,24 +11,48 @@ namespace controlescolar.modelo.KardexEmpledos
     [EntidadDB]
     public class EntidadKardexEmpleado
     {
+        /// <summary>
+        /// Identificador único del Kardex Empleado en el repositorio, se genera al crear un registro
+        /// </summary>
         [BsonId]
         public virtual Guid Id { get; set; }
+        /// <summary>
+        /// Identificador de empleado dentro de Kardex Empleados
+        /// </summary>
         [BsonElement("pe")]
         public virtual Guid EmpleoId { get; set; }
-        [BsonElement("c")]
-        public virtual string Categoria { get; set; }
-        [BsonElement("pt")]
-        public virtual string PlanTrabajo  { get; set; }
+        /// <summary>
+        ///   Identificador del turno del empleado
+        /// </summary>
+        [BsonElement("t")]
+        public virtual Guid TurnoId { get; set; }
+        /// <summary>
+        ///Periodo escolar del empleado
+        /// </summary>
+        [BsonElement("pe")]
+        public virtual string PeriodoEscolar  { get; set; }
+        /// <summary>
+        /// especialidad del empleado si este es profesor
+        /// </summary>
 
         [BsonElement("ep")]
         public virtual string Especialidad { get; set; }
-        
+        /// <summary>
+        ///  Documento que acredita la identidad y nacionalidad de una persona
+        /// </summary>
+
         [BsonElement("dn")]
         public virtual string DNI { get; set; }
-        [BsonElement("s")]
-        public virtual string Salario { get; set; }
-        [BsonElement("tp")]
-        public virtual string TituloProfesional { get; set; }
+        /// <summary>
+        ///Horario de trabajo del empleado
+        /// </summary>
+        [BsonElement("hl")]
+        public virtual string HorarioLaboral { get; set; }
+        /// <summary>
+        ///   Nivel de estudios del empleado
+        /// </summary>
+        [BsonElement("ne")]
+        public virtual Guid NivelEstudiosId { get; set; }
        
 
 

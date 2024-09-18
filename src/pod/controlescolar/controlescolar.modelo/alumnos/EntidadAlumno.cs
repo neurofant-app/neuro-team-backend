@@ -10,20 +10,11 @@ namespace controlescolar.modelo.alumnos;
 [EntidadDB]
 public class EntidadAlumno: PersonaBase
 {
-
     /// <summary>
     /// Identificador único del alumno en el repositorio, se genera al crear un registro
     /// </summary>
     [BsonId]
     public virtual Guid Id { get; set; }
-
-
-    /// <summary>
-    /// Identificador único del campus al que pertenece el alumno
-    /// </summary>
-    [BsonElement("cid")]
-    public virtual required Guid CampusId { get; set; }
-
     /// <summary>
     /// IDentificadpr único del alumno dentro del campus por ejemplo número de alumno 
     /// </summary>
@@ -32,4 +23,6 @@ public class EntidadAlumno: PersonaBase
 
     [BsonElement("eid")]
     public Guid EscuelaId { get; set; }
+
+
 }

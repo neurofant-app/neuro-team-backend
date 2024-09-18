@@ -13,19 +13,28 @@ namespace controlescolar.modelo.KardexAlumnos
     [EntidadDB]
     public class EntidadKardexAlumno
     {
+        /// <summary>
+        /// Identificador único del Kardex Alumno en el repositorio, se genera al crear un registro
+        /// </summary>
         [BsonId]
         public virtual Guid Id { get; set; }
+        /// <summary>
+        ///Identificador  de alumno dentro del kardex de alumnos
+        /// </summary>
         [BsonElement("ai")]
         public Guid AlumnoId { get; set; }
-        
-        [BsonElement("ne")]
-        public string NotasEntrevista   { get; set; }
+  
+        /// <summary>
+        /// Evaluacion de rendimiento
+        /// </summary>
         [BsonElement("er")]
         public string EvaluacionesRendimiento { get; set; }
-        
-
+       
+        /// <summary>
+        /// especialidad del alumno 
+        /// </summary>
         [BsonElement("es")]
-        public string Especialidad { get; set; }
+        public Guid EspecialidadId { get; set; }
 
     }
 }
