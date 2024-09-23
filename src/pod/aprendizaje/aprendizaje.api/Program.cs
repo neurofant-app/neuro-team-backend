@@ -31,7 +31,8 @@ public class Program
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
-
+        // Añadir la extensión para los servicios de API genérica
+        app.UseEntidadAPI();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

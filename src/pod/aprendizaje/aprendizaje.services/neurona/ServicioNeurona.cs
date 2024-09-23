@@ -5,12 +5,19 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using aprendizaje.model.neurona;
+using comunes.interservicio.primitivas;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
+using FluentStorage;
+using FluentStorage.Blobs;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson.IO;
 using MongoDB.Driver;
+using System.Data.Common;
+using System.Text;
 using System.Text.Json;
 
 namespace aprendizaje.services;
@@ -20,11 +27,16 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
 {
     private readonly ILogger<ServicioNeurona> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
+    private IBlobStorage blobStorage;
+    private readonly IConfiguration configuration;
+
     public ServicioNeurona(ILogger<ServicioNeurona> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector,
-        IDistributedCache cache) : base(null, null, logger, reflector, cache)
+        IDistributedCache cache, IBlobStorage blobStorage, IConfiguration configuration) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
         _reflector = reflector;
+        this.blobStorage = blobStorage;
+        this.configuration = configuration;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA);
@@ -196,13 +208,17 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
         actual.FechaActualizacion = actualizacion.FechaActualizacion;
         actual.FechaConsulta = actualizacion.FechaConsulta;
         actual.AlmacenamientoId = actualizacion.AlmacenamientoId;
+        actual.GaleriaId = actualizacion.GaleriaId;
         actual.TipoLicencia = actualizacion.TipoLicencia;
         actual.ConteoFlashcards = actualizacion.ConteoFlashcards;
-        actual.ConteoActividdades = actualizacion.ConteoActividdades;
+        actual.ConteoActividades = actualizacion.ConteoActividades;
         actual.ConteoDescargas = actualizacion.ConteoDescargas;
         actual.SecuenciaObjetos = actualizacion.SecuenciaObjetos;
         actual.Flashcards = actualizacion.Flashcards;
         actual.ActividadesIds = actualizacion.ActividadesIds;
+        actual.TimeStampt = actualizacion.TimeStampt;
+        actual.Eventos = actualizacion.Eventos;
+        actual.Precios = actualizacion.Precios;
         return actual;
     }
 
@@ -223,13 +239,17 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             FechaActualizacion = data.FechaActualizacion,
             FechaConsulta = data.FechaConsulta,
             AlmacenamientoId = data.AlmacenamientoId,
+            GaleriaId = data.GaleriaId,
             TipoLicencia = data.TipoLicencia,
             ConteoFlashcards = data.ConteoFlashcards,
-            ConteoActividdades = data.ConteoActividdades,
+            ConteoActividades = data.ConteoActividades,
             ConteoDescargas = data.ConteoDescargas,
             SecuenciaObjetos = data.SecuenciaObjetos,
             Flashcards = data.Flashcards,
             ActividadesIds = data.ActividadesIds,
+            TimeStampt = data.TimeStampt,
+            Eventos = data.Eventos,
+            Precios = data.Precios
         };
         return neurona;
     }
@@ -247,20 +267,65 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             EstadoPublicacion = data.EstadoPublicacion,
             Version = data.Version,
             NeuronaDerivadaId = data.NeuronaDerivadaId,
-            FechaCreacion = DateTime.UtcNow,
+            FechaCreacion = data.FechaCreacion,
             FechaActualizacion = data.FechaActualizacion,
             FechaConsulta = data.FechaConsulta,
             AlmacenamientoId = data.AlmacenamientoId,
+            GaleriaId = data.GaleriaId,
             TipoLicencia = data.TipoLicencia,
             ConteoFlashcards = data.ConteoFlashcards,
-            ConteoActividdades = data.ConteoActividdades,
+            ConteoActividades = data.ConteoActividades,
             ConteoDescargas = data.ConteoDescargas,
             SecuenciaObjetos = data.SecuenciaObjetos,
             Flashcards = data.Flashcards,
             ActividadesIds = data.ActividadesIds,
+            TimeStampt = data.TimeStampt,
+            Eventos = data.Eventos,
+            Precios = data.Precios
 
         };
         return neurona;
+    }
+
+    public override async Task<RespuestaPayload<Neurona>> Insertar(Neurona data)
+    {
+        var settings = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value;
+
+        var respuesta = new RespuestaPayload<Neurona>();
+
+        try
+        {
+            var resultadoValidacion = await ValidarInsertar(data);
+            if (resultadoValidacion.Valido)
+            {
+                var entidad = ADTOFull(data);
+                _dbSetFull.Add(entidad);
+                var ruta = Path.Combine(settings, entidad.Id.ToString());
+                this.blobStorage = StorageFactory.Blobs.DirectoryFiles(ruta);
+                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "flashcard"));
+                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "evaluacion"));
+                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "contenido"));
+                await _db.SaveChangesAsync();
+
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+                respuesta.Payload = ADTODespliegue(entidad);
+            }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.APRENDIZAJE_DATOS_NO_VALIDOS;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ServicioNeurona-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.APRENDIZAJE_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
     }
 
 

@@ -97,8 +97,8 @@ public class Neurona
     public Guid AlmacenamientoId { get; set; }
 
     /// <summary>
-    /// Identificador único de la galería a locala la neurona si existe una 
-    /// A veces la neurona solo conume recursos de su galería local.
+    /// Identificador único de la galería a locala la neurona si existe una.
+    /// A veces la neurona solo consume recursos de su galería local.
     /// </summary>
     [BsonElement("gid")]
     public Guid? GaleriaId { get; set; }
@@ -120,7 +120,7 @@ public class Neurona
     /// Número de Actividades de evaluación existentes en la neurona
     /// </summary>
     [BsonElement("ca")]
-    public long ConteoActividdades { get; set; } = 0;
+    public long ConteoActividades { get; set; } = 0;
 
     /// <summary>
     /// Número de descargas de la neurona desde el mercado o por grupos de usuarios
@@ -130,7 +130,7 @@ public class Neurona
 
     /// <summary>
     /// Guarda un número que corresponde al Identificado del siguiente 
-    /// obneto a insertar asociado a la neurona por ejemplo una flashcard o actividad
+    /// objeto a insertar asociado a la neurona por ejemplo una flashcard o actividad
     /// </summary>
     [BsonElement("s")]
     public long SecuenciaObjetos { get; set; }
@@ -148,14 +148,14 @@ public class Neurona
     public List<long> ActividadesIds { get; set; } = [];
 
     /// <summary>
-    /// Identificador del último cambio existente en la neurona, el valor inicial el cero
-    /// cada actualziación trae la fecha UTC convertida a ticks de net core
+    /// Identificador del último cambio existente en la neurona, el valor inicial es cero,
+    /// cada actualización trae la fecha UTC convertida a ticks de net core
     /// </summary>
-    [BsonElement("s")]
+    [BsonElement("ts")]
     public long TimeStampt { get; set; } = 0;
 
     /// <summary>
-    /// Lista de eentos asociados a la neurona
+    /// Lista de eventos asociados a la neurona
     /// </summary>
     [BsonIgnore]
     public List<EventoNeurona> Eventos { get; set; } = [];
