@@ -189,8 +189,15 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
     {
         actual.EspacioTrabajoId = actualizacion.EspacioTrabajoId;
         actual.Nombre = actualizacion.Nombre;
+        actual.Fecha = actualizacion.Fecha;
+        actual.FechaActualizacion = actualizacion.FechaActualizacion;
+        actual.AlmacenamientoId = actualizacion.AlmacenamientoId;
+        actual.ExtensiongaleriaId = actualizacion.ExtensiongaleriaId;
+        actual.Idiomas = actualizacion.Idiomas;
         actual.Contenido = actualizacion.Contenido;
+        actual.NeuronaId = actualizacion.NeuronaId;
         actual.Publica = actualizacion.Publica;
+        actual.LocalNuerona = actualizacion.LocalNuerona;
         actual.EspaciosVinculadosLectura = actualizacion.EspaciosVinculadosLectura;
         actual.TagsContenido = actualizacion.TagsContenido;
         return actual;
@@ -203,11 +210,18 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
             Id = Guid.NewGuid(),
             EspacioTrabajoId = data.EspacioTrabajoId,
             Nombre = data.Nombre,
+            Fecha = data.Fecha,
+            FechaActualizacion = data.FechaActualizacion,
+            AlmacenamientoId = data.AlmacenamientoId,
+            ExtensiongaleriaId = data.ExtensiongaleriaId,
+            Idiomas = data.Idiomas,
             Contenido = data.Contenido,
+            NeuronaId = data.NeuronaId,
             Publica = data.Publica,
+            LocalNuerona = data.LocalNuerona,
             EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
             TagsContenido = data.TagsContenido
-        };
+    };
         return galeria;
     }
 
@@ -219,8 +233,14 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
             EspacioTrabajoId = data.EspacioTrabajoId,
             Nombre = data.Nombre,
             Fecha = data.Fecha,
+            FechaActualizacion = data.FechaActualizacion,
+            AlmacenamientoId = data.AlmacenamientoId,
+            ExtensiongaleriaId = data.ExtensiongaleriaId,
+            Idiomas = data.Idiomas,
             Contenido = data.Contenido,
+            NeuronaId = data.NeuronaId,
             Publica = data.Publica,
+            LocalNuerona = data.LocalNuerona,
             EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
             TagsContenido = data.TagsContenido
         };
