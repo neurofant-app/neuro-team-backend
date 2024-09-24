@@ -15,7 +15,6 @@ using AspNetCore.Identity.MongoDbCore.Models;
 using Microsoft.Extensions.DependencyInjection;
 using identidad.api;
 
-
 namespace contabee.identity.api;
 
 public class Program
@@ -29,7 +28,6 @@ public class Program
     /// <exception cref="Exception"></exception>
     private static void InyectaOpenIdDict(IServiceCollection services, ConfigurationManager configuration)
     {
-
         ConfiguracionAPI configuracionAPI = new();
         configuration.GetSection(ConfiguracionAPI.ClaveConfiguracionBase).Bind(configuracionAPI);
 
@@ -45,11 +43,9 @@ public class Program
                     {
                         X509Certificate2 ec = new(auth.EncryptionCertificate);
                         options.AddEncryptionCertificate(ec);
-
                     }
                     options.UseSystemNetHttp();
                     options.UseAspNetCore();
-
                 }
                 else
                 {
@@ -60,7 +56,6 @@ public class Program
         services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);
         services.AddAuthorization();
     }
-
 
     public static void Main(string[] args)
     {
@@ -73,7 +68,6 @@ public class Program
                 .AddEnvironmentVariables();
         var configuration = builder.Configuration;
 
-
         ConfiguracionAPI configuracionAPI = new();
         configuration.GetSection("ConfiguracionAPI").Bind(configuracionAPI);
 
@@ -83,7 +77,6 @@ public class Program
             Console.WriteLine("PreProceso finalizado");
             return;
         }
-
 
         // Add services to the container.
         builder.Services.AddCors(c =>
@@ -122,6 +115,7 @@ public class Program
                     .AddEntityFrameworkStores<ApplicationDbContext>()
                     .AddDefaultTokenProviders();
                 break;
+
             case "mongo":
                 var connectionString = builder.Configuration.GetConnectionString("identityMongo");
 
@@ -131,6 +125,7 @@ public class Program
                         connectionString, "identityMongo"
                     ).AddDefaultTokenProviders();
                 break;
+
             case "default":
                 break;
         }
@@ -160,12 +155,14 @@ public class Program
                         options.UseEntityFrameworkCore()
                                .UseDbContext<ApplicationDbContext>();
                         break;
+
                     case "mongo":
                         var connectionString = builder.Configuration.GetConnectionString("identityMongo");
 
                         options.UseMongoDb()
                         .UseDatabase(new MongoClient(connectionString).GetDatabase("identityMongo"));
                         break;
+
                     case "default":
                         break;
                 }
@@ -177,6 +174,13 @@ public class Program
             // Register the OpenIddict server components.
             .AddServer(options =>
             {
+                // Enable & register external grants i.e.: google, facebook, etc
+                if (configuracionAPI.SocialAuthConfig is not null)
+                {
+                    options.AllowCustomFlow(configuracionAPI.SocialAuthConfig.Google.GrantType);
+                    options.AllowCustomFlow(configuracionAPI.SocialAuthConfig.Facebook.GrantType);
+                }
+
                 // Enable the token endpoint.
                 options.SetAuthorizationEndpointUris("connect/authorize")
                      .SetLogoutEndpointUris("connect/logout")
@@ -193,7 +197,7 @@ public class Program
                        .AllowClientCredentialsFlow();
 
                 // Accept anonymous clients (i.e clients that don't send a client_id).
-                options.AcceptAnonymousClients();
+                //options.AcceptAnonymousClients();
 
                 // REgistra credenciales  de  cifrado para el JWT.
                 if (!string.IsNullOrEmpty(configuracionAPI.EncryptionCertificate) && File.Exists(configuracionAPI.EncryptionCertificate))
@@ -221,13 +225,11 @@ public class Program
                     options.AddDevelopmentSigningCertificate();
                 }
 
-
                 // Evita que se encripte el payload del token
                 if (!configuracionAPI.JWTCifrado)
                 {
                     options.DisableAccessTokenEncryption();
                 }
-
 
                 //#endif
 
@@ -239,7 +241,6 @@ public class Program
                        .EnableUserinfoEndpointPassthrough()
                        .EnableStatusCodePagesIntegration();
             });
-
 
         InyectaOpenIdDict(builder.Services, builder.Configuration);
 
@@ -260,10 +261,8 @@ public class Program
         app.UseAuthentication();
         app.UseAuthorization();
 
-
         app.MapControllers();
         app.MapDefaultControllerRoute();
-
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -271,8 +270,6 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-
-
 
         app.Run();
     }
