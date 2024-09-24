@@ -1,11 +1,6 @@
 ﻿using extensibilidad.metadatos.configuraciones;
 using extensibilidad.metadatos.validadores;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace extensibilidad.metadatos.atributos;
 
@@ -14,7 +9,7 @@ public static class ExtensionesAtributos
 
     public static Propiedad? ObtieneMetadatos(this PropertyInfo propertyInfo)
     {
-        Propiedad propiedad = new();
+        Propiedad propiedad = propertyInfo.ObtieneDatosDefaultPropiedad(new Propiedad());
 
         Attribute[] attrs = propertyInfo.GetCustomAttributes().ToArray();
 
@@ -87,6 +82,17 @@ public static class ExtensionesAtributos
             }
         }
 
+        return propiedad;
+    }
+
+    private static Propiedad ObtieneDatosDefaultPropiedad(this PropertyInfo propertyInfo, Propiedad propiedad)
+    {
+        propiedad.Nombre = propertyInfo.Name;
+        propiedad.Id = propertyInfo.Name;
+        propiedad.Buscable = true;
+        propiedad.Visible = true;
+        propiedad.ValorDefault = null;
+        propiedad.Tipo = GetTipoDato(propertyInfo);
         return propiedad;
     }
 
