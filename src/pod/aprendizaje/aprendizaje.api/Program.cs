@@ -3,6 +3,7 @@ using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
 using aprendizaje.api;
 using aprendizaje.api.seguridad;
+using aprendizaje.services.almacenamientoNeurona;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
@@ -28,10 +29,12 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IServicioAlmacenamientoNeurona, ServicioAlmacenamientoNeuronaFilesSystem>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
-
+        // Añadir la extensión para los servicios de API genérica
+        app.UseEntidadAPI();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

@@ -55,7 +55,7 @@ public class FlashcardNeurona
     /// Determina el tipo base del contenido de la tarjeta
     /// </summary>
     [BsonElement("z")]
-    public TipoBaseFlashcard TipoContendo { get; set; }
+    public TipoBaseFlashcard TipoContenido { get; set; }
 
     /// <summary>
     /// Si es true, sincroniza automáticamente los cambios del contenido en la galería
