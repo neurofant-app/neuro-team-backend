@@ -5,6 +5,7 @@ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using aprendizaje.model.neurona;
+using aprendizaje.services.almacenamientoNeurona;
 using comunes.interservicio.primitivas;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
@@ -27,16 +28,14 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
 {
     private readonly ILogger<ServicioNeurona> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
-    private IBlobStorage blobStorage;
-    private readonly IConfiguration configuration;
+    private readonly IServicioAlmacenamientoNeurona _neuronaFilesSystem;
 
     public ServicioNeurona(ILogger<ServicioNeurona> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector,
-        IDistributedCache cache, IBlobStorage blobStorage, IConfiguration configuration) : base(null, null, logger, reflector, cache)
+        IDistributedCache cache, IServicioAlmacenamientoNeurona neuronaFilesSystem) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
         _reflector = reflector;
-        this.blobStorage = blobStorage;
-        this.configuration = configuration;
+        this._neuronaFilesSystem = neuronaFilesSystem;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA);
@@ -289,8 +288,6 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
 
     public override async Task<RespuestaPayload<Neurona>> Insertar(Neurona data)
     {
-        var settings = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value;
-
         var respuesta = new RespuestaPayload<Neurona>();
 
         try
@@ -300,13 +297,8 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
             {
                 var entidad = ADTOFull(data);
                 _dbSetFull.Add(entidad);
-                var ruta = Path.Combine(settings, entidad.Id.ToString());
-                this.blobStorage = StorageFactory.Blobs.DirectoryFiles(ruta);
-                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "flashcard"));
-                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "evaluacion"));
-                await this.blobStorage.CreateFolderAsync(Path.Combine(ruta, "contenido"));
+                var x = await this._neuronaFilesSystem.CreaFolderBaseNeurona(entidad.Id.ToString());
                 await _db.SaveChangesAsync();
-
                 respuesta.Ok = true;
                 respuesta.HttpCode = HttpCode.Ok;
                 respuesta.Payload = ADTODespliegue(entidad);

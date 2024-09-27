@@ -6,6 +6,7 @@ using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using aprendizaje.model.flashcard;
 using aprendizaje.model.neurona;
+using aprendizaje.services.almacenamientoNeurona;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
@@ -28,8 +29,7 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 {
     private readonly ILogger<ServicioFlashCard> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
-    private IBlobStorage blobStorage;
-    private readonly IConfiguration configuration;
+    private readonly IServicioAlmacenamientoNeurona _neuronaFilesSystem;
     public Neurona? neurona;
     public DbSet<Neurona> _dbSetNeurona;
 
@@ -38,14 +38,12 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
                              IReflectorEntidadesAPI reflector,
                              IServicionConfiguracionMongo configuracionMongo,
                              IDistributedCache cache,
-                             IBlobStorage blobStorage,
-                             IConfiguration configuration)
+                             IServicioAlmacenamientoNeurona neuronaFilesSystem)
                              : base(null, null, logger, reflector, cache)
     {
         this._logger = logger;
         this._reflector = reflector;
-        this.blobStorage = blobStorage;
-        this.configuration = configuration;
+        this._neuronaFilesSystem = neuronaFilesSystem;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAprendizaje.NOMBRE_COLECCION_NEURONA);
@@ -192,84 +190,17 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
     #region Overrides para la personalización de la ENTIDAD => FlashCard hijo de Neurona
     public override async Task<ResultadoValidacion> ValidarInsertar(FlashCard data)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
-        this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-        var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), data.Id.ToString() + ".json");
-        var existe = this.blobStorage.ExistsAsync(pathtemp).Result;
-        if (existe == true)
-        {
-
-            return new ResultadoValidacion()
-            {
-                Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_ERROR_INSERTAR,
-                    Mensaje = "Ya existe el FlashCard con el ID proporcionado",
-                    HttpCode = HttpCode.NotFound
-                },
-                Valido = false
-            };
-        }
-
         return new ResultadoValidacion()
         {
             Valido = true,
         };
     }
-
-    public async Task<ResultadoValidacion> ValidacionEliminarFlashCard(string id)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, FlashCard original)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
-        this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-        var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), id + ".json");
-        var existe = this.blobStorage.ExistsAsync(pathtemp).Result;
-        if (existe == false)
-        {
-
-            return new ResultadoValidacion()
-            {
-                Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_ERROR_ELIMINAR,
-                    Mensaje = "No existe el FlashCard con el ID proporcionado",
-                    HttpCode = HttpCode.NotFound
-                },
-                Valido = false
-            };
-        }
-
         return new ResultadoValidacion()
         {
-            Valido = true,
+            Valido = true
         };
-    }
-
-    public async Task<ResultadoValidacion> ValidacionActualizarFlashCard(string id, FlashCard actualizacion)
-    {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
-        this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-        var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), id + ".json");
-        var existe = this.blobStorage.ExistsAsync(pathtemp).Result;
-        if (existe == false)
-        {
-
-            return new ResultadoValidacion()
-            {
-                Error = new ErrorProceso()
-                {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_ERROR_ACTUALIZAR,
-                    Mensaje = "No existe el FlashCard con el ID proporcionado",
-                    HttpCode = HttpCode.NotFound
-                },
-                Valido = false
-            };
-        }
-
-        return new ResultadoValidacion()
-        {
-            Valido = true,
-        };
-
     }
 
     public override FlashCard ADTOFull(FlashCard data)
@@ -310,8 +241,6 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 
     public override async Task<RespuestaPayload<FlashCard>> Insertar(FlashCard data)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
-
         var respuesta = new RespuestaPayload<FlashCard>();
         try
         {
@@ -330,10 +259,18 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
                     TimeStampt = data.TimeStampt
 
                 };
+
+                var creaFlashCard = this._neuronaFilesSystem.CreaActualizaFlashcard(neurona.Id.ToString(), data.Id.ToString(), entidad).Result;
+                if(creaFlashCard.Ok == false)
+                {
+                    respuesta.Error = creaFlashCard.Error;
+                    respuesta.Error!.Codigo = creaFlashCard.Error!.Codigo;
+                    respuesta.HttpCode = creaFlashCard.Error?.HttpCode ?? HttpCode.None;
+                    return respuesta;
+                }
+
                 neurona.Flashcards.Add(flashcardNeurona);
                 _dbSetNeurona.Update(neurona);
-                this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-                await this.blobStorage.WriteJsonAsync(Path.Combine(Path.Combine(settingsPath, "flashcard"), entidad.Id.ToString() + ".json"  ), entidad);
                 await _db.SaveChangesAsync();
 
                 respuesta.Ok = true;
@@ -358,7 +295,6 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 
     public override async Task<Respuesta> Actualizar(string id, FlashCard data)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
         var respuesta = new Respuesta();
         try
         {
@@ -366,28 +302,14 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_ID_PAYLOAD_NO_INGRESADO,
+                    Codigo = CodigosError.APRENDIZAJE_FLASHCARDNEURONA_ID_PAYLOAD_NO_INGRESADO,
                     Mensaje = "No ha sido procionado el Id ó Payloasd",
                     HttpCode = HttpCode.BadRequest
                 };
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-            this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-            var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), id + ".json");
-
-            var resultadoValidacion = await ValidacionActualizarFlashCard(id.ToString(), data);
-
-            var existe = this.blobStorage.ExistsAsync(pathtemp).Result;
-            if(resultadoValidacion.Valido == false)
-            {
-                respuesta.Error = resultadoValidacion.Error;
-                respuesta.Error!.Codigo = resultadoValidacion.Error!.Codigo;
-                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-            }
-
-            await this.blobStorage.DeleteAsync(pathtemp);
-            await this.blobStorage.WriteJsonAsync(pathtemp, data);
+            var actualizaFlashCard = this._neuronaFilesSystem.CreaActualizaFlashcard(neurona.Id.ToString(), data.Id.ToString(), data).Result;
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
         }
@@ -402,7 +324,6 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 
     public override async Task<Respuesta> Eliminar(string id)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
         var respuesta = new Respuesta();
         try
         {
@@ -410,7 +331,7 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_ID_NO_INGRESADO,
+                    Codigo = CodigosError.APRENDIZAJE_FLASHCARDNEURONA_ID_NO_INGRESADO,
                     Mensaje = "No ha sido proporcionado el Id",
                     HttpCode = HttpCode.BadRequest
                 };
@@ -420,25 +341,31 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 
             FlashcardNeurona actual = neurona.Flashcards.FirstOrDefault(_ => _.FlashcardId == long.Parse(id));
 
-            this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath, "flashcard"));
-            var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), id + ".json");
-            var resultadoValidacion = await this.ValidacionEliminarFlashCard(id);
-            if (resultadoValidacion.Valido == false && actual == null)
+            if(actual == null)
             {
                 respuesta.Error = new ErrorProceso()
                 {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_NO_ENCONTRADA,
-                    Mensaje = "No existe el FlashCard con el ID proporcionado",
-                    HttpCode = HttpCode.NotFound
+                    Codigo = CodigosError.APRENDIZAJE_FLASHCARDNEURONA_NO_ENCONTRADA,
+                    Mensaje = "No existe un FlashCardNeurona con el Id proporcionado",
+                    HttpCode = HttpCode.BadRequest
                 };
                 respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            var eliminaFlashCard = this._neuronaFilesSystem.EliminaFlashcard(neurona.Id.ToString(), actual.FlashcardId.ToString()).Result;
+
+            if(eliminaFlashCard.Ok == false)
+            {
+                respuesta.Error = eliminaFlashCard.Error;
+                respuesta.Error!.Codigo = eliminaFlashCard.Error!.Codigo;
+                respuesta.HttpCode = eliminaFlashCard.Error?.HttpCode ?? HttpCode.None;
                 return respuesta;
             }
 
             neurona.Flashcards.Remove(actual);
             _dbSetNeurona.Update(neurona);
             await _db.SaveChangesAsync();
-            await this.blobStorage.DeleteAsync(pathtemp);
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
 
@@ -454,19 +381,15 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
 
     public override async Task<RespuestaPayload<FlashCard>> UnicaPorId(string id)
     {
-        var settingsPath = configuration.GetSection("FluentStorageDesarrollo").GetSection("rutaBase").Value + neurona?.Id;
         var respuesta = new RespuestaPayload<FlashCard>();
         try
         {
-            this.blobStorage = StorageFactory.Blobs.DirectoryFiles(Path.Combine(settingsPath,"flashcard"));
-            var pathtemp = Path.Combine(Path.Combine(settingsPath, "flashcard"), id + ".json");
-            var actual = await this.blobStorage.ReadJsonAsync<FlashCard>(pathtemp);
-
-            if (actual == null)
+            var unico = this._neuronaFilesSystem.ObtieneFlashcard(neurona.Id.ToString(), id).Result;
+            if (unico.Ok == false)
             {
                 respuesta.Error = new()
                 {
-                    Codigo = CodigosError.APRENDIZAJE_FLASHCARD_NO_ENCONTRADA,
+                    Codigo = CodigosError.APRENDIZAJE_FLASHCARDNEURONA_NO_ENCONTRADA,
                     Mensaje = "No se encontró FlashCard con el Id proporcionado",
                     HttpCode = HttpCode.NotFound
                 };
@@ -475,7 +398,7 @@ public class ServicioFlashCard : ServicioEntidadHijoGenericaBase<FlashCard, Flas
             }
             respuesta.Ok = true;
             respuesta.HttpCode = HttpCode.Ok;
-            respuesta.Payload = actual;
+            respuesta.Payload = unico;
         }
         catch(Exception ex)
         {
