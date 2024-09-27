@@ -29,7 +29,7 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
-        builder.Services.AddTransient<IServicioAlmacenamientoNeurona, ServicioAlmacenamientoNeuronaGCPBucket>();
+        builder.Services.AddTransient<IServicioAlmacenamientoNeurona, ServicioAlmacenamientoNeuronaFilesSystem>();
         builder.Services.AddHttpClient();
 
         var app = builder.Build();
