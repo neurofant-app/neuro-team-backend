@@ -217,7 +217,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
           UsuarioId= data.UsuarioId
         };
     }
-    public override async Task<RespuestaPayload<ConsultaUsuarioGrupo>> Insertar(CreaUsuarioGrupo data)
+    public override async Task<RespuestaPayload<ConsultaUsuarioGrupo>> Insertar(CreaUsuarioGrupo data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaUsuarioGrupo>();
 
