@@ -10,6 +10,7 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 namespace disenocurricular.services.temario;
@@ -58,7 +59,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     private MongoDbContextDisenoCurricular DB { get { return (MongoDbContextDisenoCurricular)_db; } }
     public bool RequiereAutenticacion => true;
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Temario>(JsonAPIDefaults());
@@ -67,7 +68,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -105,7 +106,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         this.EstableceContextoUsuario(contexto);
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-InsertarAPI-{data}", data);
         var add = data.Deserialize<Temario>(JsonAPIDefaults());
@@ -115,7 +116,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public Task<Entidad>? Metadatos(string Tipo)
+    public Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         throw new NotImplementedException();
     }
@@ -126,7 +127,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -135,7 +136,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -144,7 +145,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -153,7 +154,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -324,7 +325,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

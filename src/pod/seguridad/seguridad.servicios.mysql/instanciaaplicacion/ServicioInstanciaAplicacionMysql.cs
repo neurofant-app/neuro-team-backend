@@ -14,6 +14,7 @@ using MongoDB.Driver;
 using seguridad.modelo;
 using seguridad.modelo.instancias;
 using seguridad.modelo.servicios;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 
@@ -67,7 +68,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         var add = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
@@ -75,25 +76,25 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         var update = data.Deserialize<InstanciaAplicacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         var temp = await UnicaPorIdDespliegue((string)id);
 
@@ -101,7 +102,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
@@ -109,7 +110,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
@@ -256,7 +257,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

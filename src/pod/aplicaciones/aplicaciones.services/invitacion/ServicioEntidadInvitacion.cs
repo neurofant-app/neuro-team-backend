@@ -22,6 +22,7 @@ using aplicaciones.services.proxy.abstractions;
 using System.Data.Common;
 using comunes.primitivas.atributos;
 using System.Runtime.CompilerServices;
+using System.Collections.Specialized;
 
 
 namespace aplicaciones.services.invitacion;
@@ -120,7 +121,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
 
     [Rol("00000000-0000-0000-0000-000000000001", "app-manager-rol-admin")]
     [Permiso("00000000-0000-0000-0000-000000000001", "app-manager-perm-admin")]
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI-{data}",data);
         if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
@@ -137,7 +138,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaInvitacion>(JsonAPIDefaults());
@@ -146,7 +147,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -154,7 +155,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -163,7 +164,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -172,7 +173,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -181,7 +182,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -328,7 +329,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

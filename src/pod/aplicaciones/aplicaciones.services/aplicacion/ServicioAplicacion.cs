@@ -13,6 +13,7 @@ using System.Text.Json;
 using comunes.primitivas.configuracion.mongo;
 using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 
 namespace aplicaciones.services.aplicacion;
 [ServicioEntidadAPI(entidad: typeof(EntidadAplicacion))]
@@ -98,7 +99,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-InsertarAPI-{data}", data);
         var add = data.Deserialize<CreaAplicacion>(JsonAPIDefaults());
@@ -108,7 +109,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaAplicacion>(JsonAPIDefaults());
@@ -117,7 +118,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -125,7 +126,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -134,7 +135,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -143,7 +144,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-PaginaAPI-{consulta}",consulta);
         var temp = await this.Pagina(consulta);
@@ -152,7 +153,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioAplicacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -367,7 +368,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

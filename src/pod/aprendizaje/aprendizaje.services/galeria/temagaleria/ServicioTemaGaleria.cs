@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 namespace aprendizaje.services.galeria.temagaleria;
@@ -68,7 +69,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
     
     string IServicioEntidadHijoAPI.Padreid { get => this.galeria.Id.ToString() ?? null; set => EstableceDbSet(value); }
     
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-ActualizarAPI-{data}", data);
         var update = data.Deserialize<TagContenido>(JsonAPIDefaults());
@@ -77,7 +78,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -123,7 +124,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         _logger.LogDebug("ServicioTemaGaleria-EstableceDbSet - resultado {padreId}", this.Padreid);
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-InsertarAPI-{data}", data);
         var add = data.Deserialize<TagContenido>(JsonAPIDefaults());
@@ -139,7 +140,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -148,7 +149,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -157,7 +158,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -166,7 +167,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -357,7 +358,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

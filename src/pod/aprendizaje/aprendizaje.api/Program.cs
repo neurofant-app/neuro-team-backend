@@ -1,7 +1,6 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
-using aprendizaje.api;
 using aprendizaje.api.seguridad;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;

@@ -10,6 +10,7 @@ using comunes.primitivas;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using apigenerica.model.interpretes;
+using System.Collections.Specialized;
 
 namespace apigenerica.model.servicios;
 
@@ -93,7 +94,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         return respuesta;
     }
 
-    public virtual async Task<Entidad>? Metadatos(string Tipo)
+    public virtual async Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         await Task.Delay(0);
         Entidad entidad = new();
@@ -167,7 +168,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         return respuesta;
     }
 
-    public virtual async Task<Respuesta> Eliminar(string id)
+    public virtual async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

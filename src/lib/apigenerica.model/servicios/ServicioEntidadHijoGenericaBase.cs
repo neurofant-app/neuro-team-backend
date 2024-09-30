@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
 using apigenerica.model.interpretes;
+using System.Collections.Specialized;
 
 namespace apigenerica.model.servicios;
 
@@ -87,7 +88,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<Entidad>? Metadatos(string Tipo)
+    public virtual async Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         await Task.Delay(0);
         Entidad entidad = new();
@@ -153,7 +154,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<Respuesta> Eliminar(string id)
+    public virtual async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

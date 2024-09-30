@@ -7,14 +7,13 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.plantilla;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using aplicaciones.services.dbcontext;
 using comunes.primitivas.configuracion.mongo;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 
 namespace aplicaciones.services.consentimiento;
 [ServicioEntidadAPI(entidad: typeof(EntidadConsentimiento))]
@@ -86,7 +85,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return this.EntidadDespliegue();
     }
 
-    public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
+    public void EstableceContextoUsuarioAPI(ContextoUsuario contexto, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
@@ -98,7 +97,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-InsertarAPI-{data}",data);
         var add = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
@@ -108,7 +107,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-ActualizarAPI-{data}", data);
         var update = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
@@ -117,7 +116,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -125,7 +124,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -134,7 +133,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -143,7 +142,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-PaginaAPI-{consulta}",consulta);
         var temp = await this.Pagina(consulta);
@@ -152,7 +151,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -314,7 +313,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

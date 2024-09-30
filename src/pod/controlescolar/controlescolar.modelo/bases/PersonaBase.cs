@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using controlescolar.modelo.persona;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace controlescolar.modelo;
 

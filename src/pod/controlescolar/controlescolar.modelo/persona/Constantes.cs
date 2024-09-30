@@ -1,4 +1,4 @@
-﻿namespace controlescolar.modelo;
+﻿namespace controlescolar.modelo.persona;
 
 /// <summary>
 /// Género de la persona

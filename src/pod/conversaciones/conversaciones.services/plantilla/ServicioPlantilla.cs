@@ -11,6 +11,7 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 using Plantilla = conversaciones.model.Plantilla;
 
@@ -94,7 +95,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-InsertarAPI-{data}", data);
         var add = data.Deserialize<Plantilla>(JsonAPIDefaults());
@@ -104,7 +105,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Plantilla>(JsonAPIDefaults());
@@ -113,7 +114,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -121,7 +122,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(Object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -130,7 +131,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -139,7 +140,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -148,7 +149,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);

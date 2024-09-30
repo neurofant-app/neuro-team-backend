@@ -13,6 +13,7 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
@@ -109,7 +110,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-InsertarAPI-{data}", data);
         if (!permisosValidos(Constantes.AplicacionId))
@@ -128,7 +129,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-ActualizarAPI-{data}", data);
         if (!permisosValidos(Constantes.AplicacionId))
@@ -146,7 +147,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-EliminarAPI");
         if (!permisosValidos(Constantes.AplicacionId))
@@ -163,7 +164,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-UnicaPorIdAPI");
         if (!permisosValidos(Constantes.AplicacionId))
@@ -181,7 +182,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-UnicaPorIdDespliegueAPI");
         if (!permisosValidos(Constantes.AplicacionId))
@@ -201,7 +202,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-PaginaAPI-{consulta}", consulta);
         if (!permisosValidos(Constantes.AplicacionId))
@@ -220,7 +221,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_VISOR)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_VIEW)]
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-PaginaDespliegueAPI-{consulta}", consulta);
         if (!permisosValidos(Constantes.AplicacionId))
@@ -371,7 +372,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

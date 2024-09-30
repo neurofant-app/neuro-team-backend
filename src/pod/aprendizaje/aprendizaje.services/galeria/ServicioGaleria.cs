@@ -12,8 +12,8 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
-using ZstdSharp.Unsafe;
 
 namespace aprendizaje.services.galeria;
 [ServicioEntidadAPI(entidad: typeof(Galeria))]
@@ -61,7 +61,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
     private MongoDbContextAprendizaje DB { get { return (MongoDbContextAprendizaje)_db; } }
     public bool RequiereAutenticacion => true;
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Galeria>(JsonAPIDefaults());
@@ -70,7 +70,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -108,7 +108,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         this.EstableceContextoUsuario(contexto);
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-InsertarAPI-{data}", data);
         var add = data.Deserialize<Galeria>(JsonAPIDefaults());
@@ -118,7 +118,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public Task<Entidad>? Metadatos(string Tipo)
+    public Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         throw new NotImplementedException();
     }
@@ -129,7 +129,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -138,7 +138,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -147,7 +147,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -156,7 +156,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -314,7 +314,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

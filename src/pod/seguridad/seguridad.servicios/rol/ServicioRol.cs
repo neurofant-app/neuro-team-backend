@@ -16,6 +16,7 @@ using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
 using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 
@@ -112,7 +113,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-InsertarAPI-{data}", data); var add = data.Deserialize<CreaRol>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
@@ -121,7 +122,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaRol>(JsonAPIDefaults());
@@ -130,7 +131,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -138,7 +139,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -147,7 +148,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -156,7 +157,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -165,7 +166,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -368,7 +369,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

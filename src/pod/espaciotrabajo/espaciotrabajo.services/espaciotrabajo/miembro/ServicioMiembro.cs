@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 namespace espaciotrabajo.services.espaciotrabajo.miembro;
@@ -67,7 +68,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
 
     string IServicioEntidadHijoAPI.Padreid { get => this.espacioTrabajo.Id.ToString() ?? null; set => EstableceDbSet(value); }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Miembro>(JsonAPIDefaults());
@@ -76,7 +77,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -122,7 +123,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         _logger.LogDebug("ServicioMiembro-EstableceDbSet - resultado {padreId}", this.Padreid);
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-InsertarAPI-{data}", data);
         var add = data.Deserialize<Miembro>(JsonAPIDefaults());
@@ -138,7 +139,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -147,7 +148,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -156,7 +157,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -165,7 +166,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -360,7 +361,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

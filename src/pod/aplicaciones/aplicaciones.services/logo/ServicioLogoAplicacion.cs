@@ -7,15 +7,13 @@ using apigenerica.model.reflectores;
 using comunes.primitivas;
 using apigenerica.model.servicios;
 using aplicaciones.model;
-using aplicaciones.services.consentimiento;
-using aplicaciones.services.plantilla;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using comunes.primitivas.configuracion.mongo;
 using aplicaciones.services.dbcontext;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 
 
 
@@ -96,7 +94,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-InsertarAPI-{data}", data);
         var add = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
@@ -106,7 +104,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<EntidadLogoAplicacion>(JsonAPIDefaults());
@@ -115,7 +113,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -123,7 +121,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -132,7 +130,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -141,7 +139,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta);
@@ -150,7 +148,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioLogoAplicacion-PaginaDespliegueAPI-{consulta}", consulta);
         var temp = await this.PaginaDespliegue(consulta);
@@ -320,7 +318,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
