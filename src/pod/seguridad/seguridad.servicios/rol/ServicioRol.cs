@@ -131,7 +131,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -229,7 +229,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
              Personalizado=data.Personalizado
         };
     }
-    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)
+    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaRol>();
 
@@ -262,7 +262,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
 
         return respuesta;
     }
-    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -338,7 +338,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
     }
 
 
-    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Rol>();
         try

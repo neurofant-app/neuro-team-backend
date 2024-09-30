@@ -88,7 +88,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
@@ -184,7 +184,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
              ModuloId = data.ModuloId
         };
     }
-    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)
+    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaRol>();
 
@@ -218,7 +218,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
 
         return respuesta;
     }
-    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -277,7 +277,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     }
 
 
-    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Rol>();
         try

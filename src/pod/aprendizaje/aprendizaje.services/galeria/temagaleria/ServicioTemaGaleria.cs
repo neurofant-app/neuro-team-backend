@@ -78,7 +78,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemaGaleria-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -222,7 +222,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return temaGaleria;
     }
 
-    public override async Task<RespuestaPayload<TagContenido>> Insertar(TagContenido data)
+    public override async Task<RespuestaPayload<TagContenido>> Insertar(TagContenido data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<TagContenido>();
 
@@ -256,7 +256,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, TagContenido data)
+    public override async Task<Respuesta> Actualizar(string id, TagContenido data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -328,7 +328,7 @@ public class ServicioTemaGaleria : ServicioEntidadHijoGenericaBase<TagContenido,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<TagContenido>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<TagContenido>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<TagContenido>();
         try

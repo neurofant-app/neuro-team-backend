@@ -68,7 +68,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -233,7 +233,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
         return temario;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Temario data)
+    public override async Task<Respuesta> Actualizar(string id, Temario data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -294,7 +294,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     }
 
 
-    public override async Task<RespuestaPayload<Temario>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Temario>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Temario>();
         try

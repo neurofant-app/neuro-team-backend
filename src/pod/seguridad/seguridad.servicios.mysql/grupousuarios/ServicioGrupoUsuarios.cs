@@ -76,7 +76,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
@@ -177,7 +177,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
         };
     }
 
-    public override async Task<Respuesta> Actualizar(string id, GrupoUsuarios data)
+    public override async Task<Respuesta> Actualizar(string id, GrupoUsuarios data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -226,7 +226,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     }
 
 
-    public override async Task<RespuestaPayload<GrupoUsuarios>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<GrupoUsuarios>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<GrupoUsuarios>();
         try

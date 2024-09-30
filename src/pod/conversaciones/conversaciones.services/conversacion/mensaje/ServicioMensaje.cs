@@ -91,7 +91,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -261,7 +261,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return mensaje;
     }
 
-    public virtual async Task<RespuestaPayload<Mensaje>> Insertar(Mensaje data)
+    public virtual async Task<RespuestaPayload<Mensaje>> Insertar(Mensaje data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Mensaje>();
 
@@ -308,7 +308,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Mensaje data)
+    public override async Task<Respuesta> Actualizar(string id, Mensaje data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -381,7 +381,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Mensaje>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Mensaje>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Mensaje>();
         try

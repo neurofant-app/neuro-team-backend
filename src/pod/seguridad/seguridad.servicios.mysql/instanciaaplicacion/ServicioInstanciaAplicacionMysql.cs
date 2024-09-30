@@ -82,7 +82,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
@@ -181,7 +181,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
         };
     }
 
-    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, InstanciaAplicacion data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -230,7 +230,7 @@ public class ServicioInstanciaAplicacionMySql : ServicioEntidadGenericaBase<Inst
     }
 
 
-    public override async Task<RespuestaPayload<InstanciaAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<InstanciaAplicacion>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<InstanciaAplicacion>();
         try

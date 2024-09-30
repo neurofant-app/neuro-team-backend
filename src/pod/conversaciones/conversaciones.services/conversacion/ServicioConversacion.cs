@@ -116,7 +116,7 @@ public class ServicioConversacion : ServicioEntidadGenericaBase<Conversacion, Co
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConversacion-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);

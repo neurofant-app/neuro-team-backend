@@ -265,7 +265,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, Neurona data)
+    public override async Task<Respuesta> Actualizar(string id, Neurona data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -326,7 +326,7 @@ public class ServicioNeurona : ServicioEntidadGenericaBase<Neurona, Neurona, Neu
     }
 
 
-    public override async Task<RespuestaPayload<Neurona>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Neurona>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Neurona>();
         try

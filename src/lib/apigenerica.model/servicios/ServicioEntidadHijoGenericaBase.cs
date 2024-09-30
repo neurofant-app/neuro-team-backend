@@ -52,7 +52,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     }
 
-    public virtual async Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data)
+    public virtual async Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<DTODespliegue>();
 
@@ -105,7 +105,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return entidad;
     }
 
-    public virtual async Task<Respuesta> Actualizar(string id, DTOUpdate data)
+    public virtual async Task<Respuesta> Actualizar(string id, DTOUpdate data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -200,7 +200,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<DTOFull>> UnicaPorId(string id)
+    public virtual async Task<RespuestaPayload<DTOFull>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<DTOFull>();
         try
@@ -227,7 +227,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta)
+    public virtual async Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<DTOFull>> respuesta = new();
         try
@@ -320,7 +320,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
     }
 
 
-    public virtual async Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(string id)
+    public virtual async Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(string id, StringDictionary? parametros = null)
     {
         RespuestaPayload<DTODespliegue> respuesta = new RespuestaPayload<DTODespliegue>();
 
@@ -346,7 +346,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta)
+    public virtual async Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<DTODespliegue>> respuesta = new RespuestaPayload<PaginaGenerica<DTODespliegue>>();
 

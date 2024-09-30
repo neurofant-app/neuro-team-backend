@@ -79,7 +79,7 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<Respuesta> Eliminar(TipoId id);
+    Task<Respuesta> Eliminar(TipoId id, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -109,7 +109,7 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="consulta"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta);
+    Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null);
 
 
     /// <summary>

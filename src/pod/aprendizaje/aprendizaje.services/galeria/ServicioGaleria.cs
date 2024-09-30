@@ -227,7 +227,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return galeria;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Galeria data)
+    public override async Task<Respuesta> Actualizar(string id, Galeria data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -284,7 +284,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Galeria>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Galeria>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Galeria>();
         try

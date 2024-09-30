@@ -254,7 +254,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return aplicacion;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, ActualizaAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaAplicacion data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -326,7 +326,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
     }
 
 
-    public override async Task<RespuestaPayload<EntidadAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadAplicacion>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadAplicacion>();
         try
@@ -425,7 +425,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
     }
 
 
-    public override async Task<RespuestaPayload<ConsultaAplicacion>> UnicaPorIdDespliegue(string id)
+    public override async Task<RespuestaPayload<ConsultaAplicacion>> UnicaPorIdDespliegue(string id, StringDictionary? parametros = null)
     {
         RespuestaPayload<ConsultaAplicacion> respuesta = new RespuestaPayload<ConsultaAplicacion>();
 
@@ -470,7 +470,7 @@ public class ServicioAplicacion : ServicioEntidadGenericaBase<EntidadAplicacion,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<ConsultaAplicacion>> Insertar(CreaAplicacion data)
+    public override async Task<RespuestaPayload<ConsultaAplicacion>> Insertar(CreaAplicacion data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaAplicacion>();
 

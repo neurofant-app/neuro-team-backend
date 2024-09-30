@@ -227,7 +227,7 @@ public class ServicioEntidadAlumno : ServicioEntidadGenericaBase<EntidadAlumno, 
 
 
 
-public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data)
+public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -290,7 +290,7 @@ public override async Task<Respuesta> Actualizar(string id, ActualizaAlumno data
 
 
 
-    public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadAlumno>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadAlumno>();
         try

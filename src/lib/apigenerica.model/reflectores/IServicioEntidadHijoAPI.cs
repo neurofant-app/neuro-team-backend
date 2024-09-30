@@ -77,7 +77,7 @@ public interface IServicioEntidadHijoAPI
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null);
+    Task<Respuesta> EliminarAPI(object id,StringDictionary? parametros = null);
 
 
     /// <summary>

@@ -147,7 +147,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
 
     [Rol(Constantes.AplicacionId, Constantes.CE_CAMPUS_ROL_ADMIN)]
     [Permiso(Constantes.AplicacionId, Constantes.CE_CAMPUS_PERM_ADMIN)]
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadCampus-EliminarAPI");
         if (!permisosValidos(Constantes.AplicacionId))
@@ -280,7 +280,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
         return entidadCampus;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, ActualizaCampus data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaCampus data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -341,7 +341,7 @@ public class ServicioEntidadCampus : ServicioEntidadGenericaBase<EntidadCampus, 
     }
 
 
-    public override async Task<RespuestaPayload<EntidadCampus>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadCampus>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadCampus>();
         try

@@ -146,7 +146,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -293,7 +293,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return plan;
     }
 
-    public override async Task<RespuestaPayload<Plan>> Insertar(Plan data)
+    public override async Task<RespuestaPayload<Plan>> Insertar(Plan data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Plan>();
         try
@@ -333,7 +333,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, Plan data)
+    public override async Task<Respuesta> Actualizar(string id, Plan data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -394,7 +394,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Plan>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Plan>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Plan>();
         try
@@ -487,7 +487,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> Pagina(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> Pagina(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Plan>> respuesta = new();
         try
@@ -514,7 +514,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> PaginaDespliegue(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Plan>> respuesta = new RespuestaPayload<PaginaGenerica<Plan>>();
 

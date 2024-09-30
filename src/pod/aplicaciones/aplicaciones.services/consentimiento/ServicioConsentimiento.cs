@@ -85,7 +85,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
         return this.EntidadDespliegue();
     }
 
-    public void EstableceContextoUsuarioAPI(ContextoUsuario contexto, StringDictionary? parametros = null)
+    public void EstableceContextoUsuarioAPI(ContextoUsuario contexto)
     {
         _logger.LogDebug("ServicioConsentimiento-EstableceContextoUsuarioAPI");
         this.EstableceContextoUsuario(contexto);
@@ -223,7 +223,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, EntidadConsentimiento data)
+    public override async Task<Respuesta> Actualizar(string id, EntidadConsentimiento data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -283,7 +283,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     }
 
 
-    public override async Task<RespuestaPayload<EntidadConsentimiento>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadConsentimiento>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadConsentimiento>();
         try

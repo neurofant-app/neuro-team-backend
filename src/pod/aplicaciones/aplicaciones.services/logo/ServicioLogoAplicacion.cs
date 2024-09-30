@@ -226,7 +226,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, EntidadLogoAplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, EntidadLogoAplicacion data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -287,7 +287,7 @@ public class ServicioLogoAplicacion : ServicioEntidadGenericaBase<EntidadLogoApl
     }
 
 
-    public override async Task<RespuestaPayload<EntidadLogoAplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadLogoAplicacion>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadLogoAplicacion>();
         try

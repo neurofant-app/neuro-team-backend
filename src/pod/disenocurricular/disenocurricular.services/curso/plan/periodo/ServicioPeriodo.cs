@@ -127,7 +127,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -266,7 +266,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return periodo;
     }
 
-    public override async Task<RespuestaPayload<Periodo>> Insertar(Periodo data)
+    public override async Task<RespuestaPayload<Periodo>> Insertar(Periodo data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Periodo>();
 
@@ -300,7 +300,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Periodo data)
+    public override async Task<Respuesta> Actualizar(string id, Periodo data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -372,7 +372,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Periodo>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Periodo>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Periodo>();
         try

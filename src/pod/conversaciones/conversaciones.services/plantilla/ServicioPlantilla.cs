@@ -114,7 +114,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);

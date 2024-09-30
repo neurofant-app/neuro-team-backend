@@ -104,7 +104,7 @@ public class ServicioEntidadPrueba : ServicioEntidadGenericaBase<EntidadPrueba, 
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, JsonElement data, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
@@ -196,7 +196,7 @@ public class ServicioEntidadPrueba : ServicioEntidadGenericaBase<EntidadPrueba, 
 
 
 
-public override async Task<Respuesta> Actualizar(string id, EntidadPrueba data)
+public override async Task<Respuesta> Actualizar(string id, EntidadPrueba data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -248,7 +248,7 @@ public override async Task<Respuesta> Actualizar(string id, EntidadPrueba data)
 
 
 
-public override async Task<RespuestaPayload<EntidadPrueba>> UnicaPorId(string id)
+public override async Task<RespuestaPayload<EntidadPrueba>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadPrueba>();
         try
