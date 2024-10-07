@@ -247,6 +247,8 @@ public class Program
         // Register the worker responsible for seeding the database.
         // Note: in a real world application, this step should be part of a setup script.
         builder.Services.AddHostedService<Worker>();
+        //Add httpClient for outgoing requests
+        builder.Services.AddHttpClient();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddControllers();

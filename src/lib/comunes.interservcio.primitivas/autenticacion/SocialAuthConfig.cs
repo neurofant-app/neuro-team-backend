@@ -8,11 +8,11 @@
         /// <summary>
         /// Configuración de autenticación por facebook
         /// </summary>
-        public AutenticacionFacebook? Facebook { get; set; }
+        public AutenticacionFacebook Facebook { get; set; }
 
         /// <summary>
         /// Configuración de autentición por Google
         /// </summary>
-        public AutenticacionGoogle? Google { get; set; }
+        public AutenticacionGoogle Google { get; set; }
     }
 }
