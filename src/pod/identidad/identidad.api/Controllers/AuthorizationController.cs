@@ -360,7 +360,7 @@ public class AuthorizationController : Controller
 
         //MongoDb connection
         var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
-        var userMongo = await _userManagerMongo.FindByEmailAsync(payload.Email) ?? (ApplicationUserMongo)await RegisterUserAsync(payload.Email, payload.GivenName);
+        var userMongo = (ApplicationUserMongo)await RegisterUserAsync(payload.Email, payload.GivenName);
         if (userMongo is null)
         {
             var properties = new AuthenticationProperties(new Dictionary<string, string>
@@ -454,7 +454,7 @@ public class AuthorizationController : Controller
 
         //MongoDb connection
         var _userManagerMongo = _dependencyResolver.GetService<UserManager<ApplicationUserMongo>>();
-        var userMongo = await _userManagerMongo.FindByEmailAsync(userInfo.Email) ?? (ApplicationUserMongo)await RegisterUserAsync(userInfo.Email, userInfo.Name);
+        var userMongo = (ApplicationUserMongo)await RegisterUserAsync(userInfo.Email, userInfo.ShortName);
         if (userMongo is null)
         {
             var properties = new AuthenticationProperties(new Dictionary<string, string>
