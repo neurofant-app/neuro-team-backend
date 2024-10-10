@@ -1,5 +1,6 @@
 ﻿using apigenerica.primitivas;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace aprendizaje.api.Controllers;
 

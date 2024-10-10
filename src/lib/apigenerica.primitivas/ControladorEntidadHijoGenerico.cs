@@ -72,7 +72,7 @@ public abstract class ControladorEntidadHijoGenerico : ControladorBaseGenerico
     /// <param name="entidadPadre">Tipo de la entidad padre</param>
     /// <param name="padreId">Identificador único del padre</param>
     /// <param name="dtoInsert">DTO para inserción de la entidad, no debe incluir el Id</param>
-    /// <param name="dominioId">Id del sominio del usuario en sesión</param>
+    /// <param name="dominioId">Id del dominio del usuario en sesión</param>
     /// <param name="uOrgID">Id de la unidad organizacional del usuario en sesión</param>
     /// <returns></returns>
     [HttpPost("/api/{entidad}/hijos/{entidadPadre}/{padreId}/entidad", Name = "POSTGenericoHijo")]
