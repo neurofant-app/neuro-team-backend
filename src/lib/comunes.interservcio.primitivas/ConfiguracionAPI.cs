@@ -1,22 +1,21 @@
-﻿namespace comunes.interservicio.primitivas;
+﻿using comunes.interservicio.primitivas.autenticacion;
+
+namespace comunes.interservicio.primitivas;
 
 /// <summary>
 /// Define la configuración de API para las llamadas interservicio
 /// </summary>
 public class ConfiguracionAPI
 {
-
     /// <summary>
     /// Define la clave bajo la cual se guarda la configuración de la api en ENV o Appsettings
     /// </summary>
     public const string ClaveConfiguracionBase = "ConfiguracionAPI";
 
-
     /// <summary>
-    /// DEfine la clave por defecto para el endpoint de autenticacion 
+    /// DEfine la clave por defecto para el endpoint de autenticacion
     /// </summary>
     public const string ClaveEndpointAuthDefault = "default";
-
 
     /// <summary>
     /// Ruta al certificado para las operaciones de crifrado de JWT, SOLO SE UTILZIAN POR EL SERVER DE IDENTITY
@@ -33,14 +32,16 @@ public class ConfiguracionAPI
     /// </summary>
     public bool JWTCifrado { get; set; }
 
-
-
     /// <summary>
     /// Lista de configuraciones de autenticacion JWT
     /// </summary>
     public List<AutenticacionJWT> AuthConfigJWT { get; set; } = [];
-    
-    
+
+    /// <summary>
+    ///
+    /// </summary>
+    public SocialAuthConfig? SocialAuthConfig { get; set; }
+
     /// <summary>
     /// Lista de hosts interservicio
     /// </summary>

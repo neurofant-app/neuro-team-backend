@@ -1,4 +1,5 @@
-﻿using contabee.identity.api.models;
+﻿using comunes.interservicio.primitivas;
+using contabee.identity.api.models;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -9,15 +10,19 @@ public class Worker : IHostedService
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfiguration _configuration;
     public string dbtype { get; set; }
+
     public Worker(IServiceProvider serviceProvider, IConfiguration configuration)
     {
         _serviceProvider = serviceProvider;
         _configuration = configuration;
-    } 
+    }
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
         await using var scope = _serviceProvider.CreateAsyncScope();
+
+        ConfiguracionAPI configuracionAPI = new();
+        _configuration.GetSection(ConfiguracionAPI.ClaveConfiguracionBase).Bind(configuracionAPI);
 
         if (_configuration["dbtype"].Equals("mysql"))
         {
@@ -52,8 +57,10 @@ public class Worker : IHostedService
                 {
                     Permissions.Endpoints.Token,
                     Permissions.GrantTypes.Password,
-                    Permissions.GrantTypes.RefreshToken
-                }
+                    Permissions.GrantTypes.RefreshToken,
+                    Permissions.Prefixes.GrantType + configuracionAPI.SocialAuthConfig!.Google.GrantType,
+                    Permissions.Prefixes.GrantType + configuracionAPI.SocialAuthConfig!.Facebook.GrantType,
+            }
             });
         }
     }
