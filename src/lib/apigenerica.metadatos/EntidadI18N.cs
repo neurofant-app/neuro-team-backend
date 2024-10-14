@@ -3,7 +3,7 @@
 /// <summary>
 /// Define una entdad en termios de metadatos
 /// </summary>
-public class Entidad
+public class EntidadI18N
 {
 
     /// <summary>
@@ -14,7 +14,7 @@ public class Entidad
     /// <summary>
     /// Nombre de la entidad o clave para internacionalización en la UI
     /// </summary>
-    public string Nombre { get; set; }
+    public List<DatoI18N<string>> Nombre { get; set; }
 
 
     /// <summary>
@@ -25,6 +25,6 @@ public class Entidad
     /// <summary>
     /// Lista de propiedades de la entidad
     /// </summary>
-    public List<Propiedad> Propiedades { get; set; } = [];
+    public List<PropiedadI18N> Propiedades { get; set; } = [];
 }
 #pragma 

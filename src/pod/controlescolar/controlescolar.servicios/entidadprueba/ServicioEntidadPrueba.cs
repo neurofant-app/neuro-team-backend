@@ -4,7 +4,6 @@ using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
-using controlescolar.modelo.alumnos;
 using controlescolar.modelo.prueba;
 using controlescolar.servicios.dbcontext;
 using extensibilidad.metadatos;
@@ -12,7 +11,6 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using System.Collections.Specialized;
-using System.Linq.Expressions;
 using System.Text.Json;
 
 namespace controlescolar.servicios;

@@ -1,4 +1,5 @@
-﻿using controlescolar.modelo.plantel;
+﻿using controlescolar.modelo.documentacion;
+using controlescolar.modelo.plantel;
 using controlescolar.modelo.rolesescolares;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
@@ -64,5 +65,16 @@ public class EntidadEscuela
     [BsonElement("rpe")]
     public List<EntidadRolPersonaEscuela> RolesPersona { get; set; } = [];
 
-    
+    /// <summary>
+    /// Expedientes aplicables a las personas miembros de la escuela y sus planteles
+    /// </summary>
+    [BsonElement("exp")]
+    public List<EntidadExpediente> Expedientes { get; set; } = [];
+
+    /// <summary>
+    /// Parametrode de configuracion de la escuela
+    /// </summary>
+    [BsonElement("par")]
+    public ConfiguracionEscuela? Configuracion { get; set; }
+
 }

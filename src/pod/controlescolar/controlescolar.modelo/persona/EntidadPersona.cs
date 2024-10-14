@@ -66,6 +66,13 @@ public class EntidadPersona
     /// y una persona puede tener múlples vínculos con una escuela y sus recursos por ejemplo en un plantel
     /// puede ser alumno de dos cursos y laborar como docente en un turno y administrativo en otro por ejemplo
     /// </summary>
+    [BsonElement("vi")]
     public List<VinculoPersonaEscuela> Vinculos { get; set; } = [];
+
+    /// <summary>
+    /// Instancias de los expedientes asocidos a la persona
+    /// </summary>
+    [BsonElement("xp")]
+    public List<InstanciaExpediente> Expedientes { get; set; } = [];
 
 }
