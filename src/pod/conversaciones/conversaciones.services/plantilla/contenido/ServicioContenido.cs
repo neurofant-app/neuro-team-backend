@@ -18,8 +18,8 @@ using System.Text.Json;
 using Plantilla = conversaciones.model.Plantilla;
 namespace conversaciones.services.plantilla.contenido;
 [ServicioEntidadAPI(entidad:typeof(Contenido))]
-public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Contenido,Contenido,Contenido,string>,
-    IServicioEntidadHijoAPI,IServicioContenido
+public class ServicioContenido : ServicioEntidadGenericaBase<Contenido,Contenido,Contenido,Contenido,string>,
+    IServicioEntidadAPI,IServicioContenido
 {
     private readonly ILogger<ServicioContenido> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
@@ -66,15 +66,11 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
 
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-
-    string IServicioEntidadHijoAPI.Padreid { get => this.plantilla.Id ?? null; set => EstableceDbSet(value); }
-
     public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Contenido>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioContenido-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -82,7 +78,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioContenido-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -117,18 +113,11 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioContenido-EstableceDbSet - {padreId}", padreId);
-        plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid = plantilla != null ? plantilla.Id : null;
-        _logger.LogDebug("ServicioContenido-EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-InsertarAPI-{data}", data);
         var add = data.Deserialize<Contenido>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioContenido-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -141,7 +130,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioContenido-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -149,7 +138,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioContenido-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -157,7 +146,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioContenido-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -165,7 +154,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioContenido-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -237,6 +226,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
+                plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
                 plantilla.Contenidos.Add(entidad);
                 _dbSetPlantilla.Update(plantilla);
                 await _db.SaveChangesAsync();
@@ -277,7 +267,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
@@ -340,6 +330,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         var respuesta = new RespuestaPayload<Contenido>();
         try
         {
+            plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
@@ -381,7 +372,7 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Contenido actual = plantilla.Contenidos.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
@@ -425,12 +416,13 @@ public class ServicioContenido : ServicioEntidadHijoGenericaBase<Contenido,Conte
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Contenido>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Contenido>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioContenido - ObtienePaginaElementos - {consulta}", consulta);
 
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Contenido));
         var Elementos = Enumerable.Empty<Contenido>().AsQueryable();
+        plantilla = _dbSetPlantilla.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
         if (plantilla != null)
         {
             if (consulta.Filtros.Count > 0)

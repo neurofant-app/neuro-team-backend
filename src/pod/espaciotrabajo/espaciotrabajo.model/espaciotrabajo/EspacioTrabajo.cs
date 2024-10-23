@@ -15,7 +15,7 @@ public class EspacioTrabajo
     /// Identificador único del espacio de trabajo
     /// </summary>
     [BsonId]
-    public Guid? Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Nombre del espacio de trabajo

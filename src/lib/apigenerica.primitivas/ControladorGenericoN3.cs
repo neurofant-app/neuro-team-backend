@@ -19,7 +19,7 @@ namespace apigenerica.primitivas;
 #pragma warning disable CS1998 // Async methos lacks 'await' operators and will run synchronously
 [ApiController]
 [SwaggerTag(description: "Controlador Genérico Entidad 3 Niveles")]
-public class ControladorGenericoN3 : ControladorBaseGenerico
+public abstract class ControladorGenericoN3 : ControladorBaseGenerico
 {
     private readonly ILogger<ControladorGenericoN3> _logger;
     /// <summary>
@@ -43,7 +43,7 @@ public class ControladorGenericoN3 : ControladorBaseGenerico
     {
         _logger = logger;
         entidadAPI = (IServicioEntidadAPI)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.GenericAPIServiceKey]!;
-        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey];
+        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey]!;
     }
 
     [HttpGet("/entidad/{n0}/{n0Id}/{n1}/{n1Id}/{n2}/metadatos", Name = "DefinicionEntidadN3")]
@@ -57,7 +57,7 @@ public class ControladorGenericoN3 : ControladorBaseGenerico
         var resultado = await entidadAPI.Metadatos(n2, parametros);
         if (resultado == null)
         {
-            return NotFound(n0);
+            return NotFound(n2);
         }
         return Ok(resultado);
     }
@@ -152,17 +152,17 @@ public class ControladorGenericoN3 : ControladorBaseGenerico
         return StatusCode(response.HttpCode.GetHashCode(), response.Error);
     }
 
-    [HttpPost("/entidad/{n0}/{n0Id}/{n1}/{n1Id}/{n2}/{n2Id}", Name = "PaginaN3")]
+    [HttpPost("/entidad/{n0}/{n0Id}/{n1}/{n1Id}/{n2}/pagina", Name = "PaginaN3")]
     [SwaggerOperation("Obtiene una página de entidades tal como se almacena en el repositorio en base a la consulta", OperationId = "PaginaN3")]
     [SwaggerResponse(statusCode: 200, type: typeof(PaginaGenerica<object>), description: "Página de datos de entidad")]
     [SwaggerResponse(statusCode: 400, description: "Datos de consulta incorrectos")]
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
-    public async Task<IActionResult> Pagina(string n0, string n0Id, string n1, string n1Id, string n2, string n2Id,
+    public async Task<IActionResult> Pagina(string n0, string n0Id, string n1, string n1Id, string n2,
         [FromBody] Consulta consulta, [FromQuery(Name = "d")] bool? despliegue = true)
     {
-        _logger.LogDebug($"Pagina {n0}/{n0Id}/{n1}/{n1Id}/{n2}/{n2Id} despliegue {despliegue} consulta {JsonSerializer.Serialize(consulta)}");
+        _logger.LogDebug($"Pagina {n0}/{n0Id}/{n1}/{n1Id}/{n2}/pagina despliegue {despliegue} consulta {JsonSerializer.Serialize(consulta)}");
         RespuestaPayload<PaginaGenerica<object>> response = new RespuestaPayload<PaginaGenerica<object>>();
         if (despliegue == true)
         {

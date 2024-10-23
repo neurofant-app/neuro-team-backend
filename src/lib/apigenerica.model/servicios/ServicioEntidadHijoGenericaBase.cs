@@ -239,7 +239,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
                 return respuesta;
             }
 
-            var pagina = await ObtienePaginaElementos(consulta);
+            var pagina = await ObtienePaginaElementos(consulta, parametros);
 
             respuesta.Payload = pagina;
             respuesta.Ok = true;
@@ -264,7 +264,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
 
-    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta)
+    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta, StringDictionary parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(DTOFull));
         var Elementos = Enumerable.Empty<DTOFull>().AsQueryable();
@@ -326,7 +326,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
 
         try
         {
-            var resultado = await UnicaPorId(id);
+            var resultado = await UnicaPorId(id, parametros);
 
             respuesta.Ok = resultado.Ok;
 
@@ -352,7 +352,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
 
         try
         {
-            var resultado = await Pagina(consulta);
+            var resultado = await Pagina(consulta, parametros);
 
             respuesta.Ok = resultado.Ok;
 

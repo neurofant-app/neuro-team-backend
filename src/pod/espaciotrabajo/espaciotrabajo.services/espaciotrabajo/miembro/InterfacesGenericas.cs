@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace espaciotrabajo.services.espaciotrabajo.miembro;
 
-public interface IServicioMiembro : IServicioEntidadHijoGenerica<Miembro, Miembro, Miembro, Miembro, string, string>
+public interface IServicioMiembro : IServicioEntidadGenerica<Miembro, Miembro, Miembro, Miembro, string>
 {
 
 }

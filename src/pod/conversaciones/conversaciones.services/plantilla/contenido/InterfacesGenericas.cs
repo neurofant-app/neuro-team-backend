@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace conversaciones.services.plantilla.contenido;
 
-public interface IServicioContenido : IServicioEntidadHijoGenerica<Contenido, Contenido, Contenido, Contenido, string, string>
+public interface IServicioContenido : IServicioEntidadGenerica<Contenido, Contenido, Contenido, Contenido, string>
 {
 
 }

@@ -3,7 +3,7 @@ using seguridad.modelo.roles;
 
 namespace seguridad.modelo.servicios;
 
-public interface IServicioUsuarioGrupo : IServicioEntidadHijoGenerica<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string, string>
+public interface IServicioUsuarioGrupo : IServicioEntidadGenerica<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>
 {
 }
 

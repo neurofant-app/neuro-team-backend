@@ -131,14 +131,4 @@ public interface IServicioEntidadHijoAPI
     /// <param name="Tipo"></param>
     /// <returns></returns>
     Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null);
-
-    /// <summary>
-    /// Tipo del padre expresado como string
-    /// </summary>
-    string TipoPadreId { get; set; }
-
-    /// <summary>
-    /// Identificador único del padre expresado como string
-    /// </summary>
-    string Padreid { get; set; }
 }

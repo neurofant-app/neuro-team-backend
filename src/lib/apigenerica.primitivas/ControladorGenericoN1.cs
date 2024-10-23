@@ -6,19 +6,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.Annotations;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace apigenerica.primitivas;
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 [ApiController]
 [SwaggerTag(description: "Controlador Genérico Entidad 1 Nivel")]
-public class ControladorGenericoN1 : ControladorBaseGenerico
+public abstract class ControladorGenericoN1 : ControladorBaseGenerico
 {
     private readonly ILogger<ControladorGenericoN1> _logger;
 
@@ -43,7 +38,7 @@ public class ControladorGenericoN1 : ControladorBaseGenerico
         _logger = logger; 
         this._logger = logger;
         entidadAPI = (IServicioEntidadAPI)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.GenericAPIServiceKey]!;
-        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey];
+        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey]!;
     }
 
     /// <summary>
@@ -174,7 +169,7 @@ public class ControladorGenericoN1 : ControladorBaseGenerico
         }
         else
         {
-            response = await entidadAPI.PaginaAPI(consulta);
+            response = await entidadAPI.PaginaAPI(consulta, parametros);
         }
         
         if (response.Ok)

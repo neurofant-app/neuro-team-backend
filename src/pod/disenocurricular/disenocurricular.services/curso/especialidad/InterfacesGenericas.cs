@@ -4,7 +4,7 @@ using disenocurricular.model;
 
 namespace disenocurricular.services.curso.especialidad;
 
-public interface IServicioEspecialidad : IServicioEntidadHijoGenerica<Especialidad, Especialidad, Especialidad, Especialidad, string, string>
+public interface IServicioEspecialidad : IServicioEntidadGenerica<Especialidad, Especialidad, Especialidad, Especialidad, string>
 {
 
 }

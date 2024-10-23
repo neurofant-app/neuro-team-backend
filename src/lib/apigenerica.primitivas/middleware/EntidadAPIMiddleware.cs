@@ -63,13 +63,13 @@ public class EntidadAPIMiddleware
                 case "EntidadGenericaHijo":
                     await ProcesaEntidadHijoGenerica(context);
                     break;
-                case "ControladorGenericoN1":
+                case "EntidadGenericaN1":
                     await ProcesaEntidadGenericaNivel(context);
                     break;
-                case "ControladorGenericoN2":
+                case "EntidadGenericaN2":
                     await ProcesaEntidadGenericaNivel(context);
                     break;
-                case "ControladorGenericoN3":
+                case "EntidadGenericaN3":
                     await ProcesaEntidadGenericaNivel(context);
                     break;
                 default:
@@ -230,28 +230,47 @@ public class EntidadAPIMiddleware
         return entidad;
     }
 
+    private List<ServicioEntidadAPI> ObtieneNivelServicios(string nivelEntidad)
+    {
+        List<ServicioEntidadAPI> servicios = new List<ServicioEntidadAPI>();
+        switch(nivelEntidad)
+        {
+            case "n0":
+                servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
+                break;
+            case "n1":
+                servicios = _configuracionAPI.ObtienesServiciosIEntidadHijoAPI();
+                break;
+            default:
+                servicios = [];
+                break;
+        }
+        return servicios;
+    }
+
 
     private async Task ProcesaEntidadGenericaNivel(HttpContext context)
     {
         var diccionarioParametros = ParametrosRuta(context);
-        var entidadNivel = NivelControlador(diccionarioParametros);
+        var nivelEntidad = NivelControlador(diccionarioParametros);
 
-        if (context.GetRouteData().Values[entidadNivel] == null)
+        if (context.GetRouteData().Values[nivelEntidad] == null)
         {
             return;
         }
 
-        string entidad = context.GetRouteData().Values[entidadNivel].ToString() ?? "";
+        string entidad = context.GetRouteData().Values[nivelEntidad].ToString() ?? "";
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
-        ServicioEntidadAPI? servicio = null;
-        if (string.IsNullOrEmpty(driver))
-        {
-            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
-        }
-        else
-        {
-            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
-        }
+
+        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        //if (string.IsNullOrEmpty(driver))
+        //{
+        //    servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        //}
+        //else
+        //{
+        //    servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
+        //}
 
 
         if (servicio == null)
@@ -295,9 +314,10 @@ public class EntidadAPIMiddleware
         try
         {
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
-            var service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
+            IServicioEntidadAPI service = service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
+            IServicioEntidadHijoAPI service2 = null;
 #pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
-            if (service != null)
+            if (service != null || service2 != null)
             {
                 var contexto = context.ObtieneContextoUsuario();
                 contexto = await AdicionaSeguridad(contexto);
@@ -542,8 +562,6 @@ public class EntidadAPIMiddleware
     /// <returns></returns>
     private async Task<ContextoUsuario> AdicionaSeguridad(ContextoUsuario contexto)
     {
-
-
         var aplicacion = await _proveedorAplicaciones.ObtieneApliaciones();
         var roles = await _cacheSeguridad.RolesUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
         var permisos = await _cacheSeguridad.PermisosUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
@@ -560,7 +578,6 @@ public class EntidadAPIMiddleware
     private async Task<ContextoUsuario> AdicionaAtributosMetodo(ContextoUsuario contexto, Type tipoServicio)
     {
         contexto.AtributosMetodos = await _cacheAtributos.AtributosServicio(tipoServicio);
-
         return contexto;
     }
 

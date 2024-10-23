@@ -132,7 +132,7 @@ public class Neurona
     /// Guarda un número que corresponde al Identificado del siguiente 
     /// obneto a insertar asociado a la neurona por ejemplo una flashcard o actividad
     /// </summary>
-    [BsonElement("s")]
+    [BsonElement("so")]
     public long SecuenciaObjetos { get; set; }
 
     /// <summary>
@@ -151,7 +151,7 @@ public class Neurona
     /// Identificador del último cambio existente en la neurona, el valor inicial el cero
     /// cada actualziación trae la fecha UTC convertida a ticks de net core
     /// </summary>
-    [BsonElement("s")]
+    [BsonElement("ts")]
     public long TimeStampt { get; set; } = 0;
 
     /// <summary>

@@ -7,8 +7,6 @@ using apigenerica.model.reflectores;
 using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
-using System.Numerics;
-using System.Runtime.CompilerServices;
 using apigenerica.model.interpretes;
 using System.Collections.Specialized;
 
@@ -253,7 +251,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
                 return respuesta;
             }
 
-            var pagina = await ObtienePaginaElementos(consulta);
+            var pagina = await ObtienePaginaElementos(consulta, parametros);
 
             respuesta.Payload = pagina;
             respuesta.Ok = true;
@@ -278,7 +276,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
 
-    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta)
+    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(DTOFull));
         var Elementos = Enumerable.Empty<DTOFull>().AsQueryable();
@@ -340,7 +338,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
 
         try
         {
-            var resultado = await UnicaPorId(id);
+            var resultado = await UnicaPorId(id, parametros);
 
             respuesta.Ok = resultado.Ok;
 
@@ -366,7 +364,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
 
         try
         {
-            var resultado = await Pagina(consulta);
+            var resultado = await Pagina(consulta, parametros);
 
             respuesta.Ok = resultado.Ok;
 
@@ -511,17 +509,17 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         throw new NotImplementedException();
     }
 
-    public virtual Task<List<ElementoLista>> ObtieneListaLocal(string clave, OrdenamientoLista ordenamiento)
+    public virtual Task<List<ElementoListaI18N>> ObtieneListaLocal(string clave, OrdenamientoLista ordenamiento)
     {
 
 #if DEBUG
-        return Task.FromResult(new List<ElementoLista>()
+        return Task.FromResult(new List<ElementoListaI18N>()
         {
-            new ElementoLista() { Id ="1", Nombre ="Uno", Posicion = 1, Valor = "1"},
-            new ElementoLista() { Id ="2", Nombre ="Dos", Posicion = 2, Valor = "2"},
-            new ElementoLista() { Id ="3", Nombre ="Tres", Posicion = 3, Valor = "3"},
-            new ElementoLista() { Id ="4", Nombre ="Cuatro", Posicion = 4, Valor = "4"},
-            new ElementoLista() { Id ="5", Nombre ="Cinco", Posicion = 5, Valor = "5"}
+            new ElementoListaI18N() { Id ="1", Nombre = new List<DatoI18N<string>>{new DatoI18N<string>() { Idioma = "es-Mx", Valor = "Uno"} }, Posicion = 1, Valor = "1"},
+            new ElementoListaI18N() { Id ="2", Nombre = new List<DatoI18N<string>>{new DatoI18N<string>() { Idioma = "es-Mx", Valor = "Dos"} }, Posicion = 2, Valor = "2"},
+            new ElementoListaI18N() { Id ="3", Nombre = new List<DatoI18N<string>>{new DatoI18N<string>() { Idioma = "es-Mx", Valor = "Tres"} }, Posicion = 3, Valor = "3"},
+            new ElementoListaI18N() { Id ="4", Nombre = new List<DatoI18N<string>>{new DatoI18N<string>() { Idioma = "es-Mx", Valor = "Cuatro"} }, Posicion = 4, Valor = "4"},
+            new ElementoListaI18N() { Id ="5", Nombre = new List<DatoI18N<string>>{new DatoI18N<string>() { Idioma = "es-Mx", Valor = "Cinco"} }, Posicion = 5, Valor = "5"}
         });
 #else
         throw new NotImplementedException();

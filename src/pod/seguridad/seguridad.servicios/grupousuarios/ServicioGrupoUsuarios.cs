@@ -104,7 +104,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     {
         _logger.LogDebug("ServicioGruposUsuarios-InsertarAPI-{data}", data);
         var add = data.Deserialize<GrupoUsuarios>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGruposUsuarios-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -114,7 +114,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     {
         _logger.LogDebug("ServicioGruposUsuarios-ActualizarAPI-{data}", data);
         var update = data.Deserialize<GrupoUsuarios>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioGruposUsuarios-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -122,7 +122,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGruposUsuarios-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioGruposUsuarios-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -130,7 +130,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGruposUsuarios-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGruposUsuarios-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -139,7 +139,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGruposUsuarios-UnicaPorIdDespliegueAPI");
-        var temp = await UnicaPorIdDespliegue((string)id);
+        var temp = await UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGruposUsuarios-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -148,7 +148,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGruposUsuarios-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGruposUsuarios-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -157,7 +157,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGruposUsuarios-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGruposUsuarios-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;

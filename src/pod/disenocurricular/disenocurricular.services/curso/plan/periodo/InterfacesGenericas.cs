@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace disenocurricular.services.curso.plan.periodo;
 
-public interface IServicioPeriodo : IServicioEntidadHijoGenerica<Periodo, Periodo, Periodo, Periodo, string, string>
+public interface IServicioPeriodo : IServicioEntidadGenerica<Periodo, Periodo, Periodo, Periodo, string>
 {
 
 }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace conversaciones.services.conversacion.mensaje;
 
-public interface IServicioMensaje : IServicioEntidadHijoGenerica<Mensaje, Mensaje, Mensaje, Mensaje, string, string>
+public interface IServicioMensaje : IServicioEntidadGenerica<Mensaje, Mensaje, Mensaje, Mensaje, string>
 {
     public Task<Respuesta> ProcesoWhatsApp(Conversacion conversacion,Mensaje mensaje);
     public Task<Respuesta> ProcesoEmail(Conversacion conversacion, Mensaje mensaje);

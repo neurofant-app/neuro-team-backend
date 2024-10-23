@@ -1,4 +1,4 @@
-﻿using apigenerica.model.modelos;
+﻿ using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using comunes.primitivas;
 using extensibilidad.metadatos;
@@ -14,7 +14,7 @@ namespace apigenerica.primitivas;
 
 [ApiController]
 [SwaggerTag(description: "Controlador Genérico Entidad 2 Niveles")]
-public class ControladorGenericoN2 : ControladorBaseGenerico
+public abstract class ControladorGenericoN2 : ControladorBaseGenerico
 {
     private readonly ILogger<ControladorGenericoN2> _logger;
 
@@ -39,7 +39,7 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
     {
         this._logger = logger;
         entidadAPI = (IServicioEntidadAPI)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.GenericAPIServiceKey]!;
-        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey];
+        parametros = (StringDictionary?)httpContextAccessor.HttpContext!.Items[EntidadAPIMiddleware.DiccionarioNivelGenericoKey]!;
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
     public async Task<IActionResult> PorId(string n0, string n0Id, string n1, string n1Id,
         [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID, [FromQuery(Name = "d")] bool? despliegue = true)
     {
-        _logger.LogDebug($"PorId {n0}/{n0Id}/{n1}/{n1Id} despliegue {despliegue}");
+        _logger.LogDebug($"PorId {n0}/{n0Id}/{n1} despliegue {despliegue}");
         RespuestaPayload<object> respuesta = new RespuestaPayload<object>();
 
         if (despliegue == true)
@@ -156,7 +156,7 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
-    public async Task<IActionResult> ActualizaPorId(string n0, string n0Id, string n1, string n1Id, [FromBody] JsonElement dtoUpdate, 
+    public async Task<IActionResult> ActualizaPorId(string n0, string n0Id, string n1, string n1Id, [FromBody] JsonElement dtoUpdate,
         [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
         _logger.LogDebug($"ActualizaPorId {n0}/{n0Id}/{n1}/{n1Id}");
@@ -186,7 +186,7 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
-    public async Task<IActionResult> EliminaPorId(string n0, string n0Id, string n1, string n1Id, 
+    public async Task<IActionResult> EliminaPorId(string n0, string n0Id, string n1, string n1Id,
         [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
     {
         _logger.LogDebug($"EliminaPorId {n0}/{n0Id}/{n1}/{n1Id}");
@@ -217,11 +217,11 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
-    public async Task<IActionResult> Pagina(string n0, string n0Id, string n1, string n1Id,
+    public async Task<IActionResult> Pagina(string n0, string n0Id, string n1,
        [FromBody] Consulta consulta, [FromHeader(Name = DOMINIOHEADER)] string dominioId,
        [FromHeader(Name = UORGHEADER)] string uOrgID, [FromQuery(Name = "d")] bool? despliegue = true)
     {
-        _logger.LogDebug($"Pagina {n0}/{n0Id}/{n1}/{n1Id} despliegue {despliegue} consulta {JsonSerializer.Serialize(consulta)}");
+        _logger.LogDebug($"Pagina {n0}/{n0Id}/{n1} despliegue {despliegue} consulta {JsonSerializer.Serialize(consulta)}");
         RespuestaPayload<PaginaGenerica<object>> response = new RespuestaPayload<PaginaGenerica<object>>();
         if (despliegue == true)
         {
@@ -229,7 +229,7 @@ public class ControladorGenericoN2 : ControladorBaseGenerico
         }
         else
         {
-            response = await entidadAPI.PaginaAPI(consulta);
+            response = await entidadAPI.PaginaAPI(consulta, parametros);
         }
 
         if (response.Ok)

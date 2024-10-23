@@ -23,6 +23,7 @@ using System.Data.Common;
 using comunes.primitivas.atributos;
 using System.Runtime.CompilerServices;
 using System.Collections.Specialized;
+using apigenerica.model.interpretes;
 
 
 namespace aplicaciones.services.invitacion;
@@ -44,6 +45,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         reflector = Reflector;
         this.configuration = configuration;
         _proxyComunicacionesServices = proxyComunicacionesServices;
+        interpreteConsulta = new InterpreteConsultaExpresiones();
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_INVITACION);
         if (configuracionEntidad == null)
         {
@@ -132,7 +134,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
             return respuestaPayload;
         }
         var add = data.Deserialize<CreaInvitacion>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI resultado {ok} {code} {error}", respuesta.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -142,7 +144,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     {
         _logger.LogDebug("ServicioEntidadInvitacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaInvitacion>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioEntidadInvitacion-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -150,7 +152,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioEntidadInvitacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -158,7 +160,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -167,7 +169,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadInvitacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -176,7 +178,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -185,7 +187,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadInvitacion-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -417,7 +419,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
                 var logoTipos = await DB.LogoAplicaciones.ToListAsync();
                 var logoAp = logoTipos.FirstOrDefault(x => x.AplicacionId == data.AplicacionId);
                 EntidadPlantillaInvitacion plantillaInvitacion = await DB.PlantillaInvitaciones.Where(x => x.AplicacionId == data.AplicacionId && x.TipoContenido == tipoPlantillaContenido).FirstOrDefaultAsync();
-                
+
                 byte[] bytes = Convert.FromBase64String(plantillaInvitacion.Plantilla);
                 string html = Encoding.UTF8.GetString(bytes);
                 DatosPlantillaRegistro datosPlantilla = new DatosPlantillaRegistro()

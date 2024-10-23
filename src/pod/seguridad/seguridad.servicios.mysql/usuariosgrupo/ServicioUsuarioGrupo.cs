@@ -20,8 +20,8 @@ using System.Text.Json;
 
 namespace seguridad.servicios.mysql;
 [ServicioEntidadAPI(entidad: typeof(UsuarioGrupo), driver: Constantes.MYSQL)]
-public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>,
-    IServicioEntidadHijoAPI, IServicioUsuarioGrupo
+public class ServicioUsuarioGrupo : ServicioEntidadGenericaBase<UsuarioGrupo, CreaUsuarioGrupo, UsuarioGrupo, ConsultaUsuarioGrupo, string>,
+    IServicioEntidadAPI, IServicioUsuarioGrupo
 {
     private readonly ILogger _logger;
 
@@ -37,9 +37,6 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         interpreteConsulta = new InterpreteConsultaExpresiones();
     }
     public bool RequiereAutenticacion => true;
-
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-    string IServicioEntidadHijoAPI.Padreid { get => this.grupo.Id.ToString() ?? null; set => EstableceDbSet(value); }
 
     public Entidad EntidadRepoAPI()
     {
@@ -63,11 +60,6 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(padreId));
-        this.Padreid = grupo!= null ? grupo.Id.ToString() : null;
-    }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         return this._contextoUsuario;
@@ -76,7 +68,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         var add = data.Deserialize<CreaUsuarioGrupo>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
@@ -88,19 +80,19 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
 
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
-        return await this.Eliminar((string)id);
+        return await this.Eliminar((string)id, parametros);
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
 
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
@@ -108,7 +100,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
 
         return respuesta;
@@ -116,7 +108,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
 
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
@@ -168,7 +160,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
     public override async Task<RespuestaPayload<ConsultaUsuarioGrupo>> Insertar(CreaUsuarioGrupo data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaUsuarioGrupo>();
-
+        grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
         try
         {
             var resultadoValidacion = await ValidarInsertar(data);
@@ -204,6 +196,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         var respuesta = new RespuestaPayload<UsuarioGrupo>();
         try
         {
+            grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
             string actual = grupo.UsuarioId.FirstOrDefault(_=>_==id);
             if (string.IsNullOrEmpty(actual))
             {                
@@ -235,6 +228,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
+            grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
             var actual = grupo.UsuarioId.FirstOrDefault(_ => _ == id);
             if (string.IsNullOrEmpty(actual))
             {
@@ -268,8 +262,9 @@ public class ServicioUsuarioGrupo : ServicioEntidadHijoGenericaBase<UsuarioGrupo
         }
         return respuesta;
     }
-    public override async Task<PaginaGenerica<UsuarioGrupo>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<UsuarioGrupo>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
+        grupo = _dbSetgrupoUsuarios.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
         var Elementos =grupo!=null && grupo.UsuarioId.Any() ? grupo.UsuarioId.AsQueryable() : new List<string>().AsQueryable();
         var ElementosFinal = new List<UsuarioGrupo>();
         var pagina = Elementos.Paginado(consulta);

@@ -30,7 +30,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     {
         _logger = logger;
         reflector = Reflector;
-
+        interpreteConsulta = new InterpreteConsultaExpresiones();
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_CONSENTIMIENTO);
         if (configuracionEntidad == null)
         {
@@ -101,7 +101,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     {
         _logger.LogDebug("ServicioConsentimiento-InsertarAPI-{data}",data);
         var add = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioConsentimiento-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -111,7 +111,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     {
         _logger.LogDebug("ServicioConsentimiento-ActualizarAPI-{data}", data);
         var update = data.Deserialize<EntidadConsentimiento>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioConsentimiento-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -119,7 +119,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioConsentimiento-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -127,7 +127,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -136,7 +136,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioConsentimiento-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -145,7 +145,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-PaginaAPI-{consulta}",consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioConsentimiento-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -154,7 +154,7 @@ public class ServicioConsentimiento :ServicioEntidadGenericaBase<EntidadConsenti
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioConsentimiento-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioConsentimiento-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;

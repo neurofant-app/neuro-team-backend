@@ -63,7 +63,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     {
         _logger.LogDebug("ServicioTemario-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Temario>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioTemario-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -71,7 +71,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioTemario-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -110,7 +110,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     {
         _logger.LogDebug("ServicioTemario-InsertarAPI-{data}", data);
         var add = data.Deserialize<Temario>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemario-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -130,7 +130,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemario-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -139,7 +139,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemario-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -148,7 +148,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemario-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -157,7 +157,7 @@ public class ServicioTemario : ServicioEntidadGenericaBase<Temario, Temario, Tem
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioTemario-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioTemario-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
