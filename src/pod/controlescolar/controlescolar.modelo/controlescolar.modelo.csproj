@@ -16,8 +16,4 @@
     <ProjectReference Include="..\..\..\lib\comunes.primitivas\comunes.primitivas.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="propiedades\" />
-  </ItemGroup>
-
 </Project>
