@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace controlescolar.modelo.escuela;
@@ -7,6 +8,7 @@ namespace controlescolar.modelo.escuela;
 /// Parámetros de configuración de la escuela, estas propiedades se heredan a los planteles
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class ConfiguracionEscuela
 {
 

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace controlescolar.modelo.rolesescolares;
@@ -7,6 +8,7 @@ namespace controlescolar.modelo.rolesescolares;
 /// Define el catálogo de motivos de baja para el vínculo de un rol escolar
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class EntidadMovimientoRolPersonaEscuela
 {
     /// <summary>

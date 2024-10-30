@@ -170,7 +170,7 @@ public abstract class ControladorGenericoN3 : ControladorBaseGenerico
         }
         else
         {
-            response = await entidadAPI.PaginaAPI(consulta);
+            response = await entidadAPI.PaginaAPI(consulta, parametros);
         }
 
         if (response.Ok)

@@ -11,11 +11,6 @@ namespace controlescolar.modelo.documentacion;
 public class ActualizaExpediente
 {
     /// <summary>
-    /// Identificador único del documento
-    /// </summary>
-    public required long Id { get; set; }
-
-    /// <summary>
     /// Nombre internacionalizable del expediente
     /// <summary>
     /// </summary>

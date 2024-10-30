@@ -1,4 +1,5 @@
-﻿using controlescolar.modelo.comunes;
+﻿using comunes.primitivas.atributos;
+using controlescolar.modelo.comunes;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
@@ -8,6 +9,7 @@ namespace controlescolar.modelo.documentacion;
 /// Define una serie de documentos relevantes relacionados a una entidad
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class EntidadExpediente
 {
     /// <summary>
@@ -25,7 +27,7 @@ public class EntidadExpediente
     /// <summary>
     /// Descripcion del expediente
     /// </summary>
-    [BsonElement("n")]
+    [BsonElement("d")]
     public required List<ValorI18N<string>>? Descripcion { get; set; } = [];
 
     /// <summary>
@@ -49,7 +51,7 @@ public class EntidadExpediente
     /// <summary>
     /// DOcumentos asociados al rol
     /// </summary>
-    [BsonElement("d")]
+    [BsonElement("dc")]
     public List<EntidadDocumentoBase> Documentos { get; set; } = [];
 
 }

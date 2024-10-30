@@ -1,4 +1,5 @@
-﻿using controlescolar.modelo.documentacion;
+﻿using comunes.primitivas.atributos;
+using controlescolar.modelo.documentacion;
 using controlescolar.modelo.plantel;
 using controlescolar.modelo.rolesescolares;
 using MongoDB.Bson.Serialization.Attributes;
@@ -11,6 +12,7 @@ namespace controlescolar.modelo.escuela;
 /// Una escuela es un agrupador lógico de recursos para el control escolar
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class EntidadEscuela
 {
     // <summary>
@@ -55,7 +57,7 @@ public class EntidadEscuela
     /// <summary>
     /// Lista de planteles asociados a la escuela
     /// </summary>
-    [BsonElement("rpe")]
+    [BsonElement("p")]
     public List<EntidadPlantel> Planteles { get; set; } = [];
 
     /// <summary>
@@ -74,7 +76,7 @@ public class EntidadEscuela
     /// <summary>
     /// Parametrode de configuracion de la escuela
     /// </summary>
-    [BsonElement("par")]
+    [BsonElement("ce")]
     public ConfiguracionEscuela? Configuracion { get; set; }
 
 }

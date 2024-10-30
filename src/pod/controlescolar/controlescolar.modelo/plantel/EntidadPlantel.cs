@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace controlescolar.modelo.plantel;
@@ -8,6 +9,7 @@ namespace controlescolar.modelo.plantel;
 /// Una escuela es un agrupador lógico de recursos para el control escolar
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class EntidadPlantel
 {
     // <summary>

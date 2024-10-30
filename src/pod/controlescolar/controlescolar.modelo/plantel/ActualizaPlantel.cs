@@ -6,7 +6,7 @@ namespace controlescolar.modelo.plantel;
 /// DTO de API para la actualización de una escuela
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class ActualizaEscuela
+public class ActualizaPlantel
 {
     /// <summary>
     /// Id del plantel

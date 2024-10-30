@@ -7,7 +7,7 @@ namespace controlescolar.modelo.documentacion;
 /// Define un documento perteneciente a un expediente
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class CreadDocumentoBase
+public class CreaDocumentoBase
 {
     /// <summary>
     /// Nombre asigando al documento

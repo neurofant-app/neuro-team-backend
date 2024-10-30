@@ -23,7 +23,7 @@ public class EntidadDocumentoBase
     /// <summary>
     /// Descripcion del documento
     /// </summary>
-    [BsonElement("n")]
+    [BsonElement("D")]
     public required List<ValorI18N<string>>? Descripcion { get; set; } = [];
 
 

@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace controlescolar.modelo.rolesescolares;
@@ -7,7 +8,9 @@ namespace controlescolar.modelo.rolesescolares;
 /// Rol de vinculación de personas a escuelas
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class EntidadRolPersonaEscuela
+
 {
     /// <summary>
     /// Identificador único del rol, este valor se calcula automaticamente al crear el rol

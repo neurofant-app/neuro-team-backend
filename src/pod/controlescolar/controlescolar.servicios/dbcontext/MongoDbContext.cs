@@ -1,4 +1,5 @@
-﻿using controlescolar.modelo.prueba;
+﻿using controlescolar.modelo.escuela;
+using controlescolar.modelo.prueba;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
@@ -12,8 +13,9 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options) : DbContex
     public const string NOMBRE_COLECCION_ALUMNOS = "alumnos";
     public const string NOMBRE_COLECCION_PRUEBA = "prueba";
     public const string NOMBRE_COLECCION_INSTRUCTORES = "instructores";
-
+    public const string NOMBRE_COLECCION_ESCUELAS = "escuelas";
     public DbSet<EntidadPrueba> EntidadPrueba { get; set; }
+    public DbSet<EntidadEscuela> Escuelas { get; set; }
 
     public static MongoDbContext Create(IMongoDatabase database)
     {
@@ -33,6 +35,8 @@ public class MongoDbContext(DbContextOptions<MongoDbContext> options) : DbContex
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<EntidadPrueba>().ToCollection(NOMBRE_COLECCION_PRUEBA);
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<EntidadEscuela>().ToCollection(NOMBRE_COLECCION_ESCUELAS);
     }
 
 }

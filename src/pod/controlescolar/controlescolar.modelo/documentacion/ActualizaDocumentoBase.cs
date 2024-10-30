@@ -10,11 +10,6 @@ namespace controlescolar.modelo.documentacion;
 public class ActualizaDocumentoBase
 {
     /// <summary>
-    /// Identificador único del documento
-    /// </summary>
-    public required long Id { get; set; }
-
-    /// <summary>
     /// Nombre asigando al documento
     /// </summary>
     public required List<ValorI18N<string>> Nombre { get; set; } = [];
