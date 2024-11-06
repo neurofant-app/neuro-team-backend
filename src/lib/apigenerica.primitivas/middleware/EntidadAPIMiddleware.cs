@@ -263,15 +263,6 @@ public class EntidadAPIMiddleware
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
 
         var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
-        //if (string.IsNullOrEmpty(driver))
-        //{
-        //    servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
-        //}
-        //else
-        //{
-        //    servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
-        //}
-
 
         if (servicio == null)
         {
