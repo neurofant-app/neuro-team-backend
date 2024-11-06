@@ -1,5 +1,6 @@
 ﻿using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace aplicaciones.model;
@@ -9,6 +10,7 @@ namespace aplicaciones.model;
 /// Define una aplicación orbetivo para el sistema de invitaciones
 /// por ejemeplo contabee o eccordion
 /// </summary>
+[ExcludeFromCodeCoverage]
 [EntidadDB]
 public class EntidadAplicacion
 {
@@ -16,7 +18,7 @@ public class EntidadAplicacion
     /// Identificador único de la aplicación
     /// </summary>
     [BsonId]
-    public virtual Guid Id { get; set; }
+    public Guid Id { get; set; }
     // Requerida 
     // [A] [D]
 

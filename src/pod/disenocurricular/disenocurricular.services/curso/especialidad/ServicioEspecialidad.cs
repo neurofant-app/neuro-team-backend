@@ -13,13 +13,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace disenocurricular.services.curso.especialidad;
 [ServicioEntidadAPI(entidad:typeof(Especialidad))]
-public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad,Especialidad,Especialidad,Especialidad,string>,
-    IServicioEntidadHijoAPI, IServicioEspecialidad
+public class ServicioEspecialidad : ServicioEntidadGenericaBase<Especialidad,Especialidad,Especialidad,Especialidad,string>,
+    IServicioEntidadAPI, IServicioEspecialidad
 {
     private readonly ILogger<ServicioEspecialidad> _logger;
     private readonly IServicioCurso servicioCurso;
@@ -73,41 +74,19 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
 
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId
-    {
-        get => this.TipoPadreId;
-        set => this.TipoPadreId = value;
-    }
-
-    public async void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioEspecialidad - EstableceDbSet {padreId}", padreId);
-        var entidadCurso = await this.servicioCurso.UnicaPorId(padreId);
-        curso = (Curso)entidadCurso.Payload;
-        this.Padreid = curso != null ? curso.Id.ToString() : null;
-        _logger.LogDebug("ServicioEspecialidad - EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
-
-    string IServicioEntidadHijoAPI.Padreid
-    {
-        get => this.curso.Id.ToString() ?? null;
-        set => EstableceDbSet(value);
-    }
-
-
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - ActualizarAPI - {data}", data);
         var update = data.Deserialize<Especialidad>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioEspecialidad - ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - EliminarAPI - {id}", id);
-        Respuesta respuesta = await this.Eliminar((string) id);
+        Respuesta respuesta = await this.Eliminar((string) id, parametros);
         _logger.LogDebug("ServicioEspecialidad - EliminarAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -148,47 +127,47 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - InsertarAPI {data}", data);
         var add = data.Deserialize<Especialidad>(JsonAPIDefaults());
-        var insert = await this.Insertar(add);
+        var insert = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(insert));
         _logger.LogDebug("ServicioEspecialidad - InsertarAPI {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - UnicaPodId - {id}", id);
-        var unica = await this.UnicaPorId((string)id);
+        var unica = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta= JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(unica));
         _logger.LogDebug("ServicioEspecialidad - UnicaPorId - resultado {ok} {code} {error}");
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - UnicaPorIdDespliegueAPI - {id}", id);
-        var unicaDespliegue = await this.UnicaPorIdDespliegue((string)id);
+        var unicaDespliegue = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(unicaDespliegue));
         _logger.LogDebug("ServicioEspecialidad - UnicaPorIdDespliegueAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - PaginaAPI - {consulta}", consulta);
-        var consult = await this.Pagina(consulta);
+        var consult = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(consult));
         _logger.LogDebug("ServicioEspecialidad - PaginaAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEspecialidad - PaginaDespliegueAPI {consulta}", consulta);
-        var consult = this.PaginaDespliegue(consulta);
+        var consult = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(consult));
         _logger.LogDebug("ServicioEspecialidad - PaginaDespliegueAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -199,9 +178,9 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
     public override async Task<ResultadoValidacion> ValidarActualizar(string id, Especialidad actualizacion, Especialidad original)
     {
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(actualizacion.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(actualizacion.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -212,6 +191,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -219,9 +199,9 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
     public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Especialidad original)
     {
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(original.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(original.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -232,6 +212,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -240,9 +221,9 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
     {
 
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(data.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(data.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -253,6 +234,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -302,7 +284,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return especialidad;
     }
 
-    public override async Task<RespuestaPayload<Especialidad>> Insertar(Especialidad data)
+    public override async Task<RespuestaPayload<Especialidad>> Insertar(Especialidad data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Especialidad>();
 
@@ -312,8 +294,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-                
-                this.curso.Especialidades.Add(entidad.Id);
+                curso?.Especialidades.Add(entidad.Id);
 
                 var updateCurso = await this.servicioCurso.ActualizaDbSetCurso(curso);
 
@@ -342,7 +323,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Especialidad data)
+    public override async Task<Respuesta> Actualizar(string id, Especialidad data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -403,7 +384,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -465,7 +446,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
     }
 
 
-    public override async Task<RespuestaPayload<Especialidad>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Especialidad>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Especialidad>();
         try
@@ -496,7 +477,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Especialidad>>> Pagina(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Especialidad>>> Pagina(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Especialidad>> respuesta = new();
         try
@@ -523,13 +504,13 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Especialidad>>> PaginaDespliegue(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Especialidad>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Especialidad>> respuesta = new RespuestaPayload<PaginaGenerica<Especialidad>>();
 
         try
         {
-            var resultado = await Pagina(consulta);
+            var resultado = await Pagina(consulta, parametros);
 
             respuesta.Ok = resultado.Ok;
 
@@ -550,6 +531,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
                 }
                 respuesta.Ok = true;
                 respuesta.Payload = pagina;
+                respuesta.HttpCode = HttpCode.Ok;
             }
 
         }
@@ -564,7 +546,7 @@ public class ServicioEspecialidad : ServicioEntidadHijoGenericaBase<Especialidad
     }
 
 
-    public override async Task<PaginaGenerica<Especialidad>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Especialidad>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Especialidad));
         var Elementos = Enumerable.Empty<Especialidad>().AsQueryable();

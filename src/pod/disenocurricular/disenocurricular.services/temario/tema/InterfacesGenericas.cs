@@ -2,6 +2,6 @@
 using disenocurricular.model;
 
 namespace disenocurricular.services.temario.tema;
-public interface IServicioTema : IServicioEntidadHijoGenerica<Tema, Tema, Tema, Tema, string, string>
+public interface IServicioTema : IServicioEntidadGenerica<Tema, Tema, Tema, Tema, string>
 {
 }

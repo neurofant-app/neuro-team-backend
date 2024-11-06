@@ -5,15 +5,18 @@ using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
+using aprendizaje.model.almacenamiento;
 using aprendizaje.model.galeria;
+using aprendizaje.model.neurona;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
 using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
-using ZstdSharp.Unsafe;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace aprendizaje.services.galeria;
 [ServicioEntidadAPI(entidad: typeof(Galeria))]
@@ -61,19 +64,19 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
     private MongoDbContextAprendizaje DB { get { return (MongoDbContextAprendizaje)_db; } }
     public bool RequiereAutenticacion => true;
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Galeria>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioGaleria-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioGaleria-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -108,17 +111,17 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         this.EstableceContextoUsuario(contexto);
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-InsertarAPI-{data}", data);
         var add = data.Deserialize<Galeria>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGaleria-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public Task<Entidad>? Metadatos(string Tipo)
+    public Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         throw new NotImplementedException();
     }
@@ -129,37 +132,37 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGaleria-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGaleria-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGaleria-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioGaleria-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioGaleria-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -189,10 +192,17 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
     {
         actual.EspacioTrabajoId = actualizacion.EspacioTrabajoId;
         actual.Nombre = actualizacion.Nombre;
+        actual.Fecha = actualizacion.Fecha;
+        actual.FechaActualizacion = actualizacion.FechaActualizacion;
+        actual.AlmacenamientoId = actualizacion.AlmacenamientoId;
+        actual.ExtensiongaleriaId = actualizacion.ExtensiongaleriaId;
+        actual.Idiomas = actualizacion.Idiomas;
         actual.Contenido = actualizacion.Contenido;
+        actual.NeuronaId = actualizacion.NeuronaId;
         actual.Publica = actualizacion.Publica;
+        actual.LocalNuerona = actualizacion.LocalNuerona;
         actual.EspaciosVinculadosLectura = actualizacion.EspaciosVinculadosLectura;
-        actual.TagsContenido = actualizacion.TagsContenido;
+        actual.TagsContenido = actual.TagsContenido;
         return actual;
     }
 
@@ -203,8 +213,14 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
             Id = Guid.NewGuid(),
             EspacioTrabajoId = data.EspacioTrabajoId,
             Nombre = data.Nombre,
+            FechaActualizacion = data.FechaActualizacion,
+            AlmacenamientoId = data.AlmacenamientoId,
+            ExtensiongaleriaId = data.ExtensiongaleriaId,
+            Idiomas = data.Idiomas,
             Contenido = data.Contenido,
+            NeuronaId = data.NeuronaId,
             Publica = data.Publica,
+            LocalNuerona = data.LocalNuerona,
             EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
             TagsContenido = data.TagsContenido
         };
@@ -214,20 +230,25 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
     public override Galeria ADTODespliegue(Galeria data)
     {
         Galeria galeria = new Galeria() 
-        { 
+        {
             Id = data.Id,
             EspacioTrabajoId = data.EspacioTrabajoId,
             Nombre = data.Nombre,
-            Fecha = data.Fecha,
+            FechaActualizacion = data.FechaActualizacion,
+            AlmacenamientoId = data.AlmacenamientoId,
+            ExtensiongaleriaId = data.ExtensiongaleriaId,
+            Idiomas = data.Idiomas,
             Contenido = data.Contenido,
+            NeuronaId = data.NeuronaId,
             Publica = data.Publica,
+            LocalNuerona = data.LocalNuerona,
             EspaciosVinculadosLectura = data.EspaciosVinculadosLectura,
             TagsContenido = data.TagsContenido
         };
         return galeria;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Galeria data)
+    public override async Task<Respuesta> Actualizar(string id, Galeria data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -284,7 +305,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Galeria>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Galeria>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Galeria>();
         try
@@ -314,7 +335,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

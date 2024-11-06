@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Collections.Specialized;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
@@ -23,6 +24,7 @@ public class EntidadAPIMiddleware
 
     public const string GenericAPIServiceKey = "GENERICAPISERVICE";
     public const string GenericCatalogAPIServiceKey = "GENERICCATALOGAPISERVICE";
+    public const string DiccionarioNivelGenericoKey = "DICCIONARIONIVELGENERICO";
 
     private readonly RequestDelegate _next;
     private readonly IConfiguracionAPIEntidades _configuracionAPI;
@@ -61,7 +63,15 @@ public class EntidadAPIMiddleware
                 case "EntidadGenericaHijo":
                     await ProcesaEntidadHijoGenerica(context);
                     break;
-
+                case "EntidadGenericaN1":
+                    await ProcesaEntidadGenericaNivel(context);
+                    break;
+                case "EntidadGenericaN2":
+                    await ProcesaEntidadGenericaNivel(context);
+                    break;
+                case "EntidadGenericaN3":
+                    await ProcesaEntidadGenericaNivel(context);
+                    break;
                 default:
                     ProcesaControladorAutenticado(context);
                     break;
@@ -177,6 +187,159 @@ public class EntidadAPIMiddleware
         }
     }
 
+    private StringDictionary ParametrosRuta(HttpContext context)
+    {
+        StringDictionary paramNiveles = new StringDictionary();
+
+        var rutaDatos = context.GetRouteData().Values;
+
+        var niveles = new[] { "n0", "n0Id", "n1", "n1Id", "n2", "n2Id" };
+
+        foreach (var nivel in niveles)
+        {
+            if (rutaDatos.TryGetValue(nivel, out var valorNivel))
+            {
+                paramNiveles[nivel] = valorNivel?.ToString();
+            }
+            else
+            {
+                paramNiveles[nivel] = null;
+            }
+        }
+        return paramNiveles;
+    }
+
+    private string NivelControlador(StringDictionary diccionarioParametros)
+    {
+        var entidad = "";
+
+        if (diccionarioParametros.ContainsKey("n2"))
+        {
+            entidad = "n2";
+            if(diccionarioParametros["n2"] == null && diccionarioParametros.ContainsKey("n1"))
+            {
+                entidad = "n1";
+                if (diccionarioParametros["n1"] == null && diccionarioParametros.ContainsKey("n0"))
+                {
+                    entidad = "n0";
+
+                }
+            }
+        }
+
+        return entidad;
+    }
+
+    private List<ServicioEntidadAPI> ObtieneNivelServicios(string nivelEntidad)
+    {
+        List<ServicioEntidadAPI> servicios = new List<ServicioEntidadAPI>();
+        switch(nivelEntidad)
+        {
+            case "n0":
+                servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
+                break;
+            case "n1":
+                servicios = _configuracionAPI.ObtienesServiciosIEntidadHijoAPI();
+                break;
+            default:
+                servicios = [];
+                break;
+        }
+        return servicios;
+    }
+
+
+    private async Task ProcesaEntidadGenericaNivel(HttpContext context)
+    {
+        var diccionarioParametros = ParametrosRuta(context);
+        var nivelEntidad = NivelControlador(diccionarioParametros);
+
+        if (context.GetRouteData().Values[nivelEntidad] == null)
+        {
+            return;
+        }
+
+        string entidad = context.GetRouteData().Values[nivelEntidad].ToString() ?? "";
+        var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
+
+        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+
+        if (servicio == null)
+        {
+            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+            {
+                Entidad = entidad,
+                Error = ErrorMiddlewareGenerico.ERROR_SERVICIO_NO_LOCALIZADO,
+                HttpCode = 400
+            });
+        }
+
+        var assembly = Assembly.LoadFrom(servicio.Ruta);
+        var tt = assembly.GetType(servicio.NombreEnsamblado);
+
+        if (tt == null)
+        {
+            await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+            {
+                Entidad = entidad,
+                Error = ErrorMiddlewareGenerico.ERROR_ENSAMBLADO_NO_LOCALIZADO,
+                HttpCode = 400
+            });
+        }
+
+
+        var ctors = tt.GetConstructors();
+        var ps = ctors[0].GetParameters();
+        object[] paramArray = new object[ps.Length];
+        int i = 0;
+        foreach (var p in ps)
+        {
+            var s = context.RequestServices.GetService(p.ParameterType);
+            if (s != null)
+            {
+                paramArray[i] = s;
+            }
+            i++;
+        }
+
+        try
+        {
+#pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
+            IServicioEntidadAPI service = service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
+            IServicioEntidadHijoAPI service2 = null;
+#pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
+            if (service != null || service2 != null)
+            {
+                var contexto = context.ObtieneContextoUsuario();
+                contexto = await AdicionaSeguridad(contexto);
+                contexto = await AdicionaAtributosMetodo(contexto, tt);
+#if !DEBUG
+                if (service.RequiereAutenticacion)
+                {
+                    if (string.IsNullOrEmpty(contexto.UsuarioId))
+                    {
+                        await ReturnMiddlewareError(context, new ErrorMiddlewareGenerico()
+                        {
+                            Entidad = entidad,
+                            Error = ErrorMiddlewareGenerico.ERROR_SIN_AUTENTICACION_BEARER,
+                            HttpCode = 401
+                        });
+                    }
+                }
+#endif
+                service.EstableceContextoUsuarioAPI(contexto);
+                context.Request.HttpContext.Items.Add(GenericAPIServiceKey, service);
+                context.Request.HttpContext.Items.Add(DiccionarioNivelGenericoKey, diccionarioParametros);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(message: ex.ToString());
+            throw;
+        }
+    }
+
+
     /// <summary>
     /// Realiza el procesamiento de un endpoint atendido por un servicio de entidad genérica
     /// </summary>
@@ -184,6 +347,7 @@ public class EntidadAPIMiddleware
     /// <returns></returns>
     private async Task ProcesaEntidadGenerica(HttpContext context)
     {
+
         if (context.GetRouteData().Values["entidad"] == null)
         {
             return;
@@ -389,8 +553,6 @@ public class EntidadAPIMiddleware
     /// <returns></returns>
     private async Task<ContextoUsuario> AdicionaSeguridad(ContextoUsuario contexto)
     {
-
-
         var aplicacion = await _proveedorAplicaciones.ObtieneApliaciones();
         var roles = await _cacheSeguridad.RolesUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
         var permisos = await _cacheSeguridad.PermisosUsuario(aplicacion.First().ApplicacionId.ToString(), contexto.UsuarioId, contexto.DominioId, contexto.UOrgId);
@@ -407,7 +569,6 @@ public class EntidadAPIMiddleware
     private async Task<ContextoUsuario> AdicionaAtributosMetodo(ContextoUsuario contexto, Type tipoServicio)
     {
         contexto.AtributosMetodos = await _cacheAtributos.AtributosServicio(tipoServicio);
-
         return contexto;
     }
 

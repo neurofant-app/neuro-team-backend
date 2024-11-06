@@ -11,6 +11,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using seguridad.modelo;
 using seguridad.modelo.servicios;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 
@@ -59,7 +60,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         var add = data.Deserialize<Aplicacion>(JsonAPIDefaults());
         var temp = await this.Insertar(add);
@@ -67,25 +68,25 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         var update = data.Deserialize<Aplicacion>(JsonAPIDefaults());
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         return await this.Eliminar((string)id);
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         var temp = await this.UnicaPorId((string)id);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         var temp = await this.UnicaPorIdDespliegue((string)id);
 
@@ -93,7 +94,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         var temp = await this.Pagina(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
@@ -101,7 +102,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         var temp = await this.PaginaDespliegue(consulta);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
@@ -161,7 +162,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
             Modulos=data.Modulos
         };
     }
-    public override async Task<Respuesta> Actualizar(string id, Aplicacion data)
+    public override async Task<Respuesta> Actualizar(string id, Aplicacion data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -217,7 +218,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
     }
 
 
-    public override async Task<RespuestaPayload<Aplicacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Aplicacion>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Aplicacion>();
         try
@@ -247,7 +248,7 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

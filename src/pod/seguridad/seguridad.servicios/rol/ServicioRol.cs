@@ -16,13 +16,14 @@ using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
 using seguridad.modelo.servicios;
 using seguridad.servicios.dbcontext;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 
 namespace seguridad.servicios;
 [ServicioEntidadAPI(entidad: typeof(Rol), driver: Constantes.MONGODB)]
-public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
-    IServicioEntidadHijoAPI, IServicioRol
+public class ServicioRol : ServicioEntidadGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
+    IServicioEntidadAPI, IServicioRol
 {
     private readonly ILogger _logger;
     private readonly IReflectorEntidadesAPI reflector;
@@ -67,8 +68,6 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
     private MongoDbContext DB { get { return (MongoDbContext)_db; } }
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-    string IServicioEntidadHijoAPI.Padreid { get => this.aplicacion.Id ?? null; set => EstableceDbSet(value); }
     public Entidad EntidadDespliegueAPI()
     {
         _logger.LogDebug("ServicioRol-EntidadDespliegueAPI");
@@ -99,76 +98,69 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioRol-EstableceDbSet - {padreId}", padreId);
-        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid= aplicacion != null?aplicacion.Id:null;
-        _logger.LogDebug("ServicioRol-EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         _logger.LogDebug("ServicioRol-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-InsertarAPI-{data}", data); var add = data.Deserialize<CreaRol>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioRol-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaRol>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioRol-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioRol-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioRol-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioRol-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioRol-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioRol-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -228,12 +220,13 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
              Personalizado=data.Personalizado
         };
     }
-    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)
+    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaRol>();
 
         try
         {
+            aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             var resultadoValidacion = await ValidarInsertar(data);
             if (resultadoValidacion.Valido)
             {
@@ -261,7 +254,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
 
         return respuesta;
     }
-    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -277,7 +270,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_=>_.RolId==data.RolId);
 
             if (actual == null)
@@ -337,11 +330,12 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
     }
 
 
-    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Rol>();
         try
         {
+            aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_ => _.RolId == id);
             if (actual == null)
             {
@@ -368,7 +362,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -385,7 +379,7 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Rol actual = aplicacion.RolesPersonalizados.FirstOrDefault(_=>_.RolId==id);
             if (actual == null)
             {
@@ -428,11 +422,12 @@ public class ServicioRol : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Actuali
         }
         return respuesta;
     }
-    public override async Task<PaginaGenerica<Rol>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Rol>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioRol - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Rol));
         var Elementos = Enumerable.Empty<Rol>().AsQueryable();
+        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
         if (aplicacion != null)
         {
             if (consulta.Filtros.Count > 0)

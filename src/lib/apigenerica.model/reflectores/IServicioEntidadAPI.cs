@@ -2,6 +2,7 @@
 using apigenerica.model.modelos;
 using comunes.primitivas;
 using System.Text.Json;
+using System.Collections.Specialized;
 
 namespace apigenerica.model.reflectores;
 
@@ -58,8 +59,9 @@ public interface IServicioEntidadAPI
     /// Método para insertar una entidad nueva en el repositorio
     /// </summary>
     /// <param name="data"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<object>> InsertarAPI(JsonElement data);
+    Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -67,16 +69,18 @@ public interface IServicioEntidadAPI
     /// </summary>
     /// <param name="id"></param>
     /// <param name="data"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<Respuesta> ActualizarAPI(object id, JsonElement data);
+    Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null);
 
 
     /// <summary>
     /// Elimina una entidad del repositorio eb base a su Id único
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<Respuesta> EliminarAPI(object id);
+    Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -84,50 +88,38 @@ public interface IServicioEntidadAPI
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<object>> UnicaPorIdAPI(object  id);
+    Task<RespuestaPayload<object>> UnicaPorIdAPI(object  id, StringDictionary? parametros = null);
 
     /// <summary>
     /// Obtiene una entidad para despliegue del repositorio por Id
     /// </summary>
     /// <param name="id"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id);
+    Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null);
 
 
     /// <summary>
     /// Obtiene una lista de elementos en base a la configuración de la consulta y su paginado
     /// </summary>
     /// <param name="consulta"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta);
+    Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null);
 
     /// <summary>
     /// Obtiene una lista de elementos para el despliegue en base a la configuración de la consulta y su paginado
     /// </summary>
     /// <param name="consulta"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta);
-
-
-    ///// <summary>
-    ///// Obtiene una lista de elementos hijos de la entidad padre en base a la configuración de la consulta y su paginado
-    ///// </summary>
-    ///// <param name="consulta"></param>
-    ///// <returns></returns>
-    //Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijoAPI(Consulta consulta, string tipoPadre, string id);
-
-    ///// <summary>
-    ///// Obtiene una lista de elementos hijos de la entidad padre para el despliegue en base a la configuración de la consulta y su paginado
-    ///// </summary>
-    ///// <param name="consulta"></param>
-    ///// <returns></returns>
-    //Task<RespuestaPayload<PaginaGenerica<object>>> PaginaHijosDespliegueAPI(Consulta consulta, string tipoPadre, string id);
-
+    Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null);
 
     /// <summary>
     /// DEvulver la conjunción de DTOFull, DTOInsert y DTOUpdate para la entidad con el tipo
     /// </summary>
     /// <param name="Tipo"></param>
+    /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<Entidad>? Metadatos(string Tipo);
+    Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null);
 }

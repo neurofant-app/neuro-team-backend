@@ -15,6 +15,7 @@ using aplicaciones.services.dbcontext;
 using aplicaciones.services.invitacion;
 using comunes.primitivas.configuracion.mongo;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 
 namespace aplicaciones.services.plantilla;
 [ServicioEntidadAPI(entidad:typeof(EntidadPlantillaInvitacion))]
@@ -30,7 +31,7 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
     {
         _logger = logger;
         reflector = Reflector;
-
+        interpreteConsulta = new InterpreteConsultaExpresiones();
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextAplicaciones.NOMBRE_COLECCION_PLANTILLaAPLICACION);
         if (configuracionEntidad == null)
         {
@@ -94,64 +95,64 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-InsertarAPI-{data}", data);
         var add = data.Deserialize<CreaPlantillaInvitacion>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-ActualizarAPI-{data}", data);
         var update = data.Deserialize<ActualizaPlantillaInvitacion>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioEntidadPlantillaInvitacion-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -202,7 +203,19 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
         return plantillaInvitacion;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, ActualizaPlantillaInvitacion data)
+    public override ConsultaPlantillaInvitacion ADTODespliegue(EntidadPlantillaInvitacion data)
+    {
+        ConsultaPlantillaInvitacion consultaPlantillaInvitacion = new()
+        {
+            Id = data.Id,
+            TipoContenido = data.TipoContenido,
+            AplicacionId = data.AplicacionId,
+            Plantilla = data.Plantilla,
+        };
+        return consultaPlantillaInvitacion;
+    }
+
+    public override async Task<Respuesta> Actualizar(string id, ActualizaPlantillaInvitacion data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -263,7 +276,7 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
     }
 
 
-    public override async Task<RespuestaPayload<EntidadPlantillaInvitacion>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<EntidadPlantillaInvitacion>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<EntidadPlantillaInvitacion>();
         try
@@ -294,7 +307,7 @@ public class ServicioEntidadPlantillaInvitacion : ServicioEntidadGenericaBase<En
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try

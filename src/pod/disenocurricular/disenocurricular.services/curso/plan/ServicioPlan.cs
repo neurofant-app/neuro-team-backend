@@ -15,17 +15,17 @@ using MongoDB.Driver;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Collections.Specialized;
 
 namespace disenocurricular.services.curso.plan;
 [ServicioEntidadAPI(typeof(Plan))]
-public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Plan, string>,
-    IServicioEntidadHijoAPI, IServicioPlan
+public class ServicioPlan : ServicioEntidadGenericaBase<Plan, Plan, Plan, Plan, string>,
+    IServicioEntidadAPI, IServicioPlan
 {
     private readonly ILogger<ServicioPlan> _logger;
     private readonly IServicioCurso servicioCurso;
     private readonly IReflectorEntidadesAPI _reflector;
     private Curso? curso;
-
 
     public ServicioPlan(ILogger<ServicioPlan> logger, IServicionConfiguracionMongo configuracionMongo, IServicioCurso servicioCurso,
         IReflectorEntidadesAPI reflector, IDistributedCache distributedCache) : base(null, null, logger, reflector, distributedCache)
@@ -55,6 +55,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
 
             _db = MongoDbContextDisenoCurricular.Create(client.GetDatabase(configuracionEntidad.Esquema));
             _dbSetFull = ((MongoDbContextDisenoCurricular)_db).Planes;
+            
         }
         catch (Exception ex)
         {
@@ -67,28 +68,20 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     private MongoDbContextDisenoCurricular DB { get { return (MongoDbContextDisenoCurricular)_db; } }
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId
-    {
-        get => this.TipoPadreId;
-        set => this.TipoPadreId = value;
-    }
-
-    string IServicioEntidadHijoAPI.Padreid
-    {
-        get => this.curso.Id.ToString() ?? null;
-        set => EstableceDbSet(value);
-    }
-
-
-    public async void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioEspecialidad - EstableceDbSet {padreId}", padreId);
-        var entidadCurso = await this.servicioCurso.UnicaPorId(padreId);
-        curso = (Curso)entidadCurso.Payload;
-        this.Padreid = curso != null ? curso.Id.ToString() : null;
-        _logger.LogDebug("ServicioEspecialidad - EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
-
+    //public async Task<Respuesta> EstableceDbSet(StringDictionary? parametros = null)
+    //{
+    //    _logger.LogDebug("ServicioPlan-EstableceDbSet");
+    //    var entidadCurso = await this.servicioCurso.UnicaPorId(parametros["n0Id"]);
+    //    curso = (Curso)entidadCurso.Payload;
+    //    if(curso == null)
+    //    {
+    //        return new Respuesta()
+    //        {
+    //            Ok = false
+    //        };
+    //    }
+    //    return new Respuesta() { Ok = true };
+    //}
 
     public Entidad EntidadRepoAPI()
     {
@@ -126,64 +119,64 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return this.ObtieneContextoUsuario();
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-InsertarAPI-{data}", data);
         var add = data.Deserialize<Plan>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add,parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlan-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Plan>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioPlan-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioPlan-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-UnicaPorIdAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlan-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlan-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlan-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlan-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlan-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -194,9 +187,9 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     public override async Task<ResultadoValidacion> ValidarActualizar(string id, Plan actualizacion, Plan original)
     {
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(actualizacion.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(actualizacion.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -207,6 +200,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -214,9 +208,9 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Plan original)
     {
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(original.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(original.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -227,6 +221,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -234,9 +229,9 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     public override async Task<ResultadoValidacion> ValidarInsertar(Plan data)
     {
         var resultado = new ResultadoValidacion();
-        var existeCurso = this.UnicaPorId(data.CursoId.ToString());
+        var existeCurso = this.servicioCurso.UnicaPorId(data.CursoId.ToString());
 
-        if (existeCurso == null)
+        if (existeCurso.Result.Ok == false)
         {
             resultado.Error = new ErrorProceso()
             {
@@ -247,6 +242,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
             resultado.Valido = false;
             return resultado;
         }
+        curso = (Curso)existeCurso.Result.Payload;
         resultado.Valido = true;
         return resultado;
     }
@@ -292,7 +288,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return plan;
     }
 
-    public override async Task<RespuestaPayload<Plan>> Insertar(Plan data)
+    public override async Task<RespuestaPayload<Plan>> Insertar(Plan data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Plan>();
         try
@@ -301,8 +297,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
-
-                this.curso?.PlanesEstudio.Add(entidad.Id);
+                curso?.PlanesEstudio.Add(entidad.Id);
                 var updateCurso = await this.servicioCurso.ActualizaDbSetCurso(curso);
 
                 if(updateCurso.Ok == true)
@@ -332,7 +327,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     }
 
 
-    public override async Task<Respuesta> Actualizar(string id, Plan data)
+    public override async Task<Respuesta> Actualizar(string id, Plan data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -393,7 +388,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Plan>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Plan>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Plan>();
         try
@@ -424,7 +419,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -486,7 +481,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> Pagina(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> Pagina(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Plan>> respuesta = new();
         try
@@ -513,7 +508,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> PaginaDespliegue(Consulta consulta)
+    public override async Task<RespuestaPayload<PaginaGenerica<Plan>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<Plan>> respuesta = new RespuestaPayload<PaginaGenerica<Plan>>();
 
@@ -538,6 +533,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
                 {
                     pagina.Elementos.Add(ADTODespliegue(item));
                 }
+                respuesta.Ok = true;
                 respuesta.Payload = pagina;
             }
 
@@ -553,7 +549,7 @@ public class ServicioPlan : ServicioEntidadHijoGenericaBase<Plan, Plan, Plan, Pl
     }
 
 
-    public override async Task<PaginaGenerica<Plan>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Plan>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Plan));
         var Elementos = Enumerable.Empty<Plan>().AsQueryable();

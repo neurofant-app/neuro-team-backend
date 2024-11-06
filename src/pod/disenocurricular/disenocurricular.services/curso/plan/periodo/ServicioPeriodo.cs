@@ -12,14 +12,15 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 
 namespace disenocurricular.services.curso.plan.periodo;
 [ServicioEntidadAPI(typeof(Periodo))]
-public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo, Periodo, Periodo, string>,
-    IServicioEntidadHijoAPI, IServicioPeriodo
+public class ServicioPeriodo : ServicioEntidadGenericaBase<Periodo, Periodo, Periodo, Periodo, string>,
+    IServicioEntidadAPI, IServicioPeriodo
 {
     private readonly ILogger<Periodo> logger;
     private readonly IReflectorEntidadesAPI _reflector;
@@ -65,17 +66,6 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
 
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-
-    string IServicioEntidadHijoAPI.Padreid { get => this.plan.Id.ToString() ?? null; set => EstableceDbSet(value); }
-    public void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioPeriodo-EstableceDbSet - {padreId}", padreId);
-        plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(padreId));
-        this.Padreid = plan != null ? plan.Id.ToString() : null;
-        _logger.LogDebug("ServicioPeriodo-EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
-
     public Entidad EntidadDespliegueAPI()
     {
         _logger.LogDebug("ServicioPeriodo-EntidadDespliegueAPI");
@@ -107,29 +97,29 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
     }
 
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-InsertarAPI-{data}", data);
         var add = data.Deserialize<Periodo>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPeriodo-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Periodo>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioPeriodo-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioPeriodo-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -140,37 +130,37 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPeriodo-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPeriodo-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPeriodo-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPeriodo-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -265,7 +255,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return periodo;
     }
 
-    public override async Task<RespuestaPayload<Periodo>> Insertar(Periodo data)
+    public override async Task<RespuestaPayload<Periodo>> Insertar(Periodo data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Periodo>();
 
@@ -275,6 +265,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
+                plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
                 plan.Periodos.Add(entidad);
                 _dbSetPlanes.Update(plan);
                 await _db.SaveChangesAsync();
@@ -299,7 +290,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Periodo data)
+    public override async Task<Respuesta> Actualizar(string id, Periodo data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -315,7 +306,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
             Periodo actual = plan.Periodos.FirstOrDefault(_ => _.Id == Guid.Parse(id));
             if (actual == null)
             {
@@ -371,11 +362,12 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Periodo>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Periodo>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Periodo>();
         try
         {
+            plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
             Periodo actual = plan.Periodos.FirstOrDefault(_ => _.Id == Guid.Parse(id));
             if (actual == null)
             {
@@ -401,7 +393,7 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -418,8 +410,9 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
+            plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
 
-            Periodo actual = _dbSetFull!.Find(Guid.Parse(id));
+            Periodo actual = plan.Periodos.FirstOrDefault(_ => _.Id == Guid.Parse(id));
             if (actual == null)
             {
                 respuesta.Error = new ErrorProceso()
@@ -462,11 +455,12 @@ public class ServicioPeriodo : ServicioEntidadHijoGenericaBase<Periodo, Periodo,
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Periodo>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Periodo>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPeriodo - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Periodo));
         var Elementos = Enumerable.Empty<Periodo>().AsQueryable();
+        plan = _dbSetPlanes.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
         if (plan != null)
         {
             if (consulta.Filtros.Count > 0)

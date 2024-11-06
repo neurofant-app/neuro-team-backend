@@ -1,6 +1,7 @@
 ﻿using extensibilidad.metadatos;
 using apigenerica.model.modelos;
 using comunes.primitivas;
+using System.Collections.Specialized;
 
 namespace apigenerica.model.servicios;
 
@@ -61,7 +62,7 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="data"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data);
+    Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -70,7 +71,7 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// <param name="id"></param>
     /// <param name="data"></param>
     /// <returns></returns>
-    Task<Respuesta> Actualizar(TipoId id, DTOUpdate data);
+    Task<Respuesta> Actualizar(TipoId id, DTOUpdate data, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -78,7 +79,7 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<Respuesta> Eliminar(TipoId id);
+    Task<Respuesta> Eliminar(TipoId id, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -86,14 +87,14 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<DTOFull>> UnicaPorId(TipoId id);
+    Task<RespuestaPayload<DTOFull>> UnicaPorId(TipoId id, StringDictionary? parametros = null);
 
     /// <summary>
     /// Obtiene una entidad para despliegue del repositorio por Id
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(TipoId id);
+    Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(TipoId id, StringDictionary? parametros = null);
 
 
     /// <summary>
@@ -101,14 +102,14 @@ public interface IServicioEntidadHijoGenerica<DTOFull, DTOInsert, DTOUpdate, DTO
     /// </summary>
     /// <param name="consulta"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta);
+    Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta, StringDictionary? parametros = null);
 
     /// <summary>
     /// Obtiene una lista de elementos para el despliegue en base a la configuración de la consulta y su paginado
     /// </summary>
     /// <param name="consulta"></param>
     /// <returns></returns>
-    Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta);
+    Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null);
 
 
     /// <summary>

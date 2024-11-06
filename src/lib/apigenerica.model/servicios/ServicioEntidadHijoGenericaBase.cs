@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using apigenerica.model.abstracciones;
 using comunes.primitivas;
 using apigenerica.model.interpretes;
+using System.Collections.Specialized;
 
 namespace apigenerica.model.servicios;
 
@@ -51,7 +52,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     }
 
-    public virtual async Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data)
+    public virtual async Task<RespuestaPayload<DTODespliegue>> Insertar(DTOInsert data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<DTODespliegue>();
 
@@ -87,7 +88,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<Entidad>? Metadatos(string Tipo)
+    public virtual async Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null)
     {
         await Task.Delay(0);
         Entidad entidad = new();
@@ -104,7 +105,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return entidad;
     }
 
-    public virtual async Task<Respuesta> Actualizar(string id, DTOUpdate data)
+    public virtual async Task<Respuesta> Actualizar(string id, DTOUpdate data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -153,7 +154,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<Respuesta> Eliminar(string id)
+    public virtual async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -199,7 +200,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<DTOFull>> UnicaPorId(string id)
+    public virtual async Task<RespuestaPayload<DTOFull>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<DTOFull>();
         try
@@ -226,7 +227,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta)
+    public virtual async Task<RespuestaPayload<PaginaGenerica<DTOFull>>> Pagina(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<DTOFull>> respuesta = new();
         try
@@ -238,7 +239,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
                 return respuesta;
             }
 
-            var pagina = await ObtienePaginaElementos(consulta);
+            var pagina = await ObtienePaginaElementos(consulta, parametros);
 
             respuesta.Payload = pagina;
             respuesta.Ok = true;
@@ -263,7 +264,7 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
     /// <returns></returns>
     /// <exception cref="NotImplementedException"></exception>
 
-    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta)
+    public virtual async Task<PaginaGenerica<DTOFull>> ObtienePaginaElementos(Consulta consulta, StringDictionary parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(DTOFull));
         var Elementos = Enumerable.Empty<DTOFull>().AsQueryable();
@@ -319,13 +320,13 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
     }
 
 
-    public virtual async Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(string id)
+    public virtual async Task<RespuestaPayload<DTODespliegue>> UnicaPorIdDespliegue(string id, StringDictionary? parametros = null)
     {
         RespuestaPayload<DTODespliegue> respuesta = new RespuestaPayload<DTODespliegue>();
 
         try
         {
-            var resultado = await UnicaPorId(id);
+            var resultado = await UnicaPorId(id, parametros);
 
             respuesta.Ok = resultado.Ok;
 
@@ -345,13 +346,13 @@ public abstract class ServicioEntidadHijoGenericaBase<DTOFull, DTOInsert, DTOUpd
         return respuesta;
     }
 
-    public virtual async Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta)
+    public virtual async Task<RespuestaPayload<PaginaGenerica<DTODespliegue>>> PaginaDespliegue(Consulta consulta, StringDictionary? parametros = null)
     {
         RespuestaPayload<PaginaGenerica<DTODespliegue>> respuesta = new RespuestaPayload<PaginaGenerica<DTODespliegue>>();
 
         try
         {
-            var resultado = await Pagina(consulta);
+            var resultado = await Pagina(consulta, parametros);
 
             respuesta.Ok = resultado.Ok;
 

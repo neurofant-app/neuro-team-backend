@@ -1,5 +1,6 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
@@ -11,6 +12,7 @@ using extensibilidad.metadatos;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 using Plantilla = conversaciones.model.Plantilla;
 
@@ -30,7 +32,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         _logger = logger;
         reflector = Reflector;
         cache = Cache;
-
+        interpreteConsulta = new InterpreteConsultaExpresiones();
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextConversaciones.NOMBRE_COLECCION_PLANTILLA);
         if(configuracionEntidad == null)
         {
@@ -94,7 +96,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-InsertarAPI-{data}", data);
         var add = data.Deserialize<Plantilla>(JsonAPIDefaults());
@@ -104,7 +106,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Plantilla>(JsonAPIDefaults());
@@ -113,7 +115,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-EliminarAPI");
         Respuesta respuesta = await this.Eliminar((string)id);
@@ -121,7 +123,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(Object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-UnicaPorIdAPI");
         var temp = await this.UnicaPorId((string)id);
@@ -130,7 +132,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-UnicaPorIdDespliegueAPI");
         var temp = await this.UnicaPorIdDespliegue((string)id);
@@ -139,19 +141,19 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlantilla-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioPlantilla-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioPlantilla-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -181,6 +183,7 @@ public class ServicioPlantilla : ServicioEntidadGenericaBase<Plantilla, Plantill
         actual.Contenidos = actualizacion.Contenidos;
         actual.AplicacionId = actualizacion.AplicacionId;
         actual.DeUsuario = actualizacion.DeUsuario;
+        actual.UsuarioId = actualizacion.UsuarioId;
         actual.FechaCreacion = actualizacion.FechaCreacion;
         return actual;
     }

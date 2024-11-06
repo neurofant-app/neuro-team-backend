@@ -19,13 +19,14 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 using static comunicaciones.modelo.Constantes;
 
 namespace conversaciones.services.conversacion.mensaje;
 [ServicioEntidadAPI(entidad:typeof(Mensaje))]
-public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje, Mensaje, Mensaje, string>,
-    IServicioEntidadHijoAPI, IServicioMensaje
+public class ServicioMensaje : ServicioEntidadGenericaBase<Mensaje, Mensaje, Mensaje, Mensaje, string>,
+    IServicioEntidadAPI, IServicioMensaje
 {
     private readonly ILogger<ServicioMensaje> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
@@ -77,23 +78,19 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
 
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-
-    string IServicioEntidadHijoAPI.Padreid { get => this.conversacion.Id ?? null; set => EstableceDbSet(value); }
-
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Mensaje>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioMensaje-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioMensaje-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -128,19 +125,11 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioMensaje-EstableceDbSet - {padreId}", padreId);
-        conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid = conversacion != null ? conversacion.Id : null;
-        _logger.LogDebug("ServicioMensaje-EstableceDbSet - resultado {padreId}", this.Padreid);
-
-    }
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-InsertarAPI-{data}", data);
         var add = data.Deserialize<Mensaje>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMensaje-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -150,34 +139,34 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         _logger.LogDebug("ServicioMensaje-ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMensaje-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMensaje-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMensaje-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMensaje-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -260,7 +249,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return mensaje;
     }
 
-    public virtual async Task<RespuestaPayload<Mensaje>> Insertar(Mensaje data)
+    public override async Task<RespuestaPayload<Mensaje>> Insertar(Mensaje data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Mensaje>();
 
@@ -271,10 +260,10 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
             {
                 var entidad = ADTOFull(data);
 
-
+                conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
                 var r = SeleccionCanal(conversacion, entidad);
 
-                if(r.Result.Ok == true)
+                if (r.Result.Ok == true)
                 {
                     conversacion.Mensajes.Add(entidad);
                     _dbSetConversacion.Update(conversacion);
@@ -282,14 +271,14 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                     respuesta.Ok = true;
                     respuesta.HttpCode = HttpCode.Ok;
                     respuesta.Payload = ADTODespliegue(entidad);
-                }
-                else
-                {
-                    respuesta.Error = resultadoValidacion.Error;
-                    respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_MENSAJE_ERROR_ENVIO_A_CONVERSACION;
-                    respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
-                }
             }
+            else
+            {
+                respuesta.Error = resultadoValidacion.Error;
+                respuesta.Error!.Codigo = CodigosError.CONVERSACIONES_MENSAJE_ERROR_ENVIO_A_CONVERSACION;
+                respuesta.HttpCode = resultadoValidacion.Error?.HttpCode ?? HttpCode.None;
+            }
+        }
             else
             {
                 respuesta.Error = resultadoValidacion.Error;
@@ -307,7 +296,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Mensaje data)
+    public override async Task<Respuesta> Actualizar(string id, Mensaje data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -323,7 +312,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == data.Id);
             if (actual == null)
             {
@@ -380,11 +369,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Mensaje>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Mensaje>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Mensaje>();
         try
         {
+            conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
@@ -410,7 +400,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -427,7 +417,7 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
             Mensaje actual = conversacion.Mensajes.FirstOrDefault(_ => _.Id == id);
             if (actual == null)
             {
@@ -471,11 +461,12 @@ public class ServicioMensaje : ServicioEntidadHijoGenericaBase<Mensaje, Mensaje,
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Mensaje>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Mensaje>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMensaje - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Mensaje));
         var Elementos = Enumerable.Empty<Mensaje>().AsQueryable();
+        conversacion = _dbSetConversacion.FirstOrDefault(_ => _.Id == parametros["n0Id"]);
         if (conversacion != null)
         {
             if (consulta.Filtros.Count > 0)

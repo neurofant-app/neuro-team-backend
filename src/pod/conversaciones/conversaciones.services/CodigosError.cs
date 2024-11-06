@@ -19,4 +19,5 @@ public class CodigosError
     public const string CONVERSACIONES_CONTENIDO_ERROR_ELIMINAR = "CONVERSACIONES-CONTENIDO-ERROR-ELIMINAR";
 
 
+
 }

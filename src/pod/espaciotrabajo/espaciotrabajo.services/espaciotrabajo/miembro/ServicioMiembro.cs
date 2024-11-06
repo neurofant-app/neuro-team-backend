@@ -12,19 +12,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using System.Collections.Specialized;
 using System.Text.Json;
 
 namespace espaciotrabajo.services.espaciotrabajo.miembro;
 
 [ServicioEntidadAPI(typeof(Miembro))]
-public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro, Miembro, Miembro,string>,
-    IServicioEntidadHijoAPI, IServicioMiembro
+public class ServicioMiembro : ServicioEntidadGenericaBase<Miembro, Miembro, Miembro, Miembro,string>,
+    IServicioEntidadAPI, IServicioMiembro
 {
     private readonly ILogger<Miembro> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
     private DbSet<EspacioTrabajo> _dbSetEspacioTrabajo;
     private EspacioTrabajo? espacioTrabajo;
-
 
     public ServicioMiembro(ILogger<Miembro> logger,IReflectorEntidadesAPI reflector, IServicionConfiguracionMongo configuracionMongo, IDistributedCache cache) 
         : base (null, null, logger, reflector, cache)
@@ -63,23 +63,19 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
 
     public bool RequiereAutenticacion => true;
 
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-
-    string IServicioEntidadHijoAPI.Padreid { get => this.espacioTrabajo.Id.ToString() ?? null; set => EstableceDbSet(value); }
-
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-ActualizarAPI-{data}", data);
         var update = data.Deserialize<Miembro>(JsonAPIDefaults());
-        Respuesta respuesta = await this.Actualizar((string)id, update);
+        Respuesta respuesta = await this.Actualizar((string)id, update, parametros);
         _logger.LogDebug("ServicioMiembro-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros);
         _logger.LogDebug("ServicioMiembro-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -114,19 +110,11 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        _logger.LogDebug("ServicioMiembro-EstableceDbSet - {padreId}", padreId);
-        espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == new Guid(padreId));
-        this.Padreid = espacioTrabajo != null ? espacioTrabajo.Id.ToString() : null;
-        _logger.LogDebug("ServicioMiembro-EstableceDbSet - resultado {padreId}", this.Padreid);
-    }
-
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-InsertarAPI-{data}", data);
         var add = data.Deserialize<Miembro>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -138,37 +126,37 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-PaginaAPI-{consulta}", consulta);
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-PaginaDespliegueAPI-{consulta}", consulta);
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-PaginaDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioMiembro-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -224,7 +212,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return miembro;
     }
 
-    public override async Task<RespuestaPayload<Miembro>> Insertar(Miembro data)
+    public override async Task<RespuestaPayload<Miembro>> Insertar(Miembro data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Miembro>();
 
@@ -234,6 +222,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
             if (resultadoValidacion.Valido)
             {
                 var entidad = ADTOFull(data);
+                espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
                 espacioTrabajo.Miembros.Add(entidad);
                 _dbSetEspacioTrabajo.Update(espacioTrabajo);
                 await _db.SaveChangesAsync();
@@ -258,7 +247,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Actualizar(string id, Miembro data)
+    public override async Task<Respuesta> Actualizar(string id, Miembro data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -274,7 +263,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == new Guid(parametros["n0Id"]));
             Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
@@ -330,11 +319,12 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public override async Task<RespuestaPayload<Miembro>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Miembro>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Miembro>();
         try
         {
+            espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
             Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
@@ -360,7 +350,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -377,7 +367,7 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
                 respuesta.HttpCode = HttpCode.BadRequest;
                 return respuesta;
             }
-
+            espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
             Miembro actual = espacioTrabajo.Miembros.FirstOrDefault(_ => _.UsuarioId.Equals(id));
             if (actual == null)
             {
@@ -421,11 +411,12 @@ public class ServicioMiembro : ServicioEntidadHijoGenericaBase<Miembro, Miembro,
         return respuesta;
     }
 
-    public override async Task<PaginaGenerica<Miembro>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Miembro>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioMiembro - ObtienePaginaElementos - {consulta}", consulta);
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Miembro));
         var Elementos = Enumerable.Empty<Miembro>().AsQueryable();
+        espacioTrabajo = _dbSetEspacioTrabajo.FirstOrDefault(_ => _.Id == Guid.Parse(parametros["n0Id"]));
         if (espacioTrabajo != null)
         {
             if (consulta.Filtros.Count > 0)

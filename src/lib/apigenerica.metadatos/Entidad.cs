@@ -25,6 +25,6 @@ public class Entidad
     /// <summary>
     /// Lista de propiedades de la entidad
     /// </summary>
-    public List<Propiedad> Propiedades { get; set; } = new List<Propiedad>();
+    public List<Propiedad> Propiedades { get; set; } = [];
 }
 #pragma 

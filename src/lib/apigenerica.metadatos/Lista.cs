@@ -36,5 +36,5 @@ public class Lista
     /// <summary>
     /// Elementos de la lista
     /// </summary>
-    public List<ElementoLista> Elementos { get; set; } = new List<ElementoLista>();
+    public List<ElementoListaI18N> Elementos { get; set; } = [];
 }

@@ -1,7 +1,6 @@
 using apigenerica.primitivas;
 using apigenerica.primitivas.aplicacion;
 using apigenerica.primitivas.seguridad;
-using aprendizaje.api;
 using aprendizaje.api.seguridad;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
@@ -32,6 +31,8 @@ public class Program
 
         var app = builder.Build();
 
+        // Añadir la extensión para los servicios de API genérica
+        app.UseEntidadAPI();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

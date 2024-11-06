@@ -14,12 +14,14 @@ using seguridad.modelo;
 using seguridad.modelo.instancias;
 using seguridad.modelo.roles;
 using seguridad.modelo.servicios;
+using System.Collections.Specialized;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace seguridad.servicios.mysql;
 [ServicioEntidadAPI(entidad: typeof(Rol), driver: Constantes.MYSQL)]
-public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
-    IServicioEntidadHijoAPI, IServicioRol
+public class ServicioRolMysql : ServicioEntidadGenericaBase<Rol, CreaRol, ActualizaRol, ConsultaRol, string>,
+    IServicioEntidadAPI, IServicioRol
 {
     private readonly ILogger _logger;
 
@@ -37,9 +39,6 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     }
 
     public bool RequiereAutenticacion => true;
-
-    string IServicioEntidadHijoAPI.TipoPadreId { get => this.TipoPadreId; set => this.TipoPadreId = value; }
-    string IServicioEntidadHijoAPI.Padreid { get => this.aplicacion.Id ?? null; set => EstableceDbSet(value); }
 
     public Entidad EntidadRepoAPI()
     {
@@ -63,61 +62,56 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
         this.EstableceContextoUsuario(contexto);
     }
 
-    public void EstableceDbSet(string padreId)
-    {
-        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == padreId);
-        this.Padreid= aplicacion != null?aplicacion.Id:null;
-    }
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
         return this._contextoUsuario;
     }
 
-    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data)
+    public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
     {
         var add = data.Deserialize<CreaRol>(JsonAPIDefaults());
-        var temp = await this.Insertar(add);
+        var temp = await this.Insertar(add, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data)
+    public async Task<Respuesta> ActualizarAPI(object id, JsonElement data, StringDictionary? parametros = null)
     {
         var update = data.Deserialize<ActualizaRol>(JsonAPIDefaults());
-        return await this.Actualizar((string)id, update);
+        return await this.Actualizar((string)id, update, parametros);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
     {
-        return await this.Eliminar((string)id);
+        return await this.Eliminar((string)id, parametros);
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
-        var temp = await this.UnicaPorId((string)id);
+        var temp = await this.UnicaPorId((string)id, parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id)
+    public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
-        var temp = await this.UnicaPorIdDespliegue((string)id);
+        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
 
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaAPI(Consulta consulta, StringDictionary? parametros = null)
     {
-        var temp = await this.Pagina(consulta);
+        var temp = await this.Pagina(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
 
         return respuesta;
     }
 
-    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta)
+    public async Task<RespuestaPayload<PaginaGenerica<object>>> PaginaDespliegueAPI(Consulta consulta, StringDictionary? parametros = null)
     {
-        var temp = await this.PaginaDespliegue(consulta);
+        var temp = await this.PaginaDespliegue(consulta, parametros);
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         return respuesta;
     }
@@ -126,12 +120,14 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     public override async Task<ResultadoValidacion> ValidarInsertar(CreaRol data)
     {
         ResultadoValidacion resultado = new();
+        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == data.InstanciaAplicacionId);
         resultado.Valido = aplicacion != null && !aplicacion.RolesPersonalizados.Any(_ => _.Nombre == data.Nombre);
         return resultado;
     }
     public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Rol original)
     {
         ResultadoValidacion resultado = new();
+        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == original.InstanciaAplicacionId);
         resultado.Valido = aplicacion != null ? true : false;
         return resultado;
     }
@@ -139,6 +135,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     public override async Task<ResultadoValidacion> ValidarActualizar(string id, ActualizaRol actualizacion, Rol original)
     {
         ResultadoValidacion resultado = new();
+        aplicacion = _dbSetAplicacion.FirstOrDefault(_ => _.Id == actualizacion.InstanciaAplicacionId);
 
         resultado.Valido = aplicacion != null && !aplicacion.RolesPersonalizados.Any(_ => _.Nombre == actualizacion.Nombre && _.RolId!=actualizacion.RolId);
 
@@ -183,7 +180,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
              ModuloId = data.ModuloId
         };
     }
-    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data)
+    public override async Task<RespuestaPayload<ConsultaRol>> Insertar(CreaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<ConsultaRol>();
 
@@ -217,7 +214,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
 
         return respuesta;
     }
-    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data)
+    public override async Task<Respuesta> Actualizar(string id, ActualizaRol data, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -276,7 +273,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
     }
 
 
-    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id)
+    public override async Task<RespuestaPayload<Rol>> UnicaPorId(string id, StringDictionary? parametros = null)
     {
         var respuesta = new RespuestaPayload<Rol>();
         try
@@ -303,7 +300,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
     {
         var respuesta = new Respuesta();
         try
@@ -348,7 +345,7 @@ public class ServicioRolMysql : ServicioEntidadHijoGenericaBase<Rol, CreaRol, Ac
         }
         return respuesta;
     }
-    public override async Task<PaginaGenerica<Rol>> ObtienePaginaElementos(Consulta consulta)
+    public override async Task<PaginaGenerica<Rol>> ObtienePaginaElementos(Consulta consulta, StringDictionary? parametros = null)
     {
         Entidad entidad = reflectorEntidades.ObtieneEntidad(typeof(Rol));
         var Elementos = Enumerable.Empty<Rol>().AsQueryable();
