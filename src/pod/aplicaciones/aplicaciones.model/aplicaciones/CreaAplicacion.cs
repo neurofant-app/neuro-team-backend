@@ -21,7 +21,7 @@ public class CreaAplicacion
     public required string Clave { get; set; }
 
     /// <summary>
-    /// Lista de Hosts asoviados a la aplciación
+    /// Lista de Hosts asoiados a la aplicación
     /// </summary>
     [BsonElement("u")]
     public List<string>? Hosts { get; set; }

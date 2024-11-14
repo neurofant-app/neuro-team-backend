@@ -1,0 +1,6 @@
+﻿El producto se gestiona vía un controlador N1
+/producto
+
+Las entidades se adicionan en una colección dedicada
+El nombre de la coleccion es 'productos'
+

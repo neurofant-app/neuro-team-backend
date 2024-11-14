@@ -2,7 +2,9 @@
 
 public enum HttpCode
 {
-    None = 0, Ok = 200, NotFound = 404, Conflict = 409, BadRequest = 400, UnprocessableEntity = 422, ServerError = 500, UNAUTHORIZED=402,FORBIDDEN=403
+    None = 0, Ok = 200,
+    Unauthorized = 401, Forbidden = 403, NotFound = 404, Conflict = 409, BadRequest = 400, UnprocessableEntity = 422, 
+    ServerError = 500, NotImplemented =501  
 }
 
 public class Respuesta

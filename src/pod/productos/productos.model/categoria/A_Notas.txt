@@ -1,0 +1,11 @@
+﻿Las categorías se gestionan vía un controlador N1
+/categoria
+
+Las entidades se adicionan en una colección dedicada
+El nombre de la coleccion es 'categorias'
+
+La propiedades internacionalizables de la entidad son reeemplazadas en su totalidad 
+durante el PUT
+
+Las operaciones DELETE deben verificar que no haya hijos existentes en caso de que existan
+debe devolver 409

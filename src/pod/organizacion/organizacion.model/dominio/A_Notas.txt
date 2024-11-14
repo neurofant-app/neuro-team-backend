@@ -1,0 +1,11 @@
+﻿El dominio se gestiona vía un controlador N1
+/dominio
+
+Las entidades se adicionan en una colección dedicada
+El nombre de la coleccion es 'dominios'
+
+Las propiedades  
+	'OrigenId' será inyectada como parámetro vía el JWT con el id del usuario en sesión
+	'TipoOrigen' tendrá por ahora su valor default
+
+

@@ -122,7 +122,8 @@ public static class ExtensionesConfiguracionInterservicio
 
     /// <summary>
     /// Adiciona la configuracion estandar
-    ///     Configuracion desde appsetting por entorni
+    ///     Configuracion desde appsetting por entorno
+    ///     Configurción de logs desde seccion Logging
     ///     Inyeccion IOptions de ConfiguracionAPI
     ///     CORS ANY ALL
     ///     Serilog v[ia configuracion
@@ -143,6 +144,12 @@ public static class ExtensionesConfiguracionInterservicio
                             .AddJsonFile($"appsettings.{environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
                             .AddUserSecrets(rootAssembly, true)
                             .AddEnvironmentVariables();
+        
+        builder.Services.AddLogging(logbuilder =>
+        {
+            logbuilder.AddConfiguration(builder.Configuration.GetSection("Logging"));
+            logbuilder.AddConsole();
+        });
 
         builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(ConfiguracionAPI.ClaveConfiguracionBase));
         builder.CORSAnyAll();

@@ -129,7 +129,7 @@ public class ServicioEntidadInvitacion : ServicioEntidadGenericaBase<EntidadInvi
         if (!permisosValidos("00000000-0000-0000-0000-000000000001"))
         {
             RespuestaPayload<object> respuestaPayload = new RespuestaPayload<object>()
-            { HttpCode = HttpCode.FORBIDDEN, Error = new() { Codigo = CodigosError.ENTIDADINVITACION_ACCION_PROHIBIDA_NO_PERMISOS, Mensaje = "No se tiene el permiso acccion prohibida", HttpCode = HttpCode.FORBIDDEN } };
+            { HttpCode = HttpCode.Forbidden, Error = new() { Codigo = CodigosError.ENTIDADINVITACION_ACCION_PROHIBIDA_NO_PERMISOS, Mensaje = "No se tiene el permiso acccion prohibida", HttpCode = HttpCode.Forbidden } };
             _logger.LogDebug("ServicioEntidadInvitacion-InsertarAPI resultado {ok} {code} {error}", respuestaPayload!.Ok, respuestaPayload!.HttpCode, respuestaPayload.Error);
             return respuestaPayload;
         }

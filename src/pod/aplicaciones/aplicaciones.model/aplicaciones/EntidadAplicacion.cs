@@ -7,7 +7,7 @@ namespace aplicaciones.model;
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 /// <summary>
-/// Define una aplicación orbetivo para el sistema de invitaciones
+/// Define una aplicación objetico para el sistema de invitaciones
 /// por ejemeplo contabee o eccordion
 /// </summary>
 [ExcludeFromCodeCoverage]

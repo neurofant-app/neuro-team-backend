@@ -1,7 +1,6 @@
 ﻿
 using aplicaciones.api.seguridad;
 using comunes.interservicio.primitivas;
-using OpenIddict.Abstractions;
 
 namespace aplicaciones.api;
 
@@ -20,7 +19,8 @@ public class Worker : IHostedService
 
         var manager = scope.ServiceProvider.GetRequiredService<IProxySeguridad>();
         ConfiguracionSeguridad configuracionSeguridad = new();
-        await manager.ActualizaSeguridad(await configuracionSeguridad.ObtieneApliaciones());
+        var apps = await configuracionSeguridad.ObtieneApliaciones();
+        await manager.ActualizaSeguridad(apps);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

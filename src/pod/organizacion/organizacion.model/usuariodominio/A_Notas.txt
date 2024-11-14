@@ -1,0 +1,48 @@
+﻿Los usuarios pueden pertenecer a 0 o múltiples dominios debido a ello se utiliza un antidad contenedora
+que permite almacenar en la base de datos todos los dominios a lo que un usario pertenece,
+esta entidad es 'UsuarioDominio' y solo tiene dos propiedades base UsuarioId y DominiosId que sirven
+para buscar por usuario/dominio.
+
+La configuración real del usuario en el dominio se encuentra en el ElementoDominio y las operaciones
+de CRUD modificaran esta colección
+
+El CRUD DE ESTA ENTIDAD es una mezcla de 'UsuarioDominio' con 'ElementoDominio' 
+
+Los usuarios del dominio se gestionan vía un Controlador N2
+/dominio/{dominioId}/usuariodominio/{usuarioId}
+
+>> POST Payload 'ElementoDominioInsertar', verifican si no existe la entidad UsuarioDominio en la colección
+y si no existe la crea y añade un nuevo ElementoDominio, cuando se añade un dominio su Id se adiciona
+tambien a la lista DominiosId de UsuarioDominio
+
+>> PUT Payload Payload 'ElementoDominioActualizar', verifican si no existe la entidad UsuarioDominio en la colección
+y si no existe la crea y añade/actualiza un nuevo ElementoDominio
+
+>> DELETE recibe el Id del usuario como parámetro para la eliminación vía N2 con el dominioId,
+cuando se elimina un dominio su Id se elimina tambien a la lista DominiosId de UsuarioDominio
+
+>> GET Unico no se implementa y debe devolver 501 desde el servicio
+
+>> PAGINADO devuelve una lista de 'UsuarioDominio' filtrados por DominioId, la entidad de despliegue es 
+la misma clase 'UsuarioDominio'
+
+
+El usuario tiene una lista de unidades organizacionales a las que pertenece, estas listas solo 
+aceptan los métodos POST, PUT y DELETE, NO HAY  GET o PAGINADO y deben devolver 501 desde el servicio
+para cubrir esta funcionalidad debe crearse un controlador N3
+
+ES IMPORTANTE que antes de añadir se compruebe que la OU exista en el dominio de no ser así devolver 400
+
+[POST] payload ElementoOUInsertar
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/
+
+Si la entidad 'UsuarioDominio' no existe, crear una siguiendo los pasos del POST de UsuarioDominio con 
+los datos del payload
+
+[POST] payload ElementoOUActualizar
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/{ouid}
+
+[DELETE]
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/{ouid}
+- Elimina la OU de cualquira de las listas en las que se encuentre
+

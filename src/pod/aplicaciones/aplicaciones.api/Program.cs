@@ -10,6 +10,7 @@ using aplicaciones.services.proxy.implementations;
 using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Quartz;
 using System.Reflection;
@@ -21,6 +22,7 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
         builder.Services.AddQuartz(options =>
         {
             options.UseMicrosoftDependencyInjectionJobFactory();
@@ -47,8 +49,6 @@ public class Program
         builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddHttpClient();
-
-
 
         builder.Services.AddHostedService<Worker>();
 

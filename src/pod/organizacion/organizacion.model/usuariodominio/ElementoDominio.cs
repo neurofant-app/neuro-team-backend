@@ -1,0 +1,26 @@
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace organizacion.model.usuariodominio;
+
+/// <summary>
+/// Define los vinculos de un usuario con un dominio
+/// </summary>
+[ExcludeFromCodeCoverage]
+public class ElementoDominio
+{
+    /// <summary>
+    /// Identificador único del dominio al que pertenece el usuario
+    /// </summary>
+    public Guid DominioId { get; set; }
+
+    /// <summary>
+    /// Indica si el usuario está activo en el dominio, si el usuario se encuentra inactivo también lo estará para todas las UO
+    /// </summary>
+    public bool Activo { get; set; } = true;
+
+    /// <summary>
+    /// Lista de unidades organizacionlaes a las que pertenece el usuario
+    /// </summary>
+    public List<ElementoOU> OUIds { get; set; } = [];
+
+}

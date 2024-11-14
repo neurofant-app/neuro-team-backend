@@ -1,0 +1,5 @@
+﻿Los UOs del dominio se gestionan vía un Controlador N2
+/dominio/{dominioId}/unidadorganizacional
+
+El CRUD se realiza directamente en el documento JSON de Dominio 
+no hace falta crear una colección para la unidad

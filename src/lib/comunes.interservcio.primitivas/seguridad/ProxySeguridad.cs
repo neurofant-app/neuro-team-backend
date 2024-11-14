@@ -1,9 +1,10 @@
-﻿using comunes.primitivas.seguridad;
+﻿using comunes.primitivas.extensiones;
+using comunes.primitivas.seguridad;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using System.Net.Http;
+using Serilog.Core;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -38,34 +39,48 @@ public class ProxySeguridad:IProxySeguridad
 
     public async Task ActualizaSeguridad(List<Aplicacion> apps)
     {
-        logger.LogDebug("ProxySeguridad- Actualizando Permisos");
+        var logInfo = ExtensionesLog.InfoMetodo().PrefijoLog();
         if (host == null)
         {
-            logger.LogError($"ProxySeguridad - Host seguridad no configurado");
-        }      
+            logger.LogError("{0} {1}", logInfo, "No hay configuración para el Host de seguridad");
+            return;
+        }
+
+        
+        object?[] objects = new object?[] { "A", DateTime.Now, apps };
+        logger.PrefixDebug("ejemplo", objects);
+        logger.PrefixDebug("MI texto");
+
+
         ActualizaHeaders("mi-dominio", "x-uo-id");
         try
         {
+            object?[] param = new object?[] { "apps", "more" };
+            
+
             TokenJWT? jWT = null;
             if (string.IsNullOrEmpty(host.ClaveAutenticacion))
             {
-                logger.LogError($"ProxySeguridad - No hay una clave de autencicacion definida para Seguridad");
+                logger.LogError($"ProxySeguridad - ActualizaSeguridad - No hay una clave de autencicacion definida para Seguridad");
             }
             else
             {
                 jWT = await autenticacionJWT!.TokenInterproceso(host.ClaveAutenticacion);
                 if (jWT == null)
                 {
-                    logger.LogDebug("ProxyComunicacionesServices - Error al obtener el token interservicio de JWT para aplicaciones");
+                    logger.LogDebug("ProxySeguridad - ActualizaSeguridad - Error al obtener el token interservicio de JWT para aplicaciones");
                 }
                 else
                 {
+                    string rutaAplicacion = $"{host.UrlBase}/entidad/aplicacion";
                     foreach (var app in apps)
                     {
-                        logger.LogDebug($"ProxySeguridad - Llamado remoto a {Path.Combine($"{host.UrlBase}/api/Aplicacion/Entidad/{app.ApplicacionId}")}");
+                        string rutaAppId = $"{rutaAplicacion}/{app.ApplicacionId}";
+                        logger.LogDebug($"ProxySeguridad - ActualizaSeguridad - Aplicacion {app.Nombre} {app.ApplicacionId}");
                         var payload = new StringContent(JsonConvert.SerializeObject(app,new JsonSerializerSettings() { ContractResolver = new CamelCasePropertyNamesContractResolver() }), Encoding.UTF8, "application/json");
+                        logger.LogDebug($"ProxySeguridad - ActualizaSeguridad {0} {1}", rutaAppId, payload);
                         seguridadHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jWT.access_token);
-                        var response = await seguridadHttpClient.PutAsync($"{host.UrlBase}/api/Aplicacion/entidad/{app.ApplicacionId}", payload);
+                        var response = await seguridadHttpClient.PutAsync(rutaAppId, payload);
                         logger.LogDebug($"ProxySeguridad - Respuesta {response.StatusCode} {response.ReasonPhrase}");
 
                         string? contenidoRespuesta = await response.Content.ReadAsStringAsync();
