@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Modelos y servicios básicos de api genérica</Title>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

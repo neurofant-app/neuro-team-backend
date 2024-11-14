@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>Primitivas de implementación de API genérica </Title>
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
