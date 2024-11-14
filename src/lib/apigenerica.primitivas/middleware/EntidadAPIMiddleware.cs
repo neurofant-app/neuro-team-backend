@@ -262,7 +262,17 @@ public class EntidadAPIMiddleware
         string entidad = context.GetRouteData().Values[nivelEntidad].ToString() ?? "";
         var servicios = _configuracionAPI.ObtienesServiciosIEntidadAPI();
 
-        var servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        ServicioEntidadAPI? servicio = null;
+        if (string.IsNullOrEmpty(driver))
+        {
+            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad, StringComparison.InvariantCultureIgnoreCase));
+        }
+        else
+        {
+            servicio = servicios.FirstOrDefault(x => x.NombreRuteo.Equals(entidad,
+                StringComparison.InvariantCultureIgnoreCase) && x.Driver.Equals(driver, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
         if (servicio == null)
         {
@@ -306,13 +316,9 @@ public class EntidadAPIMiddleware
         {
 #pragma warning disable CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
             IServicioEntidadAPI service = service = (IServicioEntidadAPI)Activator.CreateInstance(tt, paramArray);
-            IServicioEntidadHijoAPI service2 = null;
 #pragma warning restore CS8600 // Se va a convertir un literal nulo o un posible valor nulo en un tipo que no acepta valores NULL
-            if (service != null || service2 != null)
-            {
-                var contexto = context.ObtieneContextoUsuario();
-                contexto = await AdicionaSeguridad(contexto);
-                contexto = await AdicionaAtributosMetodo(contexto, tt);
+
+            var contexto = context.ObtieneContextoUsuario();
 #if !DEBUG
                 if (service.RequiereAutenticacion)
                 {
@@ -327,10 +333,10 @@ public class EntidadAPIMiddleware
                     }
                 }
 #endif
-                service.EstableceContextoUsuarioAPI(contexto);
-                context.Request.HttpContext.Items.Add(GenericAPIServiceKey, service);
-                context.Request.HttpContext.Items.Add(DiccionarioNivelGenericoKey, diccionarioParametros);
-            }
+            service.EstableceContextoUsuarioAPI(contexto);
+            context.Request.HttpContext.Items.Add(GenericAPIServiceKey, service);
+            context.Request.HttpContext.Items.Add(DiccionarioNivelGenericoKey, diccionarioParametros);
+
         }
         catch (Exception ex)
         {
@@ -338,6 +344,7 @@ public class EntidadAPIMiddleware
             throw;
         }
     }
+
 
 
     /// <summary>
