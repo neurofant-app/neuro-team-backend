@@ -135,9 +135,11 @@ public class ServicioAplicacionMysql : ServicioEntidadGenericaBase<Aplicacion, A
 
     public override Aplicacion ADTOFull(Aplicacion actualizacion, Aplicacion actual)
     {
+        var x = (List<Modulo>)actualizacion.Modulos.Except(actual.Modulos);
+
         actual.Nombre = actualizacion.Nombre;
         actual.Descripcion = actualizacion.Descripcion;
-        actual.Modulos = actualizacion.Modulos;
+        actual.Modulos.AddRange(x);
         return actual;
     }
 

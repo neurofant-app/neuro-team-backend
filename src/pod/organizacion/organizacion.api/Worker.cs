@@ -1,5 +1,7 @@
 ﻿
 using comunes.interservicio.primitivas;
+using comunes.primitivas.seguridad;
+using organizacion.api.seguridad;
 
 namespace organizacion.api;
 
@@ -14,12 +16,12 @@ public class Worker : IHostedService
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        //await using var scope = _serviceProvider.CreateAsyncScope();
+        await using var scope = _serviceProvider.CreateAsyncScope();
 
-        //var manager = scope.ServiceProvider.GetRequiredService<IProxySeguridad>();
-        //ConfiguracionSeguridad configuracionSeguridad = new();
-        //var apps = await configuracionSeguridad.ObtieneApliaciones();
-        //await manager.ActualizaSeguridad(apps);
+        var manager = scope.ServiceProvider.GetRequiredService<IProxySeguridad>();
+        ConfiguracionSeguridad configuracionSeguridad = new();
+        var apps = await configuracionSeguridad.ObtieneApliaciones();
+        await manager.ActualizaSeguridad(apps);
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;

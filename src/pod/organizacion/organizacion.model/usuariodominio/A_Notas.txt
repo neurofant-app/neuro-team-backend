@@ -1,5 +1,5 @@
-﻿Los usuarios pueden pertenecer a 0 o múltiples dominios debido a ello se utiliza un antidad contenedora
-que permite almacenar en la base de datos todos los dominios a lo que un usario pertenece,
+﻿Los usuarios pueden pertenecer a 0 o múltiples dominios debido a ello se utiliza una entidad contenedora
+que permite almacenar en la base de datos todos los dominios a los que un usuario pertenece,
 esta entidad es 'UsuarioDominio' y solo tiene dos propiedades base UsuarioId y DominiosId que sirven
 para buscar por usuario/dominio.
 
@@ -33,6 +33,9 @@ para cubrir esta funcionalidad debe crearse un controlador N3
 
 ES IMPORTANTE que antes de añadir se compruebe que la OU exista en el dominio de no ser así devolver 400
 
+->Revisar al abuelo si tiene la OU en sus listas. Con ayuda del parametro n0Id.
+->
+
 [POST] payload ElementoOUInsertar
 /dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/
 
@@ -44,5 +47,15 @@ los datos del payload
 
 [DELETE]
 /dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/{ouid}
-- Elimina la OU de cualquira de las listas en las que se encuentre
 
+
+ACTUALIZACION
+[POST] payload ElementoOU
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional
+
+[PUT] payload ElementoOU
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/{ouId}
+
+
+[DELETE]
+/dominio/{dominioId}/usuariodominio/{usuarioId}/unidadorganizacional/{ouid}
