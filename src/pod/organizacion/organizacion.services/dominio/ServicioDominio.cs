@@ -116,7 +116,7 @@ public class ServicioDominio : ServicioEntidadGenericaBase<Dominio, DominioInser
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioDominio-UnicaPorIdAPI");
-        var temp = await this.UnicaPorId((string)id, parametros);
+        var temp = await this.UnicaPorId(Guid.Parse((string)id), parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioDominio-UnicaPorIdAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -125,7 +125,7 @@ public class ServicioDominio : ServicioEntidadGenericaBase<Dominio, DominioInser
     public async Task<RespuestaPayload<object>> UnicaPorIdDespliegueAPI(object id, StringDictionary? parametros = null)
     {
         _logger.LogDebug("ServicioDominio-UnicaPorIdDespliegueAPI");
-        var temp = await this.UnicaPorIdDespliegue((string)id, parametros);
+        var temp = await this.UnicaPorIdDespliegue(Guid.Parse((string)id), parametros);
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioDominio-UnicaPorIdDespliegueAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
