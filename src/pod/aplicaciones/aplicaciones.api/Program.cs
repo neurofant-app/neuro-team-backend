@@ -46,7 +46,6 @@ public class Program
         builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddHttpClient();
 

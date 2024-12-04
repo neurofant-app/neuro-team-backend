@@ -5,6 +5,7 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.Extensions.Options;
+using productos.api.seguridad;
 using Quartz;
 using System.Reflection;
 
@@ -32,9 +33,9 @@ public class Program
         builder.CreaConfiguiracionEntidadGenerica();
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
+        builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
         builder.Services.AddHttpClient();
 
