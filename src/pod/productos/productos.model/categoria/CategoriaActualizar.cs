@@ -8,11 +8,6 @@ namespace productos.model.categoria;
 public class CategoriaActualizar
 {
     /// <summary>
-    /// Identificador único de la categoría
-    /// </summary>
-    public Guid Id { get; set; }
-
-    /// <summary>
     /// Idioma de la categoría si no se encuentra una coincidencia I18N, 
     /// si no se encuentra definido se toma el primer elemento de la lista
     /// </summary>
