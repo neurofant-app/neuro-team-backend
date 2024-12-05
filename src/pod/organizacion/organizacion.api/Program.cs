@@ -5,6 +5,9 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.Extensions.Options;
+using organizacion.api.seguridad;
+using organizacion.services.dominio;
+using organizacion.services.usuariodominio.elementoDominio;
 using Quartz;
 using System.Reflection;
 
@@ -28,14 +31,15 @@ public class Program
 
         // INcluye los servicios básicos para la API de contaboee
         builder.CreaConfiguracionStandar(Assembly.GetExecutingAssembly());
-        builder.Services.Configure<ConfiguracionAPI>(builder.Configuration.GetSection(nameof(ConfiguracionAPI)));
         builder.CreaConfiguiracionEntidadGenerica();
         builder.Services.AddSingleton<IConfigureOptions<ConfiguracionMongo>, ConfigureConfiguracionMongoOptions>();
         builder.Services.AddSingleton<IServicionConfiguracionMongo, ServicioConfiguracionMongoOptions>();
+        builder.Services.AddSingleton<IProveedorAplicaciones, ConfiguracionSeguridad>();
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
-        builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IServicioDominio, ServicioDominio>();
+        builder.Services.AddTransient<IServicioUsuarioDominio, ServicioUsuarioDominio>();
         builder.Services.AddHttpClient();
 
         builder.Services.AddHostedService<Worker>();

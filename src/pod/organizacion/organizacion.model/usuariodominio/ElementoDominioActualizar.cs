@@ -12,9 +12,8 @@ public class ElementoDominioActualizar
     /// Identificador único del usuario
     /// </summary>
     public Guid UsuarioId { get; set; }
-
     /// <summary>
-    /// Indica si el usuario está activo en el dominio, si el usuario se encuentra inactivo también lo estará para todas las UO
+    /// Identificador único del dominio al que pertenece el usuario
     /// </summary>
     public bool? Activo { get; set; } = true;
 

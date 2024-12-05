@@ -395,7 +395,7 @@ public class ServicioMiembro : ServicioEntidadGenericaBase<Miembro, Miembro, Mie
                 respuesta.Error = new ErrorProceso()
                 {
                     Codigo = CodigosError.ESPACIOTRABAJO_MIEMBRO_ERROR_ELIMINAR,
-                    Mensaje = "No ha sido posible ELIMINAR el Tema",
+                    Mensaje = "No ha sido posible ELIMINAR el Miembro",
                     HttpCode = HttpCode.BadRequest
                 };
                 respuesta.HttpCode = HttpCode.BadRequest;
