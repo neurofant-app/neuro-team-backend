@@ -25,7 +25,7 @@ public class TemaEvaluacion
     /// <summary>
     /// Lista de reactivos que deben estar presentes en todas las variantes de la evaluación
     /// </summary>
-    [BsonElement("rs")]
+    [BsonElement("rsr")]
     public List<Guid> ReactivosRequeridos { get; set; } = [];
 
 

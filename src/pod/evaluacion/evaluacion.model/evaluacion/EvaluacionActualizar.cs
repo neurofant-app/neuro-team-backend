@@ -11,13 +11,6 @@ namespace evaluacion.model.evaluacion;
 public class EvaluacionActualizar
 {
     /// <summary>
-    /// Identificador único de la evaluación
-    /// </summary>
-    [BsonId]
-    public Guid Id { get; set; }
-
-
-    /// <summary>
     /// Nombre de la evaluación
     /// </summary>
     [BsonElement("n")]
