@@ -51,6 +51,10 @@ public class Program
                 {
                     throw new Exception("Configuración de auntenticación no válida");
                 }
+            }).AddServer(options => {
+#if DEBUG
+                options.SetAccessTokenLifetime(TimeSpan.FromDays(365));
+#endif
             });
 
         services.AddAuthentication(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme);

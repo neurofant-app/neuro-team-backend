@@ -1,0 +1,13 @@
+﻿las evluaciones se gestionan vía un controlador N1
+/evaluacion
+
+Las entidades se adicionan en una colección dedicada
+El nombre de la coleccion es 'evaluaciones'
+
+Las propiedades  
+	'DominoId' y 'OUId' serán tomados vía el contexto con los valores a partir de los encabezados del request
+	'CreadorId' será tomado como el id de usaurio en el contexto
+
+Al crear se utilizand los valores defaul definidos en la clase evaluación
+
+
