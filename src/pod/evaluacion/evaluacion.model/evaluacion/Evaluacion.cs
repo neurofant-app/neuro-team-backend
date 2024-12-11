@@ -1,5 +1,6 @@
-﻿using evaluacion.model.evaluacion.participantes;
+using evaluacion.model.evaluacion.participantes;
 using evaluacion.model.evaluacion.temas;
+using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
@@ -10,6 +11,7 @@ namespace evaluacion.model.evaluacion;
 /// para obtener las calificaciones individuales y los estadísticos grupales asociados
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class Evaluacion
 {
     /// <summary>
