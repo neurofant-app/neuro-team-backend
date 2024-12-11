@@ -1,5 +1,27 @@
 ﻿namespace evaluacion.model;
 
+/// <summary>
+/// Grado de dificultad de l reactivo
+/// </summary>
+public enum DificultadReactivo { 
+    /// <summary>
+    /// Dificultad desconocida
+    /// </summary>
+    Desconocida,
+    /// <summary>
+    /// Baja dificultad
+    /// </summary>
+    Baja,
+    /// <summary>
+    /// Dificultad media
+    /// </summary>
+    Media,
+    /// <summary>
+    /// Dificultad alta
+    /// </summary>
+    Alta
+}
+
 
 /// <summary>
 /// Estados de un proiceso de eveluación

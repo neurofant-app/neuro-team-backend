@@ -53,12 +53,6 @@ public class Evaluacion
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Identificador único del temario asociado a la evaluación
-    /// </summary>
-    [BsonElement("tid")]
-    public Guid TemarioId { get; set; }
-
-    /// <summary>
     /// Determina si los evaluados son una lista fija para aplicar la evaluación
     /// En caso FALSE significa que las variantes serán asignadas dinámicamente a los evaluados
     /// </summary>

@@ -187,7 +187,6 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
         {
             Id = Guid.NewGuid(),
             Nombre = data.Nombre,
-            TemarioId = Guid.Parse(data.TemarioId.ToString()),
             ParticipantesFijos = data.ParticipantesFijos,
             DominioId = Guid.Parse(this._contextoUsuario.DominioId),
             OUId = Guid.Parse(this._contextoUsuario.UOrgId),
@@ -198,7 +197,6 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
     public override Evaluacion ADTOFull(EvaluacionActualizar actualizacion, Evaluacion actual)
     {
         actual.Nombre = actualizacion.Nombre;
-        actual.TemarioId = actualizacion.TemarioId;
         actual.ParticipantesFijos = actualizacion.ParticipantesFijos;
         return actual;
     }
@@ -211,7 +209,6 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
             Nombre = data.Nombre,
             CreadorId = data.CreadorId,
             FechaCreacion = data.FechaCreacion,
-            TemarioId = data.TemarioId,
             ParticipantesFijos = data.ParticipantesFijos,
             Temas = data.Temas,
             TotalReactivos = data.TotalReactivos,

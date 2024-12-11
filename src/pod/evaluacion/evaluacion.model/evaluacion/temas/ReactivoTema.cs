@@ -26,4 +26,11 @@ public class ReactivoTema
     /// </summary>
     [BsonElement("p")]
     public int Puntaje { get; set; } = 1;
+
+    /// <summary>
+    /// Dificultad del reactivo
+    /// </summary>
+    [BsonElement("d")]
+    public DificultadReactivo? Dificultad { get; set; } = DificultadReactivo.Desconocida;
+
 }

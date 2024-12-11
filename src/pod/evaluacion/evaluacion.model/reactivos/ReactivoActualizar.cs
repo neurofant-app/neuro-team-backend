@@ -32,4 +32,10 @@ public class ReactivoActualizar
     /// Puntos asociados al reactivo en la evaluación
     /// </summary>
     public int? Puntaje { get; set; } = 1;
+
+    /// <summary>
+    /// Dificultad del reactivo
+    /// </summary>
+    public DificultadReactivo? Dificultad { get; set; } = DificultadReactivo.Desconocida;
+
 }
