@@ -1,0 +1,48 @@
+﻿las REactivos se gestionan vía un controlador N2
+/evaluacion/{id}/reactivo/{reactivoid}
+
+Las entidades se adicionan como hijos de la entidad TemaEvaluacion en una entidad Evaluacion
+
+Para TODOS los métodos debe verificarse, despues de verificar que existe en el dominio y ou,
+que la evaluación se encuentre con Estado = EstadoEvaluacion.Diseno, de no ser así
+devolver 400 con un código de error con texto "Sólo se pueden actualizar evaluaciones en estado 'diseño'"
+
+LA API solo soporta los métodos
+	POST	Utiliza el DTO ReactivoCrear y sigue las regla siguientes
+			1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad Evaluacion en la lista List<TemaEvaluacion> Temas si existe una TemaEvaluacion con el TemarioId y TemaId, 
+				si no la encuentra crea un nuevo TemaEvaluacion con los valores del reactivo
+			3. En la lista del punto 2 busca si el reactivo existe y de no ser así lo adiciona a la lista
+			   List<ReactivoEvaluacion> Reactivos. Si el reactivo ya existe devulve 409.
+			4. Incrementar en la Evaluacion los campos en base a los valores o defaults del nuevo reactivo
+				    TotalPuntos += reactivo.Puntos
+					TotalReactivos ++;
+			5. Salva la evaluación y devuelve 200
+
+	PUT		Utiliza el DTO ReactivoActualizar y sigue las regla siguientes
+			1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad las listas List<TemaEvaluacion> Temas si existe alguna con un hijo List<ReactivoEvaluacion> Reactivos
+				con reactivoid = {reactivoid}, si no lo encuentra devuelve 400
+			3. Si es encontrado actualiza solamente los valores Obligatorio y Puntaje
+			4. Salva la evaluación y devuelve 200
+
+	DEL		1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad las listas List<TemaEvaluacion> Temas si existe alguna con un hijo List<ReactivoEvaluacion> Reactivos
+				con reactivoid = {reactivoid}, si no lo encuentra devuelve 400
+			3. Si es encontrado lo elimina del la lista List<ReactivoEvaluacion> Reactivos
+			4. Decrementar en la Evaluacion los campos en base a los valores del reactivo eliminado
+				    TotalPuntos -= reactivo.Puntos
+					TotalReactivos --;
+			5. Salva la evaluación y devuelve 200
+
+En el controlador EvaluacionController, la intefaz del servicio y el servicio de eveluación añadir dos nuevos métodos para dar soporte a 
+adiciones multiples y eliminación múltiple utilizando los siguientes modelos:
+
+	POST	ReactivoMultipleCrear	Contiene una lista de reactivos a insertar, adicionar cada uno como si fuera un POST, si ya existe 
+									alguno no notificar el error y continuar con la inserción
+	POST	ReactivoMultipleEliminar	Para Guid en Ids eliminar el reactivo del tema, si no existe NO notificar el error y continuar con 
+										la eliminación
+
+Ambos métodos de la API deberán devolver 200 siempre
+
+

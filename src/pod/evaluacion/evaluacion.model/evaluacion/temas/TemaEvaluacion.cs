@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
-namespace evaluacion.model.evaluacion;
+namespace evaluacion.model.evaluacion.temas;
 
 /// <summary>
 /// Define el contenido de evauación por tema de la evaluacion
@@ -9,6 +9,11 @@ namespace evaluacion.model.evaluacion;
 [ExcludeFromCodeCoverage]
 public class TemaEvaluacion
 {
+    /// <summary>
+    /// Identificador único del temario asociado a la evaluación
+    /// </summary>
+    [BsonElement("t")]
+    public Guid TemarioId { get; set; }
 
     /// <summary>
     /// Identificador único del tema contenido del la evaluación
@@ -20,16 +25,6 @@ public class TemaEvaluacion
     /// Lista de reactivos asociados a la evaluación
     /// </summary>
     [BsonElement("rs")]
-    public List<Guid> Reactivos { get; set; } = [];
-
-    /// <summary>
-    /// Lista de reactivos que deben estar presentes en todas las variantes de la evaluación
-    /// </summary>
-    [BsonElement("rs")]
-    public List<Guid> ReactivosRequeridos { get; set; } = [];
-
-
-
-
+    public List<ReactivoTema> Reactivos { get; set; } = [];
 }
 

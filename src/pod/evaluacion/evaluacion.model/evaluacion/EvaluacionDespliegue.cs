@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using evaluacion.model.evaluacion.temas;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace evaluacion.model.evaluacion;
@@ -35,11 +36,6 @@ public class EvaluacionDespliegue
     [BsonElement("fc")]
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
-    /// <summary>
-    /// Identificador único del temario asociado a la evaluación
-    /// </summary>
-    [BsonElement("tid")]
-    public Guid TemarioId { get; set; }
 
     /// <summary>
     /// Determina si los evaluados son una lista fija para aplicar la evaluación
@@ -67,5 +63,16 @@ public class EvaluacionDespliegue
     [BsonElement("tp")]
     public int TotalParticipantes { get; set; } = 0;
 
+    /// <summary>
+    /// Total de puntos de la suma de reactivos en la evaluación
+    /// </summary>
+    [BsonElement("tpu")]
+    public int TotalPuntos { get; set; } = 0;
 
+
+    /// <summary>
+    /// Estado de la evaluación
+    /// </summary>
+    [BsonElement("es")]
+    public EstadoEvaluacion Estado { get; set; }
 }

@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
-namespace evaluacion.model.evaluacion;
+namespace evaluacion.model.evaluacion.participantes;
 
 
 /// <summary>
