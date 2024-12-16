@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
-namespace evaluacion.model.variantes;
+namespace evaluacion.model.evaluacion.variantes;
 
 /// <summary>
 /// Define los elementos participantes en una variante de evluación

@@ -1,0 +1,86 @@
+﻿La entidad ParticipanteEvaluacion se utiliza para llevar el control de quienes participan en una
+evaluación. Cada uno de los participantes debe tener una Variante de evaluación (tipo de examen)
+asociado para poder realizar su ejecución
+
+La entidad ParticipanteEvaluacion se gestiona vía un controlador N2
+/evaluacion/{id}/participante/{participanteId}
+
+REGLAS GENERALES
+Antes de realziar cualquier oepración de CRUD debe verificarse que la evaluacion existe via {id}
+y filtrando por DominioId y OUId en caso de que no se encuentre el registro devolver 404
+
+Las oepraciones de CRUD sólo serán posibles cuando es estado de la evaluación sea EstadoEvaluacion.Diseno
+si la evaluación se encuentra en cualquier otro estado devolver 400 con codigo de error 
+"Sólo pueden modificarse los participantes en estado de diseño"
+
+Debe crearse una nueva colección de Mongo denominada 'ParticipantesEvaluacion' que utilice como modelo de
+datos la entidad ParticipanteEvaluacion
+
+
+LA API solo soporta los métodos
+	POST	Utiliza el DTO ParticipanteEvaluacionCrear 
+			1. Aplica las REGLAS GENERALES 
+			2. Obtiene la entidad Evaluacion 
+			3. Busca en la coleccion 'ParticipantesEvaluacion' por los IDs de Evaluacion y Participante 
+				si ya existe devuelve 409 con codigo de error 'Participante existente en la evaluacion'
+			4. Crea el nuevo ParticipanteEvaluacion
+			5. Si la propiedad ParticipanteEvaluacion.VarianteId no es nula obtiene la entidad VarianteEvaluacion y
+				añade el Id del particpante a su lista ParticipanteIds e incrementa la propiedad TotalParticipantes ++
+				al finalizar salva la VarianteEvaluacion
+			5. Incrementa en la entidad Evaluacion TotalParticipantes ++ y salvar
+			6. Salva la ParticipanteEvaluacion y devuelve 200
+
+	PUT		Utiliza el DTO ParticipanteEvaluacionActualizar y sigue las regla siguientes
+			1. Aplica las REGLAS GENERALES 
+			2. Obtiene la entidad Evaluacion 
+			3. Busca en la coleccion 'ParticipantesEvaluacion' por los IDs de Evaluacion y Participante 
+				si NO existe devuelve 404 con codigo de error 'Participante inexistente en la evaluacion'
+			4. Verifica si la propiedad VarianteId del registro actual es diferente del la de los datos entrantes
+				
+				Para cada caso si alguna de las variantes no existe por Id de evaluación y de variante devolver 404 codigo de error "Variante inexietente"
+
+				Si actual = null y entrante = null	(El participante aun no tiene un tipo de examen asociado)
+													no realiza cambios en la entidad
+				
+				Si actual != null y entrante != null y actual = entrante (El participante no cambia su tipo de examen asociado)
+													no realiza cambios en la entidad
+				
+
+				Si actual = null y entrante != null (El participante se asocia a un tipo de examen)
+													obtiene la entidad VarianteEvaluacion del Id entrante e inccrementa la propiedad TotalParticipantes ++
+				
+
+				Si actual != null y entrante = null (El participante es removido de un tipo de examen)
+													obtiene la entidad VarianteEvaluacion del Id actual y decrementa la propiedad TotalParticipantes --
+				
+
+				Si actual != null y entrante != null  y  actual != entrante (El participante es removido de un tipo de examen y asociado a otro)
+													obtiene la entidad VarianteEvaluacion del Id actual, y decrementa la propiedad TotalParticipantes --
+
+													obtiene la entidad VarianteEvaluacion del Id entrante e inccrementa la propiedad TotalParticipantes ++
+			
+			 5. Salva la entidad ParticipanteEvaluacion si hubo cambios
+			 6. Devuelve 200
+
+	DEL		1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca el ParticipanteEvaluacion por Ids de Evaluacion y Participante y devuelve 404 si no es econtrado
+			3. Obtiene la evaluacion y decrementa la propiedad TotalParticipantes --
+			4. Si el paeticipante tiene VarianteId no nula  obtiene la entidad VarianteEvaluacion del Id actual, 
+				remueve el Id del participante de   ParticipanteIds y decrementa la propiedad TotalParticipantes --
+			5. Elimina el registro de ParticipantesEvaluacion
+			6. Devuelve 200
+
+En el controlador EvaluacionController, la intefaz del servicio y el servicio de PArticpanteEvaluacion añadir dos nuevos métodos para dar soporte a 
+adiciones multiples y eliminación múltiple utilizando los siguientes modelos:
+
+	POST	List<ParticipanteEvaluacion>	Procesa cada Id de participante como el POST de creacion simple siguiendo las mismas reglas 
+											DEVUELVE una lista de ParticiapnteEvaluacion con las adicones exitosas
+	/evaluacion/{id}/participante/multiple/crear
+
+
+	POST	List<string> 	Procesa cada Id de participante como el DEL de eliminación simple 
+	/evaluacion/{id}/participante/multiple/eliminar
+
+Ambos métodos de la API deberán devolver 200 siempre
+
+

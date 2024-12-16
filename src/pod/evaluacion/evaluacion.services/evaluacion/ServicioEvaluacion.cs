@@ -211,9 +211,8 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
             FechaCreacion = data.FechaCreacion,
             ParticipantesFijos = data.ParticipantesFijos,
             Temas = data.Temas,
-            TotalReactivos = data.TotalReactivos,
-            TotalParticipantes = data.TotalParticipantes
-
+            TotalReactivos = data.TotalReactivos, 
+            Estado = data.Estado
         };
     }
 

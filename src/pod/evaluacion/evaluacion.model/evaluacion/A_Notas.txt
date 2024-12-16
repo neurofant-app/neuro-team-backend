@@ -51,3 +51,9 @@ el CRUD de Reactivos
 	sólo se utilizan en el modelo que guarda en Mongo
 
 
+	12/12/2024
+
+	Se eliminaron las propiedades 
+
+	 public List<Participante> Participantes { get; set; } = [];
+	 public bool ParticipantesExternos { get; set; } = false;

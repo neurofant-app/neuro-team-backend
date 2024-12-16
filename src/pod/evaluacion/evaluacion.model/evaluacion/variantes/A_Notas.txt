@@ -1,0 +1,37 @@
+﻿Una Variante de evaluación es un tipo de evaluación con contenido especifico y diferente
+de las otras variantes. Es un modelo de examen que se aplicará.
+
+
+Las variantes se gestionan vía un controlador N2
+/evaluacion/{id}/variante/{varianteId}
+
+Las entidades se adicionan como hijos de la entidad Variantes en una entidad Evaluacion
+
+Para TODOS los métodos 
+debe verificarse que la Evaluacion existe en el dominio y ou y si no se encuentra debe devolverse 404 "Evaluación inexistente",
+Y que la evaluación se encuentre con Estado = EstadoEvaluacion.Diseno, de no ser así
+devolver 400 con un código de error con texto "Sólo se pueden actualizar evaluaciones en estado 'diseño'"
+
+LA API solo soporta los métodos
+	POST	Utiliza el DTO ReactivoCrear y sigue las regla siguientes
+			1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad Evaluacion en la lista List<VarianteEvaluacion> si el nombre viene NO NULO 
+				verificar siexiste una Variante con el mismo nombre devolver 409, si el nombre viene nulo concatenar el nombre de
+				la evaluacion con un consecutivo entero por por ejeplo [Nombre]-1, 
+				crea una nueva VarianteVEluacion con los valores del DTO 
+			4. Incrementar en la Evaluacion los campos 
+				    TotalVariantes ++
+			5. Salva la evaluación y devuelve 200
+
+	PUT		Utiliza el DTO EvaluacionActualziar y sigue las regla siguientes
+			1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad las listas List<VarianteEvalucion> si  una con el Id del DTO si no existe devolver 404
+			3. Si es encontrado actualiza solamente los valores Nombre
+			4. Salva la evaluación y devuelve 200
+
+	DEL		1. Busca la evaluación {id} y devuelve 404 si no se encuentra o tiene parametros diferentec de Dominio y UnidadOrg 
+			2. Busca en la entidad las listas List<VarianteEvalucion> si  una con el Id del DTO si no existe devolver 404
+			3. Si es encontrado lo elimina del la lista List<VArianteEvaluacion> 
+			4. Decrementar en la Evaluacion los campos 
+					TotalVariantes --
+			5. Salva la evaluación y devuelve 200

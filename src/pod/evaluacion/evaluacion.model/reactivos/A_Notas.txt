@@ -40,8 +40,11 @@ adiciones multiples y eliminación múltiple utilizando los siguientes modelos:
 
 	POST	ReactivoMultipleCrear	Contiene una lista de reactivos a insertar, adicionar cada uno como si fuera un POST, si ya existe 
 									alguno no notificar el error y continuar con la inserción
+	/evaluacion/{id}/reactivo/multiple/crear
+
 	POST	ReactivoMultipleEliminar	Para Guid en Ids eliminar el reactivo del tema, si no existe NO notificar el error y continuar con 
 										la eliminación
+	/evaluacion/{id}/reactivo/multiple/eliminar
 
 Ambos métodos de la API deberán devolver 200 siempre
 

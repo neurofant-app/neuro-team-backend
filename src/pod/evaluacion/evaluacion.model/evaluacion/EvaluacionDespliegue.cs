@@ -56,20 +56,6 @@ public class EvaluacionDespliegue
     [BsonElement("tr")]
     public int TotalReactivos { get; set; } = 0;
 
-
-    /// <summary>
-    /// Total de participantes en la evaluación
-    /// </summary>
-    [BsonElement("tp")]
-    public int TotalParticipantes { get; set; } = 0;
-
-    /// <summary>
-    /// Total de puntos de la suma de reactivos en la evaluación
-    /// </summary>
-    [BsonElement("tpu")]
-    public int TotalPuntos { get; set; } = 0;
-
-
     /// <summary>
     /// Estado de la evaluación
     /// </summary>

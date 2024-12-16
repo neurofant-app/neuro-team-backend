@@ -1,8 +1,8 @@
-using evaluacion.model.evaluacion.participantes;
 using evaluacion.model.evaluacion.temas;
 using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
+using evaluacion.model.evaluacion.variantes;
 
 namespace evaluacion.model.evaluacion;
 
@@ -60,23 +60,11 @@ public class Evaluacion
     public bool ParticipantesFijos { get; set; }
 
     /// <summary>
-    /// Determina si la lista de participantes esta en el mismo documento 
-    /// o se almacena por separado, por ejemplo para una gran cantidad de ellos
-    /// </summary>
-    [BsonElement("pi")]
-    public bool ParticipantesExternos { get; set; } = false;
-
-    /// <summary>
     /// Cuando los participantes se almacenan externamente mantiene el indice de último elemento de la lista
     /// </summary>
     [BsonElement("il")]
     public int IndiceListaParticipantes { get; set; } = 0;
 
-    /// <summary>
-    /// Identificadores de los evaluados a las cuales les será aplicada la evaluación si EvaluadosFijos = TRUE
-    /// </summary>
-    [BsonElement("ps")]
-    public List<Participante> Participantes { get; set; } = [];
 
     /// <summary>
     /// Lista de temas incluidos en una evaluación
@@ -90,18 +78,17 @@ public class Evaluacion
     [BsonElement("tr")]
     public int TotalReactivos { get; set; } = 0;
 
+    /// <summary>
+    /// Vriantes de la evaluación
+    /// </summary>
+    [BsonElement("vs")]
+    public List<VarianteEvaluacion> Variantes { get; set; } = [];
 
     /// <summary>
-    /// Total de participantes en la evaluación
+    /// Total de variantes en la evaluación
     /// </summary>
-    [BsonElement("tp")]
-    public int TotalParticipantes { get; set; } = 0;
-
-    /// <summary>
-    /// Total de puntos de la suma de reactivos en la evaluación
-    /// </summary>
-    [BsonElement("tpu")]
-    public int TotalPuntos { get; set; } = 0;
+    [BsonElement("tvs")]
+    public int TotalVariantes { get; set; } = 0;
 
     /// <summary>
     /// Estado de la evaluación
