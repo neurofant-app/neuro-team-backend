@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using comunes.primitivas.atributos;
+using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 
 namespace evaluacion.model.evaluacion.variantes;
@@ -7,13 +8,14 @@ namespace evaluacion.model.evaluacion.variantes;
 /// Variante de evaluación aplicada a los alumnos
 /// </summary>
 [ExcludeFromCodeCoverage]
+[EntidadDB]
 public class VarianteEvaluacion
 {
 
     /// <summary>
     /// Identificador único de la variante de evaluación
     /// </summary>
-    [BsonElement("id")]
+    [BsonId]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -58,7 +60,7 @@ public class VarianteEvaluacion
     /// <summary>
     /// Total de ejecuciones de la variante
     /// </summary>
-    [BsonElement("tpu")]
+    [BsonElement("tpe")]
     public int TotalEjecuciones { get; set; } = 0;
 
 }

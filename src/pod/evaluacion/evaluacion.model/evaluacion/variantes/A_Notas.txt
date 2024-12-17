@@ -1,7 +1,6 @@
 ﻿Una Variante de evaluación es un tipo de evaluación con contenido especifico y diferente
 de las otras variantes. Es un modelo de examen que se aplicará.
 
-
 Las variantes se gestionan vía un controlador N2
 /evaluacion/{id}/variante/{varianteId}
 
@@ -19,7 +18,7 @@ LA API solo soporta los métodos
 				verificar siexiste una Variante con el mismo nombre devolver 409, si el nombre viene nulo concatenar el nombre de
 				la evaluacion con un consecutivo entero por por ejeplo [Nombre]-1, 
 				crea una nueva VarianteVEluacion con los valores del DTO 
-			4. Incrementar en la Evaluacion los campos 
+			4. Incrementar en la Evaluacion los campos
 				    TotalVariantes ++
 			5. Salva la evaluación y devuelve 200
 

@@ -10,18 +10,6 @@ namespace evaluacion.model.evaluacion;
 [ExcludeFromCodeCoverage]
 public class EvaluacionInsertar
 {
-    /// <summary>
-    /// Nombre de la evaluación
-    /// </summary>
-    [BsonElement("n")]
     public required string Nombre { get; set; }
-
-    /// <summary>
-    /// Determina si los evaluados son una lista fija para aplicar la evaluación
-    /// En caso FALSE significa que las variantes serán asignadas dinámicamente a los evaluados
-    /// </summary>
-    [BsonElement("f")]
     public bool ParticipantesFijos { get; set; }
-
-
 }

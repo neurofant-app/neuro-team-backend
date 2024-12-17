@@ -1,14 +1,19 @@
 ﻿#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+using Amazon.Runtime.Internal;
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
 using apigenerica.model.reflectores;
 using apigenerica.model.servicios;
 using comunes.primitivas;
 using comunes.primitivas.configuracion.mongo;
+using evaluacion.model;
 using evaluacion.model.evaluacion;
+using evaluacion.model.evaluacion.temas;
+using evaluacion.model.reactivos;
 using evaluacion.services.dbcontext;
 using extensibilidad.metadatos;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -23,12 +28,15 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
     private readonly ILogger<ServicioEvaluacion> _logger;
     private readonly IReflectorEntidadesAPI _reflector;
     private readonly IDistributedCache _cache;
-
-    public ServicioEvaluacion(ILogger<ServicioEvaluacion> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector, IDistributedCache cache) : base(null, null, logger, reflector, cache)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private const string _DOMINIOHEADER = "x-d-id";
+    private const string _UORGHEADER = "x-uo-id";
+    public ServicioEvaluacion(ILogger<ServicioEvaluacion> logger, IServicionConfiguracionMongo configuracionMongo, IReflectorEntidadesAPI reflector, IDistributedCache cache, IHttpContextAccessor httpContextAccessor) : base(null, null, logger, reflector, cache)
     {
         _logger = logger;
         _reflector = reflector;
         _cache = cache;
+        _httpContextAccessor = httpContextAccessor;
         interpreteConsulta = new InterpreteConsultaExpresiones();
 
         var configuracionEntidad = configuracionMongo.ConexionEntidad(MongoDbContextEvaluacion.NOMBRE_COLECCION_EVALUACION);
@@ -83,7 +91,7 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
 
 
     public async Task<RespuestaPayload<object>> InsertarAPI(JsonElement data, StringDictionary? parametros = null)
-    {
+        {
         _logger.LogDebug("ServicioEvaluación - InsertarAPI - {data}", data);
         var add = data.Deserialize<EvaluacionInsertar>(JsonAPIDefaults());
         var temp = await this.Insertar(add, parametros);
@@ -160,7 +168,7 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
 
     public ContextoUsuario? ObtieneContextoUsuarioAPI()
     {
-        _logger.LogDebug("ServicioDominio - ObtieneContextoUsuarioAPI");
+        _logger.LogDebug("ServicioEvaluacion - ObtieneContextoUsuarioAPI");
         return this._contextoUsuario;
     }
 
@@ -190,7 +198,7 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
             ParticipantesFijos = data.ParticipantesFijos,
             DominioId = Guid.Parse(this._contextoUsuario.DominioId),
             OUId = Guid.Parse(this._contextoUsuario.UOrgId),
-            CreadorId = Guid.Parse(this._contextoUsuario.UsuarioId)
+            CreadorId = Guid.Parse(this._contextoUsuario.UsuarioId),
         };
     }
 
@@ -396,6 +404,175 @@ public class ServicioEvaluacion : ServicioEntidadGenericaBase<Evaluacion, Evalua
         {
             _logger.LogError(ex, "ServicioEvaluacion - UnicaPorid {msg}", ex.Message);
             respuesta.Error = new ErrorProceso() { Codigo = CodigosError.EVALUACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message};
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+        return respuesta;
+    }
+
+    public async Task<Respuesta> CambiarEstado(Guid evaluacionId, EstadoEvaluacion estadoEvaluacion)
+    {
+        var respuesta = new Respuesta();
+        
+        var evaluacion =  _dbSetFull.FirstOrDefault(e => e.Id == evaluacionId && e.DominioId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_DOMINIOHEADER]) && e.OUId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_UORGHEADER]));
+
+        if(evaluacion == null)
+        {
+            respuesta.Error = new ErrorProceso()
+            {
+                Codigo = CodigosError.EVALUACION_ESTADONUEVO_ERROR,
+                Mensaje = "Verifique que exista la evaluación, dominio y UnidadOrganizacional para realizar la acción",
+                HttpCode = HttpCode.NotFound
+            };
+            respuesta.HttpCode = HttpCode.NotFound;
+            return respuesta;
+        }
+
+        evaluacion.Estado = estadoEvaluacion;
+        _dbSetFull.Update(evaluacion);
+        await _db.SaveChangesAsync();
+
+        respuesta.Ok = true;
+        respuesta.HttpCode = HttpCode.Ok;
+        return respuesta;
+    }
+
+    public async Task<Respuesta> ReactivoMultipleCrear(Guid evaluacionId, ReactivoMultipleCrear multipleCrear)
+    {
+        var respuesta = new Respuesta();
+
+        try
+        {
+            var evaluacion = _dbSetFull.FirstOrDefault(e => e.Id == evaluacionId && e.DominioId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_DOMINIOHEADER]) && e.OUId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_UORGHEADER]));
+
+            if (evaluacion != null)
+            {
+                foreach (var data in multipleCrear.Reactivos)
+                {
+                    var temaEvaluacion = evaluacion.Temas.FirstOrDefault(_ => _.TemaId == data.TemaId && _.TemarioId == data.TemarioId);
+
+                    var reactivoTema = new ReactivoTema() { Id = data.ReactivoId, Dificultad = data.Dificultad, Puntaje = data.Puntaje, Obligatorio = data.Obligatorio };
+
+                    if (temaEvaluacion == null)
+                    {
+                        var temaEvaluacionCrea = new TemaEvaluacion()
+                        {
+                            TemarioId = data.TemarioId,
+                            TemaId = data.TemaId,
+                        };
+
+                        temaEvaluacionCrea.Reactivos.Add(reactivoTema);
+                        evaluacion.Temas.Add(temaEvaluacionCrea);
+                        evaluacion.TotalReactivos++;
+
+
+                        _dbSetFull.Update(evaluacion);
+                        await _db.SaveChangesAsync();
+
+                        respuesta.Ok = true;
+                        respuesta.HttpCode = HttpCode.Ok;
+
+                    }
+                    else
+                    {
+
+                        var reactivo = temaEvaluacion.Reactivos.FirstOrDefault(_ => _.Id == reactivoTema.Id);
+
+                        if (reactivo == null)
+                        {
+                            temaEvaluacion.Reactivos.Add(reactivoTema);
+                            evaluacion.TotalReactivos++;
+                            _dbSetFull.Update(evaluacion);
+                            await _db.SaveChangesAsync();
+                            respuesta.Ok = true;
+                            respuesta.HttpCode = HttpCode.Ok;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                respuesta.Error = new()
+                {
+                    Codigo = CodigosError.EVALUACION_NO_ENCONTRADA,
+                    Mensaje = "No existe una enitdad Evaluación",
+                    HttpCode = HttpCode.NotFound
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ServicioReactivo-Insertar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.EVALUACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
+            respuesta.HttpCode = HttpCode.ServerError;
+        }
+
+        return respuesta;
+    }
+
+    public async Task<Respuesta> ReactivoMultipleEliminar(Guid evaluacionId, ReactivoMultipleEliminar reactivos)
+    {
+        var respuesta = new Respuesta();
+        try
+        {
+            if (evaluacionId == Guid.Empty)
+            {
+                respuesta.Error = new()
+                {
+                    Codigo = CodigosError.EVALUACION_ID_NO_INGRESADO,
+                    Mensaje = "Id no proporcionado de la Evaluacion",
+                    HttpCode = HttpCode.BadRequest
+                };
+                respuesta.HttpCode = HttpCode.BadRequest;
+                return respuesta;
+            }
+
+            var evaluacion = _dbSetFull.FirstOrDefault(e => e.Id == evaluacionId && e.DominioId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_DOMINIOHEADER]) && e.OUId == Guid.Parse(_httpContextAccessor.HttpContext.Request.Headers[_UORGHEADER]));
+            if (evaluacion == null)
+            {
+                respuesta.Error = new()
+                {
+                    Codigo = CodigosError.EVALUACION_NO_ENCONTRADA,
+                    Mensaje = "No se ha encontrado la Evaluacion",
+                    HttpCode = HttpCode.NotFound,
+                };
+                respuesta.HttpCode = HttpCode.NotFound;
+                return respuesta;
+            }
+
+            foreach (var reactivoId in reactivos.Ids)
+            {
+
+                var reactivo = evaluacion.Temas.SelectMany(_ => _.Reactivos).FirstOrDefault(_ => _.Id == reactivoId.ToString());
+
+                if (reactivo == null)
+                {
+                    respuesta.Error = new ErrorProceso()
+                    {
+                        Codigo = CodigosError.EVALUACION_REACTIVO_NO_ENCONTRADO,
+                        Mensaje = "No se ha encontrado el Reactivo para eliminar",
+                        HttpCode = HttpCode.NotFound,
+                    };
+                    respuesta.HttpCode = HttpCode.NotFound;
+                    return respuesta;
+                }
+
+                var temaEvaluacion = evaluacion.Temas.FirstOrDefault(reactivo => reactivo.Reactivos.Any(_ => _.Id == reactivoId.ToString()));
+                evaluacion.TotalReactivos--;
+                temaEvaluacion.Reactivos.Remove(reactivo);
+
+                _dbSetFull.Update(evaluacion);
+                await _db.SaveChangesAsync();
+                respuesta.Ok = true;
+                respuesta.HttpCode = HttpCode.Ok;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "ServicioEvaluacion-Eliminar {msg}", ex.Message);
+            respuesta.Error = new ErrorProceso() { Codigo = CodigosError.EVALUACION_ERROR_DESCONOCIDO, HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
             respuesta.HttpCode = HttpCode.ServerError;
         }
         return respuesta;

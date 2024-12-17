@@ -8,7 +8,7 @@ namespace evaluacion.model.reactivos;
 /// </summary>
 [ExcludeFromCodeCoverage]
 public class ReactivoCrear
-{
+{ 
     /// <summary>
     /// Identificador único del temario asociado a la evaluación
     /// </summary>

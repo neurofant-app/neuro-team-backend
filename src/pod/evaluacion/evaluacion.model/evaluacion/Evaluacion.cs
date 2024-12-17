@@ -95,5 +95,4 @@ public class Evaluacion
     /// </summary>
     [BsonElement("es")]
     public EstadoEvaluacion Estado { get; set; } = EstadoEvaluacion.Diseno;
-
 }

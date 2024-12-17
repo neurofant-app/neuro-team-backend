@@ -40,7 +40,7 @@ el CRUD de Reactivos
 
 		1. Añadir el método a la interfaz del servicio de evaluaciones 
 			Task<Respuesta> CambiarEstado(Guid evaluacionId, EstadoEvaluacion nuevo estado);
-			Este Método deberá buscar la evaluacion por id incluyendo Dominio y OU, si no es encontrada debe devolver 404
+			-Este Método deberá buscar la evaluacion por id incluyendo Dominio y OU, si no es encontrada debe devolver 404
 
 		2. Llamar al método del punto 1 desde el endpoint PUT del controlador
 	

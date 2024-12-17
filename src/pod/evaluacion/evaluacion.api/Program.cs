@@ -5,6 +5,7 @@ using comunes.interservicio.primitivas;
 using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using evaluacion.api.seguridad;
+using evaluacion.services.evaluacion;
 using Microsoft.Extensions.Options;
 using Quartz;
 using System.Reflection;
@@ -36,6 +37,7 @@ public class Program
         builder.Services.AddSingleton<ICacheSeguridad, CacheSeguridad>();
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        builder.Services.AddTransient<IServicioEvaluacion,  ServicioEvaluacion>();
         builder.Services.AddHttpClient();
 
         builder.Services.AddHostedService<Worker>();

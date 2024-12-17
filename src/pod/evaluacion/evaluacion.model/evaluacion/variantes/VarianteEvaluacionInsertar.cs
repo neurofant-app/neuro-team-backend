@@ -10,6 +10,11 @@ public class VarianteEvaluacionInsertar
 {
 
     /// <summary>
+    /// Identificador único de la variante de evaluación
+    /// </summary>
+    public Guid Id { get; set; }
+
+    /// <summary>
     /// Nombre de la variante, si no se proporicione se asigna automáticamente
     /// con el nombre la evaluación y el Id
     /// </summary>

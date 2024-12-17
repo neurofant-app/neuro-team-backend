@@ -19,13 +19,13 @@ public class ReactivoTema
     /// Determina si el reactivo el requerido en todas las veriantes de la evaluación
     /// </summary>
     [BsonElement("r")]
-    public bool Obligatorio { get; set; }
+    public bool? Obligatorio { get; set; }
 
     /// <summary>
     /// Puntos asociados al reactivo en la evaluación
     /// </summary>
     [BsonElement("p")]
-    public int Puntaje { get; set; } = 1;
+    public int? Puntaje { get; set; } = 1;
 
     /// <summary>
     /// Dificultad del reactivo
