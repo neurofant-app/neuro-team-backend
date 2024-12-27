@@ -84,17 +84,63 @@ public enum EstadoEvaluacion
     /// <summary>
     /// Le evaluación ha sido publicada y se encuentra en espera de su aplicación
     /// </summary>
+    Publicada
+}
+
+
+/// <summary>
+/// Estados de un proiceso de eveluación
+/// </summary>
+public enum EstadoEjecucionEvaluacion
+{
+    /// <summary>
+    /// La ejecución de la evaluación se ecuentra en proceso de diseño
+    /// </summary>
+    Diseno,
+    /// <summary>
+    /// Le ejecución de la  evaluación ha sido publicada y se encuentra en espera de su aplicación
+    /// </summary>
     Publicada,
     /// <summary>
-    /// Le evaluación se encuentra en ejecución
+    /// La ejecución de la evaluación se encuentra en ejecución
     /// </summary>
     Ejecucion,
     /// <summary>
-    /// Le evaluación ha sido finalizada
+    /// La ejecución de la evaluación ha sido finalizada
     /// </summary>
     Finalizada,
     /// <summary>
-    /// Le evaluación se canceló
+    /// Le ejecución de la evaluación se canceló
     /// </summary>
     Cancelada
+}
+
+
+/// <summary>
+/// Define como se immprimirán los alveolos para la evaluación
+/// </summary>
+public enum TipoNumeracionAlveolos
+{
+    /// <summary>
+    /// Imprime números por ejemplo 1,2,3,5
+    /// </summary>
+    Decimal,
+    /// <summary>
+    /// Imprime letras por ejemplo a,b,c,d
+    /// </summary>
+    Alfabetica
+}
+
+/// <summary>
+/// Medio de ejecución de la evaluacion
+/// </summary>
+public enum MedioEjecucionEvaluacion { 
+    /// <summary>
+    /// La evaluación debe imprimirse
+    /// </summary>
+    Impresa,
+    /// <summary>
+    /// La evaluación puede presentarse de manera electrónica
+    /// </summary>
+    Electronica
 }

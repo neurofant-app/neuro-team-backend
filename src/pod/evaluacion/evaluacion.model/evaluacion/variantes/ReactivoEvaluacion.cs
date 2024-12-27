@@ -20,4 +20,10 @@ public class ReactivoEvaluacion
     /// </summary>
     [BsonElement("id")]
     public required string ReactivoId { get; set; }
+
+    /// <summary>
+    /// Respuestas en el órden de presentacion de la variante
+    /// </summary>
+    public List<string> Respuestas { get; set; } = [];
+
 }

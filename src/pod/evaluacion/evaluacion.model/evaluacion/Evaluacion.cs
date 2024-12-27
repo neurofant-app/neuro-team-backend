@@ -3,6 +3,7 @@ using comunes.primitivas.atributos;
 using MongoDB.Bson.Serialization.Attributes;
 using System.Diagnostics.CodeAnalysis;
 using evaluacion.model.evaluacion.variantes;
+using evaluacion.model.restricciones;
 
 namespace evaluacion.model.evaluacion;
 
@@ -53,20 +54,6 @@ public class Evaluacion
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Determina si los evaluados son una lista fija para aplicar la evaluación
-    /// En caso FALSE significa que las variantes serán asignadas dinámicamente a los evaluados
-    /// </summary>
-    [BsonElement("pf")]
-    public bool ParticipantesFijos { get; set; }
-
-    /// <summary>
-    /// Cuando los participantes se almacenan externamente mantiene el indice de último elemento de la lista
-    /// </summary>
-    [BsonElement("il")]
-    public int IndiceListaParticipantes { get; set; } = 0;
-
-
-    /// <summary>
     /// Lista de temas incluidos en una evaluación
     /// </summary>
     [BsonElement("ti")]
@@ -95,4 +82,17 @@ public class Evaluacion
     /// </summary>
     [BsonElement("es")]
     public EstadoEvaluacion Estado { get; set; } = EstadoEvaluacion.Diseno;
+
+    /// <summary>
+    /// Si es necesaria una contrasena para el acceso almacena True
+    /// </summary>
+    [BsonElement("apass")]
+    public bool AccesoContrasena { get; set; }
+
+    /// <summary>
+    /// Especifica una contraseña para acceder a la evaluación, la contraseña se almacena como un hash
+    /// </summary>
+    [BsonElement("pass")]
+    public RestriccionContrasena? RestriccionContrasena { get; set; } 
+
 }

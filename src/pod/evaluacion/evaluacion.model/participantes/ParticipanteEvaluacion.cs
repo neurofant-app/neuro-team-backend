@@ -22,17 +22,24 @@ public class ParticipanteEvaluacion
     public required string ParticipanteId { get; set; }
 
     /// <summary>
+    /// Identificador de la ejecución de la variante de evaluación
+    /// </summary>
+    [BsonElement("j")]
+    public required Guid EjecucionId { get; set; }
+
+    /// <summary>
     /// Identificador de la variante de evaluación aplicada
     /// </summary>
     [BsonElement("e")]
     public Guid EvaluacionId { get; set; }
 
     /// <summary>
-    /// IDentificador de la variante de evaluación aplicada
+    /// Identificador de la variante de evaluación aplicada
+    /// es nulable porque la variante puede asignarse dinámicamente
     /// </summary>
     [BsonElement("v")]
     public Guid? VarianteId { get; set; }
-
+    
     /// <summary>
     /// Estado de evaluación del participante
     /// </summary>

@@ -1,0 +1,59 @@
+﻿Las rntidades EjecucionVarianteEvaluacion  se gestionan vía un controlador N3
+/evaluacion/{idevaluacion}/variante/{VarianteId}/ejecucion/{ejecucionId}
+
+Las entidades se adicionan en una colección dedicada
+El nombre de la coleccion es 'EjecucionVarianteEvaluacion'
+
+Las propiedades  
+	'DominoId' y 'OUId' serán tomados vía el contexto con los valores a partir de los encabezados del request
+	'CreadorId' será tomado como el id de usaurio en el contexto
+
+Al crear se utilizand los valores defaul definidos en la clase evaluación
+
+Los temas de evaluacion se icluyen en el modelo de Evaluacion PERO NO SE CREAN DE MANERA DIRECTA para ello se utiliza 
+el CRUD de Reactivos 
+
+
+
+12/10/2024
+--------------------
+--------------------
+
+	Actualziar cambios al modelo para el CRUD donde sea necesario
+	--------------------
+	Se adicionaron los campos en el modelo de la entidad almacenada y en el de despliegue
+
+		public EstadoEvaluacion Estado { get; set; } = EstadoEvaluacion.Diseno;
+		public int TotalPuntos { get; set; } = 0;
+
+	Se eliminó el campo de todos los modelos
+		public Guid TemarioId { get; set; }
+
+
+	Tareas
+	--------------------
+
+
+	1. Crear un controlador adicional denominado EvaluacionController con el siguiente método
+
+		PUT /evaluacion/{id}/estado/{EstadoEvaluacion}
+
+		1. Añadir el método a la interfaz del servicio de evaluaciones 
+			Task<Respuesta> CambiarEstado(Guid evaluacionId, EstadoEvaluacion nuevo estado);
+			-Este Método deberá buscar la evaluacion por id incluyendo Dominio y OU, si no es encontrada debe devolver 404
+
+		2. Llamar al método del punto 1 desde el endpoint PUT del controlador
+	
+		2. Sólo debe actualizar el campo Estado con el nuevo valor
+
+
+	2. Remover de las entidades Insertar, Actualizar y Despliegue las propiedades BsonElement, no son necesarias 
+	sólo se utilizan en el modelo que guarda en Mongo
+
+
+	12/12/2024
+
+	Se eliminaron las propiedades 
+
+	 public List<Participante> Participantes { get; set; } = [];
+	 public bool ParticipantesExternos { get; set; } = false;

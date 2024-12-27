@@ -11,5 +11,4 @@ namespace evaluacion.model.evaluacion;
 public class EvaluacionInsertar
 {
     public required string Nombre { get; set; }
-    public bool ParticipantesFijos { get; set; }
 }

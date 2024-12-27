@@ -14,7 +14,6 @@ public class EvaluacionDespliegue
     public required string Nombre { get; set; }
     public Guid CreadorId { get; set; }
     public DateTime FechaCreacion { get; set; } = DateTime.UtcNow;
-    public bool ParticipantesFijos { get; set; }
     public List<TemaEvaluacion> Temas { get; set; } = [];
     public int TotalReactivos { get; set; } = 0;
 
