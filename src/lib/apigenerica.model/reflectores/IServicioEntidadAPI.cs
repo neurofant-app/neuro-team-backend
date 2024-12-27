@@ -122,4 +122,41 @@ public interface IServicioEntidadAPI
     /// <param name="parametros"></param>
     /// <returns></returns>
     Task<Entidad>? Metadatos(string Tipo, StringDictionary? parametros = null);
+
+
+    /// <summary>
+    /// Obtiene los datos de un árbol
+    /// </summary>
+    /// <param name="parcial">Si es true devuelve sólo los hijos directos de raizId</param>
+    /// <param name="raizId">Id de la raíz si es nulo se devuelven los nodos directamente conectados a la raíz</param>
+    /// <param name="incluirPayload">Determina si en la información del árbol debe debolverse la entidad completa</param>
+    /// <returns></returns>
+    /// <returns></returns>
+    Task<RespuestaPayload<List<NodoArbol<object>>>> Arbol(string? raizId = null, bool parcial = false,  bool incluirPayload = false, StringDictionary? parametros = null);
+
+    /// <summary>
+    /// Obtiene una lista de rextos asociados a un Id de entidad, por ejemplo para hace cache de los nombres 
+    /// </summary>
+    /// <param name="Ids">Lista de Ids para obtener los textos</param>
+    /// <returns></returns>
+    Task<RespuestaPayload<List<ParClaveTexto>>> TextoIds(List<string> Ids, StringDictionary? parametros = null);
+
+    /// <summary>
+    /// Método para insertar múltiples entidades nuevas en el repositorio
+    /// </summary>
+    /// <param name="data">Elemento JSON en forma de Lista de objetos</param>
+    /// <param name="parametros"></param>
+    /// <returns></returns>
+    Task<RespuestaPayload<List<object>>> InsertarMultipleAPI(JsonElement data, StringDictionary? parametros = null);
+
+
+    /// <summary>
+    /// Elimina una lista de entidades del repositorio eb base a sus Ids únicos
+    /// </summary>
+    /// <param name="ids">Lista de identificadores</param>
+    /// <param name="parametros"></param>
+    /// <returns></returns>
+    Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null);
 }
+
+

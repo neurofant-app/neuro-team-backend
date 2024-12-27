@@ -349,7 +349,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Insertar {ex.Message}");
+            _logger.LogError($"UnicaPorIdDespliegue {ex.Message}");
             _logger.LogError($"{ex}");
 
             respuesta.Error = new ErrorProceso() { Codigo = "", HttpCode = HttpCode.ServerError, Mensaje = ex.Message };
@@ -397,6 +397,26 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         }
 
         return respuesta;
+    }
+
+    public virtual Task<RespuestaPayload<List<NodoArbol<object>>>> Arbol(string? raizId = null, bool parcial = false, bool incluirPayload = false, StringDictionary? parametros = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<RespuestaPayload<List<ParClaveTexto>>> TextoIds(List<string> Ids, StringDictionary? parametros = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<RespuestaPayload<List<object>>> InsertarMultipleAPI(JsonElement data, StringDictionary? parametros = null)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null)
+    {
+        throw new NotImplementedException();
     }
 
     public virtual Filtro? FiltroPorEntidadPadre(string tipoPadre, string padreId)

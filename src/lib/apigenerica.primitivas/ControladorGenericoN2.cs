@@ -238,5 +238,26 @@ public abstract class ControladorGenericoN2 : ControladorBaseGenerico
         }
         return StatusCode(response.HttpCode.GetHashCode(), response.Error);
     }
+
+
+    [HttpPost("/entidad/{n0}/{n0Id}/{n1}/arbol", Name = "ArbolPaginaN1")]
+    [SwaggerOperation("Obtiene un arbol aplanado con los nodos que lo definen", OperationId = "ArbolPaginaN1")]
+    [SwaggerResponse(statusCode: 200, type: typeof(List<NodoArbol<object>>), description: "Árbol aplanado de datos de una entidad jerárquica")]
+    [SwaggerResponse(statusCode: 400, description: "Datos de consulta incorrectos")]
+    [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
+    [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
+    [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
+    public async Task<IActionResult> Arbol(string n0, string n0Id, string n1,
+        [FromQuery(Name = "id")] string? id = null, [FromQuery(Name = "parcial")] bool parcial = false, [FromQuery(Name = "payload")] bool payload = false)
+    {
+        _logger.LogDebug($"Arbol aplanado de {n1} para id = {id} parcial = {parcial} payload = {payload}");
+        var response = await entidadAPI.Arbol(id, parcial, payload, parametros);
+
+        if (response.Ok)
+        {
+            return Ok(response.Payload);
+        }
+        return StatusCode(response.HttpCode.GetHashCode(), response.Error);
+    }
 }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
