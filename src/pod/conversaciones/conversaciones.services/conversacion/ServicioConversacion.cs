@@ -116,10 +116,10 @@ public class ServicioConversacion : ServicioEntidadGenericaBase<Conversacion, Co
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioConversacion-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioConversacion-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }

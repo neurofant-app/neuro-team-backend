@@ -80,7 +80,7 @@ public interface IServicioEntidadGenerica<DTOFull, DTOInsert, DTOUpdate, DTODesp
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<Respuesta> Eliminar(TipoId id, StringDictionary? parametros = null);
+    Task<Respuesta> Eliminar(TipoId id, StringDictionary? parametros = null, bool forzarEliminacion = false);
 
 
     /// <summary>
@@ -135,7 +135,7 @@ public interface IServicioEntidadGenerica<DTOFull, DTOInsert, DTOUpdate, DTODesp
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    Task<ResultadoValidacion> ValidarEliminacion(TipoId id, DTOFull original);
+    Task<ResultadoValidacion> ValidarEliminacion(TipoId id, DTOFull original, bool forzarEliminacion = false);
 
     /// <summary>
     /// Convierte un DTO de inserción a la versión de entidad en el repositorio

@@ -73,10 +73,10 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioGaleria-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioGaleria-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -175,7 +175,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         resultado.Valido = true;
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Galeria original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Galeria original, bool forzarEliminacion = false)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
@@ -335,7 +335,7 @@ public class ServicioGaleria : ServicioEntidadGenericaBase<Galeria, Galeria, Gal
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

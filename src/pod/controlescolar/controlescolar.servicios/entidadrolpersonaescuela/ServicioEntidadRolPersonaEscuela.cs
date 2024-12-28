@@ -75,10 +75,10 @@ public class ServicioEntidadRolPersonaEscuela : ServicioEntidadGenericaBase<Enti
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioEntidadRolPersonaEscuela-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioEntidadRolPersonaEscuela-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -170,7 +170,7 @@ public class ServicioEntidadRolPersonaEscuela : ServicioEntidadGenericaBase<Enti
         };
     }
 
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadRolPersonaEscuela data)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadRolPersonaEscuela data, bool forzarEliminacion = false)
     {
         return new ResultadoValidacion() { Valido = true };
     }
@@ -379,7 +379,7 @@ public class ServicioEntidadRolPersonaEscuela : ServicioEntidadGenericaBase<Enti
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

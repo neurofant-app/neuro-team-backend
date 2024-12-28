@@ -119,10 +119,10 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioGruposUsuarios-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioGruposUsuarios-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -171,7 +171,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, GrupoUsuarios original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, GrupoUsuarios original, bool forzarEliminacion = false)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
@@ -299,7 +299,7 @@ public class ServicioGrupoUsuarios : ServicioEntidadGenericaBase<GrupoUsuarios, 
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

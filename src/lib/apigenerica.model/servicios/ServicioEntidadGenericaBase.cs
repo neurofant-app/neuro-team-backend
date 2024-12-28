@@ -166,7 +166,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         return respuesta;
     }
 
-    public virtual async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public virtual async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try
@@ -185,7 +185,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
                 return respuesta;
             }
 
-            var resultadoValidacion = await ValidarEliminacion(id, actual);
+            var resultadoValidacion = await ValidarEliminacion(id, actual, forzarEliminacion);
             if (resultadoValidacion.Valido)
             {
 
@@ -321,7 +321,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         return new ResultadoValidacion() { Valido = true };
     }
 
-    public virtual async Task<ResultadoValidacion> ValidarEliminacion(string id, DTOFull original)
+    public virtual async Task<ResultadoValidacion> ValidarEliminacion(string id, DTOFull original, bool forzarEliminacion = false)
     {
         return new ResultadoValidacion() { Valido = true };
     }
@@ -414,7 +414,7 @@ public abstract class ServicioEntidadGenericaBase<DTOFull, DTOInsert, DTOUpdate,
         throw new NotImplementedException();
     }
 
-    public virtual Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null)
+    public virtual Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         throw new NotImplementedException();
     }

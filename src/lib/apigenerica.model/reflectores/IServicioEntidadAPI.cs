@@ -80,7 +80,7 @@ public interface IServicioEntidadAPI
     /// <param name="id"></param>
     /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null);
+    Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false);
 
 
     /// <summary>
@@ -156,7 +156,7 @@ public interface IServicioEntidadAPI
     /// <param name="ids">Lista de identificadores</param>
     /// <param name="parametros"></param>
     /// <returns></returns>
-    Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null);
+    Task<Respuesta> EliminarAPI(List<string> ids, StringDictionary? parametros = null, bool forzarEliminacion = false);
 }
 
 

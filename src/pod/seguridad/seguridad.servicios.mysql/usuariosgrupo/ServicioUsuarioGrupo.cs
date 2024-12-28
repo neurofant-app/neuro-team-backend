@@ -78,9 +78,9 @@ public class ServicioUsuarioGrupo : ServicioEntidadGenericaBase<UsuarioGrupo, Cr
         throw new NotImplementedException();
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
-        return await this.Eliminar((string)id, parametros);
+        return await this.Eliminar((string)id, parametros, forzarEliminacion);
     }
 
     public async Task<RespuestaPayload<object>> UnicaPorIdAPI(object id, StringDictionary? parametros = null)
@@ -120,7 +120,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadGenericaBase<UsuarioGrupo, Cr
         resultado.Valido = grupo != null && !grupo.UsuarioId.Any(_=>_==data.UsuarioId);
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, UsuarioGrupo original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, UsuarioGrupo original, bool forzarEliminacion = false)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = grupo != null ? true : false;
@@ -218,7 +218,7 @@ public class ServicioUsuarioGrupo : ServicioEntidadGenericaBase<UsuarioGrupo, Cr
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

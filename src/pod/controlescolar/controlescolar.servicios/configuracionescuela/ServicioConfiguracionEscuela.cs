@@ -71,10 +71,10 @@ public class ServicioConfiguracionEscuela : ServicioEntidadGenericaBase<Configur
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioConfiguracionEscuela-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioConfiguracionEscuela-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -167,7 +167,7 @@ public class ServicioConfiguracionEscuela : ServicioEntidadGenericaBase<Configur
         };
     }
 
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, ConfiguracionEscuela data)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, ConfiguracionEscuela data, bool forzarEliminacion = false)
     {
         return new ResultadoValidacion() { Valido = true };
     }

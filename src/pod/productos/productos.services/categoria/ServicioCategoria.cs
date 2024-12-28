@@ -67,10 +67,10 @@ public class ServicioCategoria : ServicioEntidadGenericaBase<Categoria, Categori
         _logger.LogDebug("ServicioCategoria-ActualizarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioCategoria-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar(Guid.Parse((string)id), parametros);
+        Respuesta respuesta = await this.Eliminar(Guid.Parse((string)id), parametros, forzarEliminacion);
         _logger.LogDebug("ServicioCategoria-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -150,7 +150,7 @@ public class ServicioCategoria : ServicioEntidadGenericaBase<Categoria, Categori
     {
         return new ResultadoValidacion() { Valido = true };
     }
-    public async Task<ResultadoValidacion> ValidarEliminacion(Guid id, Categoria original)
+    public async Task<ResultadoValidacion> ValidarEliminacion(Guid id, Categoria original, bool forzarEliminacion = false)
     {
         var resultado = new ResultadoValidacion();
 
@@ -300,7 +300,7 @@ public class ServicioCategoria : ServicioEntidadGenericaBase<Categoria, Categori
         }
         return respuesta;
     }
-    public async Task<Respuesta> Eliminar(Guid id, StringDictionary? parametros = null)
+    public async Task<Respuesta> Eliminar(Guid id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

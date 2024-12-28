@@ -102,7 +102,7 @@ public class ServicioEntidadPrueba : ServicioEntidadGenericaBase<EntidadPrueba, 
         return await this.Actualizar((string)id, update);
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         return await this.Eliminar((string)id);
     }
@@ -145,7 +145,7 @@ public class ServicioEntidadPrueba : ServicioEntidadGenericaBase<EntidadPrueba, 
 
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadPrueba original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, EntidadPrueba original, bool forzarEliminacion = false)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = true;
@@ -273,7 +273,7 @@ public override async Task<RespuestaPayload<EntidadPrueba>> UnicaPorId(string id
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

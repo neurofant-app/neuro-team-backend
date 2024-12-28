@@ -83,10 +83,10 @@ public class ServicioEspecialidad : ServicioEntidadGenericaBase<Especialidad,Esp
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioEspecialidad - EliminarAPI - {id}", id);
-        Respuesta respuesta = await this.Eliminar((string) id, parametros);
+        Respuesta respuesta = await this.Eliminar((string) id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioEspecialidad - EliminarAPI - resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -196,7 +196,7 @@ public class ServicioEspecialidad : ServicioEntidadGenericaBase<Especialidad,Esp
         return resultado;
     }
 
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Especialidad original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Especialidad original, bool forzarEliminacion = false)
     {
         var resultado = new ResultadoValidacion();
         var existeCurso = this.servicioCurso.UnicaPorId(original.CursoId.ToString());
@@ -384,7 +384,7 @@ public class ServicioEspecialidad : ServicioEntidadGenericaBase<Especialidad,Esp
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try

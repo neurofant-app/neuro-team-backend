@@ -122,10 +122,10 @@ public class ServicioRol : ServicioEntidadGenericaBase<Rol, CreaRol, ActualizaRo
         return respuesta;
     }
 
-    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null)
+    public async Task<Respuesta> EliminarAPI(object id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         _logger.LogDebug("ServicioRol-EliminarAPI");
-        Respuesta respuesta = await this.Eliminar((string)id, parametros);
+        Respuesta respuesta = await this.Eliminar((string)id, parametros, forzarEliminacion);
         _logger.LogDebug("ServicioRol-EliminarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
     }
@@ -173,7 +173,7 @@ public class ServicioRol : ServicioEntidadGenericaBase<Rol, CreaRol, ActualizaRo
         resultado.Valido = aplicacion != null && !aplicacion.RolesPersonalizados.Any(_ => _.Nombre == data.Nombre);
         return resultado;
     }
-    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Rol original)
+    public override async Task<ResultadoValidacion> ValidarEliminacion(string id, Rol original, bool forzarEliminacion = false)
     {
         ResultadoValidacion resultado = new();
         resultado.Valido = aplicacion != null ? true : false;
@@ -362,7 +362,7 @@ public class ServicioRol : ServicioEntidadGenericaBase<Rol, CreaRol, ActualizaRo
         return respuesta;
     }
 
-    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null)
+    public override async Task<Respuesta> Eliminar(string id, StringDictionary? parametros = null, bool forzarEliminacion = false)
     {
         var respuesta = new Respuesta();
         try
