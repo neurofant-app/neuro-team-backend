@@ -140,11 +140,12 @@ public abstract class ControladorGenericoN1 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
-    public async Task<IActionResult> EliminarPorId(string n0, string n0Id, [FromHeader(Name = DOMINIOHEADER)] string dominioId, 
-        [FromHeader(Name = UORGHEADER)] string uOrgID)
+    public async Task<IActionResult> EliminarPorId(string n0, string n0Id,  
+        [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID,
+        [FromQuery(Name = "forzar")] bool forzarEliminacion = false)
     {
         _logger.LogDebug($"EliminaPorId {n0}/{n0Id}");
-        var response = await entidadAPI.EliminarAPI((object)n0Id, parametros);
+        var response = await entidadAPI.EliminarAPI((object)n0Id, parametros, forzarEliminacion);
         if (response.Ok)
         {
             return NoContent();
@@ -185,6 +186,7 @@ public abstract class ControladorGenericoN1 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 400, description: "Datos de consulta incorrectos")]
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
+    [SwaggerResponse(statusCode: 409, description: "No es posible elimiminar")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
     public async Task<IActionResult> Arbol(string n0, [FromQuery(Name = "id")] string? id = null, [FromQuery(Name = "parcial")] bool parcial = false, [FromQuery(Name = "payload")] bool payload = false)
     {

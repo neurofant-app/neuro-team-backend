@@ -139,12 +139,14 @@ public abstract class ControladorGenericoN3 : ControladorBaseGenerico
     [SwaggerResponse(statusCode: 404, description: "Entidad inexistente o no localizada")]
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]
     [SwaggerResponse(statusCode: 401, description: "Usuario no autenticado")]
+    [SwaggerResponse(statusCode: 409, description: "No es posible elimiminar")]
     [SwaggerResponse(statusCode: 405, description: "Método no implementado")]
     public async Task<IActionResult> EliminarPorId(string n0, string n0Id, string n1, string n1Id, string n2, string n2Id,
-        [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID)
+        [FromHeader(Name = DOMINIOHEADER)] string dominioId, [FromHeader(Name = UORGHEADER)] string uOrgID,
+          [FromQuery(Name = "forzar")] bool forzarEliminacion = false)
     {
         _logger.LogDebug($"EliminaPorId {n0}/{n0Id}/{n1}/{n1Id}/{n2}/{n2Id}");
-        var response = await entidadAPI.EliminarAPI((object)n2Id, parametros);
+        var response = await entidadAPI.EliminarAPI((object)n2Id, parametros, forzarEliminacion);
         if (response.Ok)
         {
             return NoContent();
