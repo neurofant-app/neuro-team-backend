@@ -7,6 +7,7 @@ using comunes.interservicio.primitivas.seguridad;
 using comunes.primitivas.configuracion.mongo;
 using Microsoft.Extensions.Options;
 using System.Reflection;
+using servicio.almacenamiento;
 
 namespace controlescolar.api;
 
@@ -27,6 +28,9 @@ public class Program
         builder.Services.AddSingleton<IProxySeguridad, ProxySeguridad>();
         builder.Services.AddTransient<IServicioAutenticacionJWT, ServicioAuthInterprocesoJWT>();
         builder.Services.AddTransient<ICacheAtributos, CacheAtributos>();
+        
+        builder.AddFabricaAlmacenamientoAppsettings();
+        
         builder.Services.AddHttpClient();
 
         var app = builder.Build();

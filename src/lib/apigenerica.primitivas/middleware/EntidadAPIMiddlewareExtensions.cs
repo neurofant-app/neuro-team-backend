@@ -83,9 +83,7 @@ public static class EntidadAPIMiddlewareExtensions
         string? usuarioId = null;
         List<Claim>? claims = null;
 
-//#if DEBUG
-//        return ("token", Guid.Empty.ToString(), new List<Claim>());
-//#endif 
+
 
         string? authHeader = context.Request.Headers?[JWTAHEADER];
         if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer"))
@@ -98,6 +96,12 @@ public static class EntidadAPIMiddlewareExtensions
             {
                 usuarioId = claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             }
+        } else
+        {
+            // Devuelve un usaurio de pruebas en el modo debug
+#if DEBUG
+            return ("token", Guid.Empty.ToString(), new List<Claim>());
+#endif
         }
 
         return (token, usuarioId, claims);

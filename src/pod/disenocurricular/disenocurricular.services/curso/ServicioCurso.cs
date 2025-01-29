@@ -1,4 +1,6 @@
-﻿#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+﻿#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
@@ -10,11 +12,9 @@ using comunes.primitivas.configuracion.mongo;
 using disenocurricular.model;
 using disenocurricular.services.dbcontext;
 using extensibilidad.metadatos;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
-using Polly;
 using System.Collections.Specialized;
 using System.Text.Json;
 
@@ -109,6 +109,7 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
         _logger.LogDebug("ServicioCurso-InsertarAPI-{data}", data);
         var add = data.Deserialize<Curso>(JsonAPIDefaults());
         var temp = await this.Insertar(add, parametros);
+
         RespuestaPayload<object> respuesta = JsonSerializer.Deserialize<RespuestaPayload<object>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioCurso-InsertarAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -153,6 +154,7 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
     {
         _logger.LogDebug("ServicioCurso-PaginaAPI-{consulta}", consulta);
         var temp = await this.Pagina(consulta, parametros);
+
         RespuestaPayload<PaginaGenerica<object>> respuesta = JsonSerializer.Deserialize<RespuestaPayload<PaginaGenerica<object>>>(JsonSerializer.Serialize(temp));
         _logger.LogDebug("ServicioCurso-PaginaAPI resultado {ok} {code} {error}", respuesta!.Ok, respuesta!.HttpCode, respuesta.Error);
         return respuesta;
@@ -435,3 +437,5 @@ public class ServicioCurso : ServicioEntidadGenericaBase<Curso, Curso, Curso, Cu
 }
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning restore CS8603 // Possible null reference return
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.

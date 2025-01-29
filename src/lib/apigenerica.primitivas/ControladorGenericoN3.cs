@@ -183,8 +183,8 @@ public abstract class ControladorGenericoN3 : ControladorBaseGenerico
     }
 
 
-    [HttpPost("/entidad/{n0}/{n0Id}/{n1}/{n1Id}/{n2}/arbol", Name = "ArbolPaginaN1")]
-    [SwaggerOperation("Obtiene un arbol aplanado con los nodos que lo definen", OperationId = "ArbolPaginaN1")]
+    [HttpPost("/entidad/{n0}/{n0Id}/{n1}/{n1Id}/{n2}/arbol", Name = "ArbolPaginaN3")]
+    [SwaggerOperation("Obtiene un arbol aplanado con los nodos que lo definen", OperationId = "ArbolPaginaN3")]
     [SwaggerResponse(statusCode: 200, type: typeof(List<NodoArbol<object>>), description: "Árbol aplanado de datos de una entidad jerárquica")]
     [SwaggerResponse(statusCode: 400, description: "Datos de consulta incorrectos")]
     [SwaggerResponse(statusCode: 403, description: "El usuario en sesión no tiene acceso a la operación")]

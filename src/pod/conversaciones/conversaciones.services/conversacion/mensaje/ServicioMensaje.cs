@@ -1,4 +1,5 @@
-﻿#pragma warning disable CS8603 // Possible null reference return.
+﻿#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
 using apigenerica.model.interpretes;
 using apigenerica.model.modelos;
@@ -589,3 +590,4 @@ public class ServicioMensaje : ServicioEntidadGenericaBase<Mensaje, Mensaje, Men
 }
 #pragma warning disable CS8603 // Possible null reference return.
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
