@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace apigenerica.primitivas.extensiones
+namespace apigenerica.model.servicios
 {
     public static class Extensiones
     {
