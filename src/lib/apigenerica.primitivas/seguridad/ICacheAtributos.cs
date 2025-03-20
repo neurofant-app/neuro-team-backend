@@ -1,5 +1,4 @@
 ﻿using apigenerica.model.modelos;
-using comunes.primitivas.seguridad;
 
 namespace apigenerica.primitivas.seguridad;
 
